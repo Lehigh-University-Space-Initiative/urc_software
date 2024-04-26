@@ -24,4 +24,4 @@ RUN /bin/bash -c '. /opt/ros/humble/setup.sh && colcon build --symlink-install'
 RUN echo "source /ros2_ws/install/setup.bash" >> ~/.bashrc
 
 # Default command to run when starting the container
-CMD ["/bin/bash", "-c", "source /ros2_ws/install/setup.bash && ros2 launch base_station_urc joy_mapper_launch.py"]
+CMD ["/bin/bash", "-c", "source /ros2_ws/install/setup.bash && ros2 launch base_station_urc base_station_launch.py"]
