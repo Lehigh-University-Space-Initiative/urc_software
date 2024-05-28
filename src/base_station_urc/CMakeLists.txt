@@ -4,17 +4,18 @@ project(base_station_urc)
 # Find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-include_directories(
-  include
-  ${rclcpp_INCLUDE_DIRS}
-)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
-include_directories(${sensor_msgs_INCLUDE_DIRS})
 find_package(geometry_msgs REQUIRED)
 find_package(image_transport REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(glfw3 REQUIRED)
+
+include_directories(
+  include
+  ${rclcpp_INCLUDE_DIRS}
+  ${sensor_msgs_INCLUDE_DIRS}
+)
 
 # Add executable for JoyMapper
 add_executable(JoyMapper_node src/joyMapper/joyMapper.cpp)
