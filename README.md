@@ -2,7 +2,8 @@
 
 ```
 docker build -t joy_mapper:humble .
-docker run -it --rm --name joy_mapper_container joy_mapper:humble
+docker build -t ros2_container .
+docker run joy_mapper:humble
 ```
 
 ## To run a specific node, specify that node in the CMD directive in the Dockerfile. Example
