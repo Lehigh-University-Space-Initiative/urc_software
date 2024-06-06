@@ -1,21 +1,24 @@
 #pragma once
 #include "GUI.h"
 #include <string>
+#include <rclcpp/rclcpp.hpp>
 
 class Panel {
-protected: 
+protected:
     std::string name;
+    rclcpp::Node::SharedPtr node_;
 
-    //the begin and and statments are alread handled so continue wihtout them
+    // The begin and end statements are already handled so continue without them
     virtual void drawBody() = 0;
+
 public:
-    Panel(std::string name);
+    Panel(const std::string &name, const rclcpp::Node::SharedPtr &node);
     virtual ~Panel();
 
     void renderToScreen();
 
-    //called once at
+    // Called once at setup
     virtual void setup();
-    //called inbetween frames during ROS update time
+    // Called in between frames during ROS update time
     virtual void update();
 };

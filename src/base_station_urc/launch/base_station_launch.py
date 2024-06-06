@@ -26,4 +26,10 @@ def generate_launch_description():
             name='joy_mapper',
             output='screen',
         ),
+        # Node(
+        #     package='base_station_urc',
+        #     executable='TelemetryPanel_node',
+        #     name='telemetry_panel',
+        #     output='screen',
+        # ),
     ])

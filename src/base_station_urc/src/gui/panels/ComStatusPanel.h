@@ -8,7 +8,6 @@
 #include <rclcpp/rclcpp.hpp>
 
 class ComStatusChecker {
-
     std::chrono::system_clock::time_point lastContact{};
     std::chrono::system_clock::time_point lastCheckTime{};
     std::mutex mutex{};
@@ -25,21 +24,19 @@ public:
     void check();
 };
 
-class ComStatusPanel: public Panel, public rclcpp::Node {
+class ComStatusPanel : public Panel {
 public:
-    // using Panel::Panel;
-    ComStatusPanel(const std::string& name)
-    : Panel(name), 
-      rclcpp::Node(name + "_node", rclcpp::NodeOptions())
-    {}
+    ComStatusPanel(const std::string& name, const rclcpp::Node::SharedPtr& node)
+        : Panel(name, node) {}
 
     virtual void setup() override;
     virtual void update() override;
     ~ComStatusPanel();
-protected:
-    virtual void drawBody();
 
-    std::vector<ComStatusChecker*> hosts; 
+protected:
+    virtual void drawBody() override;
+
+    std::vector<ComStatusChecker*> hosts;
     const std::chrono::milliseconds connectionDur = std::chrono::milliseconds(500);
     const std::chrono::milliseconds maxConnectionDur = std::chrono::milliseconds(3600'000);
 
@@ -47,5 +44,4 @@ protected:
     ImU32 conColor(size_t hostIndex);
 
     bool hootl = false;
-
 };

@@ -1,102 +1,88 @@
 #include "stdio.h"
-
 #include <rclcpp/rclcpp.hpp>
 #include <sstream>
 #include <geometry_msgs/msg/twist.hpp>
 #include <sensor_msgs/msg/joy.hpp>
-
 #include "GUI.h"
 #include "Lifecycle.h"
 #include "Panel.h"
-
 #include "panels/ComStatusPanel.h"
 #include "panels/TelemetryPanel.h"
 #include "panels/SystemControlPanel.h"
 #include "panels/VideoViewPanel.h"
 #include "panels/SoftwareDebugPanel.h"
 
-std::vector<Panel*> uiPanels{};
+std::vector<std::shared_ptr<Panel>> uiPanels{};
 
-void loadPanels() {
-   uiPanels.push_back(new ComStatusPanel("COMS Status"));
-   uiPanels.push_back(new TelemetryPanel("Telemetry"));
-   uiPanels.push_back(new SystemControlPanel("System Control"));
-   uiPanels.push_back(new VideoViewPanel("Video Stream"));
+void loadPanels(const rclcpp::Node::SharedPtr &node) {
+    uiPanels.push_back(std::make_shared<ComStatusPanel>("COMS Status", node));
+    uiPanels.push_back(std::make_shared<TelemetryPanel>("Telemetry", node));
+    uiPanels.push_back(std::make_shared<SystemControlPanel>("System Control", "system_control_node", rclcpp::NodeOptions()));
+    uiPanels.push_back(std::make_shared<VideoViewPanel>("Video Stream", node));
 
-   //uiPanels.push_back(new SoftwareDebugPanel("Software Debug"));
-
-   for(auto p : uiPanels) {
-      p->setup();
-   }
+    for (auto &p : uiPanels) {
+        p->setup();
+    }
 }
 
 bool close_ui = false;
 
-int main(int argc, char** argv) {
-    
-   ros::init(argc, argv, "GroundStationGUI"); 
+int main(int argc, char **argv) {
+    rclcpp::init(argc, argv);
+    auto node = std::make_shared<rclcpp::Node>("GroundStationGUI");
 
-   ros::NodeHandle n;
+    loadPanels(node);
 
-   loadPanels();
+    RCLCPP_INFO(node->get_logger(), "GroundStationGUI is running");
 
-   ROS_INFO("GroundStationGUI is running");
+    auto window = setupIMGUI();
 
-   auto window = setupIMGUI(); 
+    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
-   ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+    std::chrono::milliseconds sleep_duration(1000 / 60); // 60 Hz
 
-   ros::Rate sleepRate(60);
+    std::chrono::system_clock::time_point last_frame;
 
-   std::chrono::system_clock::time_point last_frame;
+    while (rclcpp::ok() && !glfwWindowShouldClose(window) && !close_ui) {
+        glfwPollEvents();
 
-   while (n.ok() && !glfwWindowShouldClose(window) && !close_ui) {
-      glfwPollEvents();
+        // ROS updates
+        rclcpp::spin_some(node);
+        for (auto &pan : uiPanels) {
+            pan->update();
+        }
 
+        // Start the Dear ImGui frame
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
 
+        // Render frame
+        for (auto &pan : uiPanels) {
+            pan->renderToScreen();
+        }
 
-      //ros updates
-      ros::spinOnce();
-      for (auto pan : uiPanels)
-         pan->update();
+        renderFrame(window, clear_color);
 
-      // Start the Dear ImGui frame
-      ImGui_ImplOpenGL3_NewFrame();
-      ImGui_ImplGlfw_NewFrame();
-      ImGui::NewFrame();
+        auto now = std::chrono::system_clock::now();
+        auto delta = now - last_frame;
+        auto delta_s = std::chrono::duration<double>(delta).count();
+        last_frame = now;
 
-      //render frame
+        std::this_thread::sleep_for(sleep_duration);
+    }
 
-      for (auto pan : uiPanels)
-         pan->renderToScreen();
+    RCLCPP_INFO(node->get_logger(), "Shutting down GUI");
 
-      renderFrame(window, clear_color);
+    // Cleanup
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
 
-      auto now = std::chrono::system_clock::now();
-      auto delta = now - last_frame;
-      auto delta_s = static_cast<double>(delta.count() * 1E-9);
-      //ROS_INFO("Frame Delta: %f", delta_s);
+    glfwDestroyWindow(window);
+    glfwTerminate();
 
-      last_frame = now;
+    rclcpp::shutdown();
 
-      sleepRate.sleep();
-   }
-   ROS_INFO("starting down gui");
-
-   //cleanup
-   {
-      // Cleanup
-      ImGui_ImplOpenGL3_Shutdown();
-      ImGui_ImplGlfw_Shutdown();
-      ImGui::DestroyContext();
-
-      glfwDestroyWindow(window);
-      glfwTerminate();
-   }
-
-   ROS_INFO("Shutting down gui");
-
-   n.shutdown();
-
-   return 0;
+    return 0;
 }
