@@ -2,7 +2,6 @@
 
 ```
 docker build -t joy_mapper:humble .
-docker build -t ros2_container .
 docker run joy_mapper:humble
 ```
 
