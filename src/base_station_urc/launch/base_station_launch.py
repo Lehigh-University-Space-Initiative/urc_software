@@ -32,4 +32,11 @@ def generate_launch_description():
         #     name='telemetry_panel',
         #     output='screen',
         # ),
+        # GroundStationGUI node
+        Node(
+            package='base_station_urc',
+            executable='GroundStationGUI',
+            name='ground_station_gui',
+            output='screen',
+        ),
     ])
