@@ -24,7 +24,6 @@ ls -la /ros2_ws/src/base_station_urc/include/cs_libguarded
 source /opt/ros/humble/setup.bash
 source install/setup.bash
 colcon build --symlink-install --packages-select cross_pkg_messages
-source install/setup.bash
 colcon build --symlink-install --packages-select base_station_urc
 ros2 launch base_station_urc base_station_launch.py
 ```
