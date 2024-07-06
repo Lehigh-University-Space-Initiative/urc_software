@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libglfw3-dev \
     libglew-dev \
     x11-apps \
+    iputils-ping \
     && rm -rf /var/lib/apt/lists/*
 
 # Set the working directory
@@ -24,13 +25,6 @@ COPY ./ /ros2_ws/
 
 # Clean previous builds
 RUN rm -rf build install log
-
-# Verify files and structure
-RUN ls -la /ros2_ws/src/base_station_urc/include/cs_libguarded
-RUN ls -la /ros2_ws/src/cross_pkg_messages
-RUN cat /ros2_ws/src/cross_pkg_messages/package.xml
-RUN cat /ros2_ws/src/cross_pkg_messages/CMakeLists.txt
-RUN cat /ros2_ws/src/cross_pkg_messages/msg/RoverComputerDriveCMD.msg
 
 # Build and install the cross_pkg_messages package
 RUN /bin/bash -c '. /opt/ros/humble/setup.sh && colcon build --symlink-install --packages-select cross_pkg_messages'
@@ -49,7 +43,7 @@ RUN /bin/bash -c 'source /opt/ros/humble/setup.bash && colcon build --symlink-in
 
 # Source the workspace in bashrc
 RUN echo "source /ros2_ws/install/setup.bash" >> ~/.bashrc
-RUN echo 'export DISPLAY=10.19.97.212:0.0' >> ~/.bashrc
+RUN echo 'export DISPLAY=10.0.0.155:0.0' >> ~/.bashrc
 
 # Copy the urcAssets directory to the home directory in the container
 RUN mkdir -p /home/urcAssets
