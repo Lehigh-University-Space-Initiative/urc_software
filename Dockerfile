@@ -43,7 +43,7 @@ RUN /bin/bash -c 'source /opt/ros/humble/setup.bash && colcon build --symlink-in
 
 # Source the workspace in bashrc
 RUN echo "source /ros2_ws/install/setup.bash" >> ~/.bashrc
-RUN echo 'export DISPLAY=10.0.0.155:0.0' >> ~/.bashrc
+RUN echo 'export DISPLAY=128.180.197.52:0.0' >> ~/.bashrc
 
 # Copy the urcAssets directory to the home directory in the container
 RUN mkdir -p /home/urcAssets
