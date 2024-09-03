@@ -1,0 +1,7 @@
+.bash_history
+.cache/
+.dotnet/
+.gitconfig
+.ros/
+.vscode-server/
+.vscode/
