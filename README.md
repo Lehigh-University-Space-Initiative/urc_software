@@ -39,6 +39,14 @@ git ros2 launch base_station_urc base_station_launch.py
 Credits to this [article](https://jackkawell.wordpress.com/2020/06/12/ros-wsl2/>)
 and this [article](https://aalonso.dev/blog/2021/how-to-use-gui-apps-in-wsl2-forwarding-x-server-cdj)
 
+## GUI Forwarding on Linux
+
+```
+export DISPLAY=:0.0
+xhost +local:docker
+sudo docker run -it -e DISPLAY=$DISPLAY --net=host lusi_software
+```
+
 ## To run a specific node, specify that node in the CMD directive in the Dockerfile. Example
 
 ```bash
