@@ -1,9 +1,11 @@
 # To run from the root of the repository
 
+## On Windows
+
 ```bash
 docker build -t ros_base_station:latest .
-docker run -it ros_base_station:latest /bin/bash
-ros2 launch base_station_urc base_station_launch.py
+export DISPLAY=128.180.246.10:0.0 # replace with your IP address
+docker run -it -e DISPLAY=$DISPLAY --net=host ros_base_station:latest
 ```
 
 ## Debugging inside docker
@@ -16,8 +18,7 @@ source /opt/ros/humble/setup.bash
 source install/setup.bash
 colcon build --symlink-install --packages-select cross_pkg_messages
 colcon build --symlink-install --packages-select base_station_urc
-xcalc # to test if GUI is working
-ros2 launch base_station_urc base_station_launch.py
+git ros2 launch base_station_urc base_station_launch.py
 ```
 
 ## Setting up GUI forwarding on Windows

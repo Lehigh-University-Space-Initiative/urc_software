@@ -24,7 +24,7 @@ WORKDIR /ros2_ws
 COPY ./ /ros2_ws/
 
 # Clean previous builds
-RUN rm -rf build install log
+# RUN rm -rf build install log
 
 # Build and install the cross_pkg_messages package
 RUN /bin/bash -c '. /opt/ros/humble/setup.sh && colcon build --symlink-install --packages-select cross_pkg_messages'
@@ -43,7 +43,7 @@ RUN /bin/bash -c 'source /opt/ros/humble/setup.bash && colcon build --symlink-in
 
 # Source the workspace in bashrc
 RUN echo "source /ros2_ws/install/setup.bash" >> ~/.bashrc
-RUN echo 'export DISPLAY=128.180.197.52:0.0' >> ~/.bashrc
+# RUN echo 'export DISPLAY=128.180.246.10:0.0' >> ~/.bashrc
 
 # Copy the urcAssets directory to the home directory in the container
 RUN mkdir -p /home/urcAssets
