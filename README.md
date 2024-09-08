@@ -25,7 +25,7 @@ git ros2 launch base_station_urc base_station_launch.py
 
 - Go [here](https://sourceforge.net/projects/vcxsrv/) to install VcXsrv
 - Launch it and choose the following settings
-  - Multiple windows
+  - Multiple windows RAHHHHHHHHh
   - Start no client
   - Uncheck “Native opengl” and check “Disable access control”
 - When executing VcXsrv for the first time, a Windows Firewall pop-up should appear. Just be sure to give it permissions on both private and public networks.
