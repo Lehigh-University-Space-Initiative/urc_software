@@ -3,9 +3,9 @@
 ## On Windows
 
 ```bash
-docker build -t ros_base_station:latest .
-export DISPLAY=128.180.246.10:0.0 # replace with your IP address
-docker run -it -e DISPLAY=$DISPLAY --net=host ros_base_station:latest
+docker build -t urc_software .
+export DISPLAY=192.168.4.49:0.0 # replace with your IP address up to the colon
+docker run -it -e DISPLAY=$DISPLAY --net=host urc_software
 ```
 
 ## Debugging inside docker
