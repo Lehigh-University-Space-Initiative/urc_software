@@ -1,21 +1,27 @@
-# To run from the root of the repository
+# URC Software
 
-## On Windows
+## Running on Windows
 
 ```bash
 docker build -t urc_software .
 export DISPLAY=128.180.198.214:0.0 # replace with your IP address up to the colon
 docker run -it -e DISPLAY=$DISPLAY --net=host urc_software
+
+# Tell docker to clean up after itself when it exits
 docker run --rm -v C:/Users/phamd/urc_software:/root --name urc_software_dev -it -e DISPLAY=$DISPLAY --net=host urc_software
 ```
 
-## Debugging inside docker
+## Inside docker
 
 ```bash
-docker run -it urc_software /bin/bash
+source /ros2_ws/install/setup.bash
+ros2 launch base_station_urc base_station_launch.py
+ros2 launch main_computer_urc main_computer_launch.py
 ```
 
-Verify executables
+### Helpful commands to know
+
+To verify executables in a package
 
 ```bash
 ros2 pkg executables main_computer_urc
@@ -45,16 +51,4 @@ and this [article](https://aalonso.dev/blog/2021/how-to-use-gui-apps-in-wsl2-for
 export DISPLAY=:0.0
 xhost +local:docker
 sudo docker run -it -e DISPLAY=$DISPLAY --net=host lusi_software
-```
-
-## To run a specific node, specify that node in the CMD directive in the Dockerfile. Example
-
-```bash
-CMD ["/bin/bash", "-c", "source /ros2_ws/install/setup.bash && ros2 run base_station_urc gui_node"]
-```
-
-## Default command to run when starting the container
-
-```bash
-CMD ["/bin/bash", "-c", "source /ros2_ws/install/setup.bash && ros2 launch base_station_urc base_station_launch.py"]
 ```
