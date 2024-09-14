@@ -26,7 +26,10 @@ COPY ./ /ros2_ws/
 # Build and install the cross_pkg_messages package
 RUN /bin/bash -c '. /opt/ros/humble/setup.sh && colcon build --symlink-install --packages-select cross_pkg_messages'
 
-# Source the workspace to include cross_pkg_messages
+# Build and install the base_station_urc package
+RUN /bin/bash -c 'source install/setup.bash && colcon build --symlink-install --packages-select base_station_urc'
+
+# Build and install the main_computer_urc package
 RUN /bin/bash -c 'source install/setup.bash && colcon build --symlink-install --packages-select main_computer_urc'
 
 # Set environment variables for build
@@ -46,4 +49,4 @@ RUN mkdir -p /home/urcAssets
 COPY urcAssets /home/urcAssets
 
 # Default command to run when starting the container
-CMD ["/bin/bash", "-c", "source /ros2_ws/install/setup.bash && ros2 launch main_computer_urc main_computer_launch.py"]
+CMD ["/bin/bash", "-c", "source /ros2_ws/install/setup.bash && ros2 launch main_computer_urc main_computer_launch.py & ros2 run base_station_urc base_station_urc.py && wait"]

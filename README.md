@@ -3,22 +3,22 @@
 ## On Windows
 
 ```bash
-docker build -t ros_base_station:latest .
-export DISPLAY=128.180.246.10:0.0 # replace with your IP address
-docker run -it -e DISPLAY=$DISPLAY --net=host ros_base_station:latest
+docker build -t urc_software .
+export DISPLAY=128.180.198.214:0.0 # replace with your IP address up to the colon
+docker run -it -e DISPLAY=$DISPLAY --net=host urc_software
+docker run --rm -v C:/Users/phamd/urc_software:/root --name urc_software_dev -it -e DISPLAY=$DISPLAY --net=host urc_software
 ```
 
 ## Debugging inside docker
 
 ```bash
-docker build -t ros_base_station:latest .
-docker run -it ros_base_station:latest /bin/bash
-ls -la /ros2_ws/src/base_station_urc/include/cs_libguarded
-source /opt/ros/humble/setup.bash
-source install/setup.bash
-colcon build --symlink-install --packages-select cross_pkg_messages
-colcon build --symlink-install --packages-select base_station_urc
-git ros2 launch base_station_urc base_station_launch.py
+docker run -it urc_software /bin/bash
+```
+
+Verify executables
+
+```bash
+ros2 pkg executables main_computer_urc
 ```
 
 ## Setting up GUI forwarding on Windows

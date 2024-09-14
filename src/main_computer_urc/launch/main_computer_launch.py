@@ -9,4 +9,10 @@ def generate_launch_description():
             name='DriveTrainManager',
             output='screen'
         ),
+        Node(
+            package='main_computer_urc',
+            executable='StatusLED_node',
+            name='StatusLED',
+            output='screen'
+        ),
     ])

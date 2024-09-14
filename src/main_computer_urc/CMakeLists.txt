@@ -17,15 +17,21 @@ include_directories(
 add_executable(DriveTrainManager_node src/DriveTrainManager/main.cpp)
 ament_target_dependencies(DriveTrainManager_node rclcpp cross_pkg_messages std_msgs)
 
+# Declare the StatusLED executable
+add_executable(StatusLED_node src/StatusLED/StatusLED.cpp)
+ament_target_dependencies(StatusLED_node rclcpp)
+
+# Install the executables
+install(TARGETS
+  DriveTrainManager_node
+  StatusLED_node
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+# Install the launch directory
 install(DIRECTORY
   launch
   DESTINATION share/${PROJECT_NAME}/
-)
-
-# Install the node
-install(TARGETS
-  DriveTrainManager_node
-  DESTINATION lib/${PROJECT_NAME}
 )
 
 ament_package()
