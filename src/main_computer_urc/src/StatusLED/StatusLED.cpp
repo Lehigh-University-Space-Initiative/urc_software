@@ -26,9 +26,9 @@ int main(int argc, char** argv) {
 
         // Check if the parameter exists and retrieve it
         if (node->get_parameter("roverStatus", status)) {
-            RCLCPP_INFO(node->get_logger(), "Status: %d", status);
+            // RCLCPP_INFO(node->get_logger(), "Status: %d", status);
         } else {
-            RCLCPP_WARN(node->get_logger(), "Status not set, setting to error");
+            // RCLCPP_WARN(node->get_logger(), "Status not set, setting to error");
             node->set_parameter(rclcpp::Parameter("roverStatus", 0));
         }
 
