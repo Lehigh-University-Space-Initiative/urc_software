@@ -23,31 +23,24 @@ WORKDIR /ros2_ws
 # Copy the entire project
 COPY ./ /ros2_ws/
 
-# Clean previous builds
-# RUN rm -rf build install log
-
 # Build and install the cross_pkg_messages package
 RUN /bin/bash -c '. /opt/ros/humble/setup.sh && colcon build --symlink-install --packages-select cross_pkg_messages'
 
-# Source the workspace to include cross_pkg_messages
-RUN /bin/bash -c 'source install/setup.bash && colcon build --symlink-install --packages-select base_station_urc'
+# Build and install the base_station_urc package and main_computer_urc package
+RUN /bin/bash -c 'source install/setup.bash && colcon build --symlink-install --packages-select base_station_urc main_computer_urc'
 
 # Set environment variables for build
 ENV CPLUS_INCLUDE_PATH=/ros2_ws/src/base_station_urc/include/cs_libguarded:$CPLUS_INCLUDE_PATH
-ENV AMENT_PREFIX_PATH=/opt/ros/humble:$AMENT_PREFIX_PATH
-ENV CMAKE_PREFIX_PATH /ros2_ws/install/cross_pkg_messages:$CMAKE_PREFIX_PATH
-
-# Source the workspace to include cross_pkg_messages and build base_station_urc
-RUN /bin/bash -c 'source /opt/ros/humble/setup.bash && colcon build --symlink-install --packages-select cross_pkg_messages && \
-                  source install/setup.bash && colcon build --symlink-install --packages-select base_station_urc'
+ENV AMENT_PREFIX_PATH=/ros2_ws/install/main_computer_urc:/ros2_ws/install/base_station_urc:/ros2_ws/install/cross_pkg_messages:/opt/ros/humble:$AMENT_PREFIX_PATH
+ENV CMAKE_PREFIX_PATH=/ros2_ws/install/cross_pkg_messages:$CMAKE_PREFIX_PATH
 
 # Source the workspace in bashrc
+RUN echo "export AMENT_PREFIX_PATH=/ros2_ws/install/main_computer_urc:/ros2_ws/install/base_station_urc:/ros2_ws/install/cross_pkg_messages:/opt/ros/humble:\$AMENT_PREFIX_PATH" >> ~/.bashrc
 RUN echo "source /ros2_ws/install/setup.bash" >> ~/.bashrc
-# RUN echo 'export DISPLAY=128.180.246.10:0.0' >> ~/.bashrc
 
 # Copy the urcAssets directory to the home directory in the container
 RUN mkdir -p /home/urcAssets
 COPY urcAssets /home/urcAssets
 
-# Default command to run when starting the container
-CMD ["/bin/bash", "-c", "source /ros2_ws/install/setup.bash && ros2 launch base_station_urc base_station_launch.py"]
+# Default command: log into the container
+CMD ["/bin/bash"]
