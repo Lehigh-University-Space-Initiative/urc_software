@@ -5,3 +5,8 @@
 .ros/
 .vscode-server/
 .vscode/
+imgui.ini
+nul
+build/
+install/
+log/
