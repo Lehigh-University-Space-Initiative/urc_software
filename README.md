@@ -5,7 +5,9 @@
 ```bash
 docker build -t urc_software .
 export DISPLAY=128.180.198.214:0.0 # replace with your IP address up to the colon
-docker run -it -e DISPLAY=$DISPLAY --net=host urc_software
+export PATH=$PATH:/usr/lib/linux-tools-5.15.0-122/
+usbip attach -r $(hostname).local -b 4-4
+docker run -it -e DISPLAY=$DISPLAY urc_software
 ```
 
 ### Tell docker to clean up after itself when it exits
@@ -13,7 +15,7 @@ docker run -it -e DISPLAY=$DISPLAY --net=host urc_software
 #### In powershell or command prompt
 
 ```bash
-docker run --rm -v C:/Users/phamd/urc_software:/root --name urc_software_dev -it -e DISPLAY=$DISPLAY --net=host urc_software
+docker run --rm -v C:/Users/phamd/urc_software:/root --name urc_software_dev -it -e DISPLAY=$DISPLAY urc_software
 ```
 
 #### In WSL2
