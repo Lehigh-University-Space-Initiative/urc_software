@@ -8,5 +8,11 @@ def generate_launch_description():
             executable='GpsDriver_node',
             name='GpsDriver',
             output='screen'
+        ),
+        Node(
+            package='driveline_urc',
+            executable='MotorCtr_node',
+            name='MotorController',
+            output='screen'
         )
     ])

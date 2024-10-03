@@ -24,12 +24,14 @@ WORKDIR /ros2_ws
 # Copy the entire project
 COPY ./ /ros2_ws/
 
+# Build pigpio from the submodule
+RUN cd /ros2_ws/libs/pigpio && make && make install
+
 # Build and install the cross_pkg_messages package
 RUN /bin/bash -c '. /opt/ros/humble/setup.sh && colcon build --symlink-install --packages-select cross_pkg_messages'
 
 # Build and install the base_station_urc, main_computer_urc, and driveline_urc
-# RUN /bin/bash -c 'source install/setup.bash && colcon build --symlink-install --packages-select base_station_urc main_computer_urc driveline_urc'
-RUN /bin/bash -c 'source install/setup.bash && colcon build --symlink-install --packages-select driveline_urc'
+RUN /bin/bash -c 'source install/setup.bash && colcon build --symlink-install --packages-select base_station_urc main_computer_urc driveline_urc'
 
 # Set environment variables for build
 ENV CPLUS_INCLUDE_PATH=/ros2_ws/src/base_station_urc/include/cs_libguarded:$CPLUS_INCLUDE_PATH
