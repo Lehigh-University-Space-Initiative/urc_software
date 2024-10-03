@@ -20,7 +20,6 @@ private:
 
     libguarded::plain_guarded<bool> sendHeartbeatsFlag{true};
     libguarded::plain_guarded<bool> heartbeatThreadShutDown{false};
-    void sendHeartbeats();
     void heartbeatThread();
     std::thread heartbeatThreadObj;
 
@@ -32,4 +31,5 @@ private:
 public:
     DriveTrainMotorManager();
     virtual ~DriveTrainMotorManager();
+    void sendHeartbeats();
 };
