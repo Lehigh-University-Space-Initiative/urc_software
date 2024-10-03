@@ -5,9 +5,7 @@
 #include "cross_pkg_messages/msg/rover_computer_drive_cmd.hpp"
 #include "geometry_msgs/msg/vector3.hpp"
 #include "CANDriver.h"
-#include "StepperDriver.h"
 #include "DriveTrainMotorManager.h"
-#include "ArmMotorManager.h"
 
 /*
 Note 
@@ -37,7 +35,7 @@ int main(int argc, char** argv) {
 
     RCLCPP_INFO(node->get_logger(), "Motor CTR startup");
 
-    ArmMotorManager arm{};
+    DriveTrainMotorManager driveTrainManager{}; 
 
     // Set loop rate to 800 Hz
     rclcpp::Rate loop_rate(800);
@@ -50,11 +48,7 @@ int main(int argc, char** argv) {
     while (rclcpp::ok()) {
         rclcpp::spin_some(node);
 
-        arm.tick();  // Handle arm motor manager
-
-        // Uncomment and update to integrate with the StepperDriver
-        // wrist_yaw.tick();
-
+        driveTrainManager.sendHeartbeats();  // Send heartbeat signals to motors
         loop_rate.sleep();  // Maintain the loop rate
     }
 
