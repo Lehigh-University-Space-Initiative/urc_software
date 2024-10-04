@@ -8,6 +8,7 @@ export DISPLAY=128.180.198.214:0.0 # replace with your IP address up to the colo
 docker run --rm -it -e DISPLAY=$DISPLAY urc_software base_station
 docker run --rm -it -e DISPLAY=$DISPLAY urc_software main_computer
 docker run --rm -it -e DISPLAY=$DISPLAY urc_software driveline
+docker run --rm -it -e DISPLAY=$DISPLAY urc_software ground_input
 ```
 
 ### Tell docker to clean up after itself when it exits
@@ -31,6 +32,7 @@ source /ros2_ws/install/setup.bash
 ros2 launch base_station_urc base_station_launch.py
 ros2 launch main_computer_urc main_computer_launch.py
 ros2 launch driveline_urc driveline_launch.py
+ros2 launch ground_input_urc ground_input_launch.py
 ```
 
 ### Helpful commands to know
