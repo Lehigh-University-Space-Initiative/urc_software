@@ -5,6 +5,9 @@
 ```bash
 docker build -t urc_software .
 export DISPLAY=128.180.198.214:0.0 # replace with your IP address up to the colon
+docker run --rm -it -e DISPLAY=$DISPLAY urc_software base_station
+docker run --rm -it -e DISPLAY=$DISPLAY urc_software main_computer
+docker run --rm -it -e DISPLAY=$DISPLAY urc_software driveline
 ```
 
 ### Tell docker to clean up after itself when it exits
