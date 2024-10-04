@@ -38,5 +38,6 @@ def generate_launch_description():
             executable='GroundStationGUI',
             name='ground_station_gui',
             output='screen',
+            # parameters=[{'/hootl': False}] 
         ),
     ])
