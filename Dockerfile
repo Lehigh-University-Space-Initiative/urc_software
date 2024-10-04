@@ -46,5 +46,5 @@ RUN echo "source /ros2_ws/install/setup.bash" >> ~/.bashrc
 RUN mkdir -p /home/urcAssets
 COPY urcAssets /home/urcAssets
 
-# Default command: log into the container
-CMD ["/bin/bash"]
+# Default command
+ENTRYPOINT ["/ros2_ws/run_nodes.sh"]
