@@ -26,6 +26,9 @@ case "$1" in
   driveline)
     ros2 launch driveline_urc driveline_launch.py
     ;;
+  ground_input)
+    ros2 launch ground_input_urc ground_input_launch.py
+    ;;
   *)
     echo "Unknown mode: $1. Please specify one of 'hootl', 'base_station', 'main_computer', or 'driveline'."
     exit 1
