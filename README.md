@@ -22,7 +22,7 @@ docker run --rm -v C:/Users/phamd/urc_software:/root --name urc_software_dev -it
 #### In WSL2
 
 ```bash 
-docker run --device=/dev/bus/usb/001/002 --privileged -it --rm -v /mnt/c/Users/phamd/urc_software:/root:rw --name urc_software_dev -e DISPLAY=$DISPLAY --net=host urc_software
+docker run --device=/dev/input/js0 --device=/dev/input/js1 -it -e DISPLAY=$DISPLAY --net=host urc_software
 ```
 
 ## Inside docker
