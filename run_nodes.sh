@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash 
+# ^^ https://discourse.nixos.org/t/how-do-you-run-a-bash-script/10141
 
 # Source the ROS 2 setup
 source /ros2_ws/install/setup.bash
