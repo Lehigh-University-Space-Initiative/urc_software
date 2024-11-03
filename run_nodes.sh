@@ -17,8 +17,7 @@ case "$1" in
     wait
     ;;
   base_station)
-    # ros2 launch base_station_urc base_station_launch.py
-    ros2 run base_station_urc GroundStationGUI
+    ros2 launch base_station_urc base_station_launch.py
     ;;
   main_computer)
     ros2 launch main_computer_urc main_computer_launch.py
