@@ -5,8 +5,8 @@ import time
 
 USERNAME = 'lusi'
 PASSWORD = 'lusi'
-MAIN_COMPUTER_IP = '10.1.0.4'
-MAIN_COMPUTER_PATH = '/home/lusi/urc_software'
+MAIN_COMPUTER_IP = '10.0.0.10'
+MAIN_COMPUTER_PATH = '/home/lusi/urc_software_deploy'
 LOCAL_PATH = '/mnt/c/Users/phamd/urc_software'
 DOCKER_IMAGE_NAME = 'urc_software'
 
@@ -34,15 +34,6 @@ def rsync_files():
     )
     subprocess.run(rsync_command, shell=True)
 
-# Function to yield lines in real-time as they are generated
-def line_buffered(f):
-    line_buf = ""
-    while not f.channel.exit_status_ready():
-        line_buf += f.read(1).decode('utf-8') 
-        if line_buf.endswith('\n'):
-            yield line_buf
-            line_buf = ""
-
 # SSH connection and run the Docker build command
 def run_docker_build():
     print("Connecting via SSH to run Docker build...")
@@ -58,6 +49,11 @@ def run_docker_build():
         print(f"Failed to connect via SSH: {e}")
         return
 
+    # Run dos2unix on run_nodes.sh
+    dos2unix_command = f'dos2unix {MAIN_COMPUTER_PATH}/run_nodes.sh'
+    ssh.exec_command(dos2unix_command)
+
+    # Run Docker build
     docker_command = f'cd {MAIN_COMPUTER_PATH} && docker build -t {DOCKER_IMAGE_NAME} .'
     
     stdin, stdout, stderr = ssh.exec_command(docker_command)
@@ -65,7 +61,7 @@ def run_docker_build():
     print("Docker build in progress...")
 
     # Iterate through each line of the output
-    for line in line_buffered(stdout):
+    for line in iter(stdout.readline, ""):
         print(line, end="")
 
     error_output = stderr.read().decode()
