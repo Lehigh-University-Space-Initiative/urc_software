@@ -1,7 +1,7 @@
 import paramiko
 import subprocess
+import argparse
 import os
-import time
 
 USERNAME = 'lusi'
 PASSWORD = 'lusi'
@@ -34,11 +34,8 @@ def rsync_files():
     )
     subprocess.run(rsync_command, shell=True)
 
-# SSH connection and run the Docker build command
 def run_docker_build():
     print("Connecting via SSH to run Docker build...")
-
-    # Establish an SSH connection
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     
@@ -49,18 +46,13 @@ def run_docker_build():
         print(f"Failed to connect via SSH: {e}")
         return
 
-    # Run dos2unix on run_nodes.sh
     dos2unix_command = f'dos2unix {MAIN_COMPUTER_PATH}/run_nodes.sh'
     ssh.exec_command(dos2unix_command)
 
-    # Run Docker build
     docker_command = f'cd {MAIN_COMPUTER_PATH} && docker build -t {DOCKER_IMAGE_NAME} .'
-    
     stdin, stdout, stderr = ssh.exec_command(docker_command)
 
     print("Docker build in progress...")
-
-    # Iterate through each line of the output
     for line in iter(stdout.readline, ""):
         print(line, end="")
 
@@ -70,12 +62,20 @@ def run_docker_build():
 
     ssh.close()
 
-# Main deployment function
-def deploy():
-    rsync_files()
-
-    # SSH into and run Docker build
-    run_docker_build()
+def deploy(args):
+    if args.rsync or args.full:
+        rsync_files()
+    if args.docker or args.full:
+        run_docker_build()
 
 if __name__ == "__main__":
-    deploy()
+    parser = argparse.ArgumentParser(description="Deployment script for different deployment levels.")
+    parser.add_argument('--rsync', action='store_true', help="Sync files only.")
+    parser.add_argument('--docker', action='store_true', help="Sync files and build Docker image.")
+    parser.add_argument('--full', action='store_true', help="Run full deployment: sync, Docker build.")
+    args = parser.parse_args()
+
+    if not (args.rsync or args.docker or args.full):
+        args.full = True  # Default to full deployment if no flags provided
+
+    deploy(args)
