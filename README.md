@@ -3,7 +3,7 @@
 
 Resource: [ROS2 Multiple Machines](https://roboticsbackend.com/ros2-multiple-machines-including-raspberry-pi/#Use_ROS_DOMAIN_ID_to_run_multiple_separate_ROS2_applications_on_the_same_network)
 
-## Testing
+## Testing docker through ports
 
 ### Container 1:
 
@@ -28,4 +28,27 @@ docker run -it --rm --name ros2-node2 -p 7401:7400/udp -p 7501:7500/udp containe
 source /opt/ros/humble/setup.bash
 
 ros2 run demo_nodes_cpp listener
+```
+
+## Testing docker through network host
+
+### Container 1 (server):
+
+```bash
+docker run -it --network host container1
+apt update && apt install netcat
+apt install tcpdump
+apt install tmux
+apt install iproute2
+
+nc -lv 7400
+```
+
+### Container 2 (client):
+
+```bash
+docker run -it --network host container2
+apt update && apt install netcat
+
+nc -v 0.0.0.0 7400
 ```
