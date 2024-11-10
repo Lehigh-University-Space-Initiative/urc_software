@@ -8,3 +8,4 @@ install/
 log/
 .bash_history
 Dockerfile
+.git/
