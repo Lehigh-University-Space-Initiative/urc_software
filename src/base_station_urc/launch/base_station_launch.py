@@ -9,7 +9,8 @@ def generate_launch_description():
             executable='joy_node',
             name='joy0_node',
             parameters=[{'dev': '/dev/input/js1', 'coalesce_interval': 0.3}],
-            remappings=[('/joy', '/joy0')]
+            remappings=[('/joy', '/joy0')],
+            output='screen',
         ),
         # Node to handle joystick input 1
         Node(
@@ -17,7 +18,8 @@ def generate_launch_description():
             executable='joy_node',
             name='joy1_node',
             parameters=[{'dev': '/dev/input/js2', 'coalesce_interval': 0.3}],
-            remappings=[('/joy', '/joy1')]
+            remappings=[('/joy', '/joy1')],
+            output='screen',
         ),
         # JoyMapper node to process joystick inputs and send commands
         Node(

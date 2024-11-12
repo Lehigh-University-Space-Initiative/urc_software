@@ -63,16 +63,45 @@ def run_docker_build():
 
     ssh.close()
 
+
+def restart_lusi_softwar():
+    print("Connecting via SSH to launch software...")
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    
+    try:
+        ssh.connect(MAIN_COMPUTER_IP, username=USERNAME, password=PASSWORD)
+        print(f"Successfully connected to {MAIN_COMPUTER_IP}")
+    except Exception as e:
+        print(f"Failed to connect via SSH: {e}")
+        return
+
+    service_command = f'echo {PASSWORD} | sudo -S systemctl restart lusi-software.service'
+    stdin, stdout, stderr = ssh.exec_command(service_command)
+
+    print("Software relaunch in progress...")
+    for line in iter(stdout.readline, ""):
+        print(line, end="")
+
+    error_output = stderr.read().decode()
+    if error_output:
+        print("software relaunch Errors:\n", error_output)
+
+    ssh.close()
+
 def deploy(args):
     if args.rsync or args.full:
         rsync_files()
     if args.docker or args.full:
         run_docker_build()
+    if args.deploy or args.full:
+        restart_lusi_softwar()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Deployment script for different deployment levels.")
     parser.add_argument('--rsync', action='store_true', help="Sync files only.")
     parser.add_argument('--docker', action='store_true', help="Sync files and build Docker image.")
+    parser.add_argument('--deploy', action='store_true', help="Sync files, build Docker image and relaunch software.")
     parser.add_argument('--full', action='store_true', help="Run full deployment: sync, Docker build.")
     args = parser.parse_args()
 
