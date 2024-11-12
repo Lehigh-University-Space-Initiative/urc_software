@@ -1,4 +1,5 @@
 #include "Lifecycle.h"
+#include <filesystem>
 
 static void glfw_error_callback(int error, const char* description)
 {
@@ -52,6 +53,9 @@ GLFWwindow* setupIMGUI()
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
     //io.ConfigViewportsNoAutoMerge = true;
     //io.ConfigViewportsNoTaskBarIcon = true;
+
+    // to allow for persisting ui layout accross container runs and builds
+    io.IniFilename = "/root/ui.ini";
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
