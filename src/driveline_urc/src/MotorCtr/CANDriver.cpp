@@ -1,6 +1,7 @@
 #include "CANDriver.h"
 #include <string>
 #include "Limits.h"
+#include "main.h"
 
 #define MAX_PWM 2000
 #define MIN_PWM 1000
@@ -19,7 +20,7 @@ bool CANDriver::setupCAN(int canBus) {
 
     data->soc = socket(PF_CAN, SOCK_RAW, CAN_RAW);
     if (data->soc < 0) {
-        RCLCPP_ERROR(rclcpp::get_logger("CANDriver"), "socket PF_CAN failed");
+        RCLCPP_ERROR(node->get_logger(), "socket PF_CAN failed");
         return false;
     }
 
@@ -30,7 +31,7 @@ bool CANDriver::setupCAN(int canBus) {
 
     int ret = ioctl(data->soc, SIOCGIFINDEX, &(data->ifr));
     if (ret < 0) {
-        RCLCPP_ERROR(rclcpp::get_logger("CANDriver"), "ioctl failed");
+        RCLCPP_ERROR(node->get_logger(), "ioctl failed");
         return false;
     }
 
@@ -56,7 +57,7 @@ bool CANDriver::sendMSG(int canBus, can_frame frame) {
 
     int nbytes = write(data->soc, &frame, sizeof(frame));
     if (nbytes != sizeof(frame)) {
-        RCLCPP_ERROR(rclcpp::get_logger("CANDriver"), "CAN Frame Send Error!\r\n");
+        RCLCPP_ERROR(node->get_logger(), "CAN Frame Send Error!\r\n");
         return false;
     }
     return true;

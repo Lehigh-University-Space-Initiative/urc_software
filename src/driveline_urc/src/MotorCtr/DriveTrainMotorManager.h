@@ -8,6 +8,8 @@
 #include <cs_plain_guarded.h>
 #include "cross_pkg_messages/msg/rover_computer_drive_cmd.hpp"
 
+extern std::shared_ptr<rclcpp::Node> node;
+
 class DriveTrainMotorManager {
 private:
     std::vector<SparkMax> motors;
@@ -24,7 +26,6 @@ private:
     std::thread heartbeatThreadObj;
 
     rclcpp::Subscription<cross_pkg_messages::msg::RoverComputerDriveCMD>::SharedPtr driveCommandsSub;
-    rclcpp::Node::SharedPtr nodeHandle;
 
     void parseDriveCommands(const cross_pkg_messages::msg::RoverComputerDriveCMD::SharedPtr msg);
 

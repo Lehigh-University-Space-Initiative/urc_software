@@ -1,8 +1,9 @@
 #include "DriveTrainMotorManager.h"
+#include "main.h"
 
 DriveTrainMotorManager::DriveTrainMotorManager()
 {
-    auto node = rclcpp::Node::make_shared("drive_train_motor_manager");
+    // auto node = rclcpp::Node::make_shared("drive_train_motor_manager");
 
     setupMotors();
 
@@ -16,8 +17,6 @@ DriveTrainMotorManager::DriveTrainMotorManager()
             *lock = std::chrono::system_clock::now();
             parseDriveCommands(msg);
         });
-
-    nodeHandle = node;
 }
 
 DriveTrainMotorManager::~DriveTrainMotorManager()
@@ -44,7 +43,7 @@ void DriveTrainMotorManager::setupMotors()
     motors.push_back(SparkMax(1, 5)); // RM
     motors.push_back(SparkMax(1, 6)); // RF
 
-    RCLCPP_INFO(nodeHandle->get_logger(), "Testing Motors");
+    RCLCPP_INFO(node->get_logger(), "Testing Motors");
     for (auto &motor : motors) {
         motor.ident();
     }
@@ -86,7 +85,7 @@ void DriveTrainMotorManager::heartbeatThread()
             auto lock = lastManualCommandTime.lock();
             auto now = std::chrono::system_clock::now();
             if (now - *lock > manualCommandTimeout) {
-                RCLCPP_WARN(nodeHandle->get_logger(), "LOS Safety Stop");
+                RCLCPP_WARN(node->get_logger(), "LOS Safety Stop");
                 stopAllMotors();
             }
         }
@@ -97,7 +96,7 @@ void DriveTrainMotorManager::heartbeatThread()
 
 void DriveTrainMotorManager::parseDriveCommands(const cross_pkg_messages::msg::RoverComputerDriveCMD::SharedPtr msg)
 {
-    RCLCPP_INFO(nodeHandle->get_logger(), "Drive Commands Received with L: %f, R: %f", msg->cmd_l.x, msg->cmd_r.x);
+    RCLCPP_INFO(node->get_logger(), "Drive Commands Received with L: %f, R: %f", msg->cmd_l.x, msg->cmd_r.x);
 
     // Send power commands to motors based on drive command message
     motors[0].sendPowerCMD(msg->cmd_l.x);
