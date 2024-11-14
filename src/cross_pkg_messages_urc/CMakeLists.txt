@@ -8,7 +8,6 @@ find_package(rosidl_default_generators REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/RoverComputerDriveCMD.msg"
-  "msg/ManualDriveCMD.msg"
   "msg/GPSData.msg"
   DEPENDENCIES std_msgs geometry_msgs
 )

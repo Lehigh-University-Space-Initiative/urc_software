@@ -57,7 +57,19 @@ void TelemetryPanel::drawBody() {
                 sliderStart.x = wheelCenter.x + 30;
             }
             ImGui::SetCursorScreenPos(sliderStart);
-            signedProgressBar(0, " ", sliderSize);
+            auto sliderSide = side ? lastDriveCMD.cmd_r : lastDriveCMD.cmd_l;
+            float sliderVal = 0;
+
+            if (wheel == 0) {
+                sliderVal = sliderSide.x;
+            } else if (wheel == 1) {
+                sliderVal = sliderSide.y;
+            } else {
+                sliderVal = sliderSide.z;
+
+            }
+
+            signedProgressBar(sliderVal / 25, " ", sliderSize);
 
         }
         

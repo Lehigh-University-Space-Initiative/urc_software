@@ -50,7 +50,7 @@ def run_docker_build():
     dos2unix_command = f'dos2unix {MAIN_COMPUTER_PATH}/run_nodes.sh'
     ssh.exec_command(dos2unix_command)
 
-    docker_command = f'cd {MAIN_COMPUTER_PATH} && docker build -t {DOCKER_IMAGE_NAME} .'
+    docker_command = f'cd {MAIN_COMPUTER_PATH} && docker build -t {DOCKER_IMAGE_NAME} -t localhost:65000/{DOCKER_IMAGE_NAME} .'
     stdin, stdout, stderr = ssh.exec_command(docker_command)
 
     print("Docker build in progress...")
@@ -60,6 +60,19 @@ def run_docker_build():
     error_output = stderr.read().decode()
     if error_output:
         print("Docker Build Errors:\n", error_output)
+
+    print("Pushing to Main Computer Docker Registry")
+
+    docker_command = f'docker push localhost:65000/{DOCKER_IMAGE_NAME}'
+    stdin, stdout, stderr = ssh.exec_command(docker_command)
+
+    print("Docker Push in progress...")
+    for line in iter(stdout.readline, ""):
+        print(line, end="")
+
+    error_output = stderr.read().decode()
+    if error_output:
+        print("Docker Push Errors:\n", error_output)
 
     ssh.close()
 
