@@ -26,7 +26,6 @@ def rsync_files():
         f'--exclude="build/" '
         f'--exclude="install/" '
         f'--exclude="log/" '
-        f'--exclude="softwareUpdate/" '
         f'--exclude=".bash_history" '
         f'--exclude=".gitconfig" '
         f'--exclude="imgui.ini" '
@@ -50,7 +49,7 @@ def run_docker_build():
     dos2unix_command = f'dos2unix {MAIN_COMPUTER_PATH}/run_nodes.sh'
     ssh.exec_command(dos2unix_command)
 
-    docker_command = f'cd {MAIN_COMPUTER_PATH} && docker build -t {DOCKER_IMAGE_NAME} -t localhost:65000/{DOCKER_IMAGE_NAME} .'
+    docker_command = f'cd {MAIN_COMPUTER_PATH} && ./softwareUpdate/dockerBuild.sh'
     stdin, stdout, stderr = ssh.exec_command(docker_command)
 
     print("Docker build in progress...")
@@ -103,7 +102,7 @@ def restart_lusi_softwar():
     ssh.close()
 
 def deploy(args):
-    if args.rsync or args.full:
+    if args.rsync or args.docker or args.full:
         rsync_files()
     if args.docker or args.full:
         run_docker_build()

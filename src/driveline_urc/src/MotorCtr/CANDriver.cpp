@@ -48,7 +48,7 @@ bool CANDriver::setupCAN(int canBus) {
         return false;
     }
 
-    setgccsockopt(data->soc, SOL_CAN_RAW, CAN_RAW_FILTER, NULL, 0);
+    // setgccsockopt(data->soc, SOL_CAN_RAW, CAN_RAW_FILTER, NULL, 0);
 
 
     // CANDriver::canReadThread = std::thread(&CANDriver::startCanReadThread, canBus);   
