@@ -52,6 +52,7 @@ protected:
     static bool setupCAN(int canBus);
     static void closeCAN(int canBus);
 
+    static std::thread canReadThread;
     static bool sendMSG(int canBus, can_frame frame);
     static bool receiveMSG(int canBus, can_frame& frame);
     static void startCanReadThread(int canBus);
@@ -68,7 +69,7 @@ public:
     bool sendHeartbeat();
     void sendPowerCMD(float power);
 
-    bool pidControlled = true;
+    bool pidControlled = false;
     // velocity in ___ / ___
     float pidSetpoint = 0;
     //should be called every Dt

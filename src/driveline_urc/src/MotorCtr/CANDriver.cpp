@@ -12,6 +12,11 @@
 std::array<CANDriver::CANStaticDataGuarded, 2> CANDriver::canStaticData;
 std::array<libguarded::plain_guarded<size_t>, 2> CANDriver::canStaticDataUsers;
 
+
+// TODO: only works with one can bus
+std::thread CANDriver::canReadThread;
+
+
 bool CANDriver::setupCAN(int canBus) {
     auto data = canStaticData[canBus].lock();
 
@@ -43,7 +48,10 @@ bool CANDriver::setupCAN(int canBus) {
         return false;
     }
 
-    setsockopt(data->soc, SOL_CAN_RAW, CAN_RAW_FILTER, NULL, 0);
+    setgccsockopt(data->soc, SOL_CAN_RAW, CAN_RAW_FILTER, NULL, 0);
+
+
+    // CANDriver::canReadThread = std::thread(&CANDriver::startCanReadThread, canBus);   
     data->canBussesSetup = true;
 
     return true;
@@ -151,10 +159,10 @@ CANDriver::CANDriver(int busNum, int canID) {
     this->canID = canID;
 
     if (setupCAN(busNum)) {
-         {
-            auto data = canStaticData[busNum].lock();
-            data->canIDMap[canID] = this;
-        }
+        // {
+        //     auto data = canStaticData[busNum].lock();
+        //     data->canIDMap[canID] = this;
+        // }
         RCLCPP_INFO(rclcpp::get_logger("CANDriver"), "CAN setup successful");
     } else {
         RCLCPP_WARN(rclcpp::get_logger("CANDriver"), "Cannot setup CAN");
