@@ -6,6 +6,7 @@ import os
 USERNAME = 'lusi'
 PASSWORD = 'lusi'
 MAIN_COMPUTER_IP = '10.0.0.10'
+DRIVELINE_COMPUTER_IP = '10.0.0.20'
 MAIN_COMPUTER_PATH = '/home/lusi/urc_software_deploy'
 # LOCAL_PATH = '/mnt/c/Users/phamd/urc_software'
 LOCAL_PATH = '/home/parallels/lusi/urc_software'
@@ -76,19 +77,19 @@ def run_docker_build():
     ssh.close()
 
 
-def restart_lusi_softwar():
-    print("Connecting via SSH to launch software...")
+def restart_lusi_softwar(computer, username, password):
+    print(f"Connecting via SSH to {computer} to launch software...")
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     
     try:
-        ssh.connect(MAIN_COMPUTER_IP, username=USERNAME, password=PASSWORD)
-        print(f"Successfully connected to {MAIN_COMPUTER_IP}")
+        ssh.connect(computer, username=username, password=password)
+        print(f"Successfully connected to {computer}")
     except Exception as e:
         print(f"Failed to connect via SSH: {e}")
         return
 
-    service_command = f'echo {PASSWORD} | sudo -S systemctl restart lusi-software.service'
+    service_command = f'echo {password} | sudo -S systemctl restart lusi-software.service'
     stdin, stdout, stderr = ssh.exec_command(service_command)
 
     print("Software relaunch in progress...")
@@ -107,7 +108,8 @@ def deploy(args):
     if args.docker or args.full:
         run_docker_build()
     if args.deploy or args.full:
-        restart_lusi_softwar()
+        restart_lusi_softwar(MAIN_COMPUTER_IP,USERNAME,PASSWORD)
+        restart_lusi_softwar(DRIVELINE_COMPUTER_IP,"pi",PASSWORD)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Deployment script for different deployment levels.")
@@ -117,7 +119,7 @@ if __name__ == "__main__":
     parser.add_argument('--full', action='store_true', help="Run full deployment: sync, Docker build.")
     args = parser.parse_args()
 
-    if not (args.rsync or args.docker or args.full):
+    if not (args.rsync or args.docker or args.deploy):
         args.full = True  # Default to full deployment if no flags provided
 
     deploy(args)
