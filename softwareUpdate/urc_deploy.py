@@ -2,6 +2,7 @@ import paramiko
 import subprocess
 import argparse
 import os
+import threading
 
 USERNAME = 'lusi'
 PASSWORD = 'lusi'
@@ -77,7 +78,7 @@ def run_docker_build():
     ssh.close()
 
 
-def restart_lusi_softwar(computer, username, password):
+def restart_lusi_software(computer, username, password):
     print(f"Connecting via SSH to {computer} to launch software...")
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -108,8 +109,12 @@ def deploy(args):
     if args.docker or args.full:
         run_docker_build()
     if args.deploy or args.full:
-        restart_lusi_softwar(MAIN_COMPUTER_IP,USERNAME,PASSWORD)
-        restart_lusi_softwar(DRIVELINE_COMPUTER_IP,"pi",PASSWORD)
+        t1 = threading.Thread(target=restart_lusi_software,args=(MAIN_COMPUTER_IP,USERNAME,PASSWORD))
+        t2 = threading.Thread(target=restart_lusi_software,args=(DRIVELINE_COMPUTER_IP,"pi",PASSWORD))
+        t1.start()
+        t2.start()
+        t1.join()
+        t2.join()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Deployment script for different deployment levels.")
