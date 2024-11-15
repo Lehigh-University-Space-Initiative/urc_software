@@ -24,6 +24,7 @@ add_custom_target(pigpio_build ALL
 # Motor Controller node executable
 file(GLOB MotorCtr_src
      "src/MotorCtr/*.cpp"
+     "src/MotorCtr/PID/*.cpp"
 )
 add_executable(MotorCtr_node ${MotorCtr_src})
 ament_target_dependencies(MotorCtr_node rclcpp std_msgs cross_pkg_messages)

@@ -8,7 +8,6 @@
 #include <cs_plain_guarded.h>
 #include "cross_pkg_messages/msg/rover_computer_drive_cmd.hpp"
 
-extern std::shared_ptr<rclcpp::Node> node;
 
 class DriveTrainMotorManager {
 private:
@@ -25,6 +24,7 @@ private:
     void heartbeatThread();
     std::thread heartbeatThreadObj;
 
+
     rclcpp::Subscription<cross_pkg_messages::msg::RoverComputerDriveCMD>::SharedPtr driveCommandsSub;
 
     void parseDriveCommands(const cross_pkg_messages::msg::RoverComputerDriveCMD::SharedPtr msg);
@@ -33,4 +33,5 @@ public:
     DriveTrainMotorManager();
     virtual ~DriveTrainMotorManager();
     void sendHeartbeats();
+    void pidUpdate();
 };

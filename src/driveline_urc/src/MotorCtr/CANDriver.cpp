@@ -63,11 +63,98 @@ bool CANDriver::sendMSG(int canBus, can_frame frame) {
     return true;
 }
 
-CANDriver::CANDriver(int busNum) {
+bool CANDriver::receiveMSG(int canBus, can_frame &frame)
+{
+    if (canBus < 0 || canBus > 1) return false;
+
+    //Lock the data to get the socket
+    auto data = canStaticData[canBus].lock();
+
+    //clear the frame
+    memset(&frame, 0, sizeof(frame));
+
+    //block until a frame is received
+    int nbytes = read(data->soc, &frame, sizeof(frame));
+
+    if(nbytes != sizeof(frame)) {
+        RCLCPP_ERROR(node->get_logger(),"CAN Frame Receive Error!\r\n");
+        return false;
+    }
+    return true;
+}
+
+const uint32_t perioticUpdateCanIDBase = 0x82051840;
+const uint32_t maxCANID = 7;
+
+void CANDriver::startCanReadThread(int canBus)
+{
+    RCLCPP_INFO(node->get_logger(), "Starting CAN Read Thread");
+    while (true) {
+        can_frame frame;
+        if (receiveMSG(canBus, frame)) {
+            // ROS_INFO("received item: %x",frame.can_id);
+
+            //check if the frame is a periotic update
+            if (frame.can_id >= perioticUpdateCanIDBase && frame.can_id < perioticUpdateCanIDBase + maxCANID) {
+                //handle periotic update
+                // ROS_INFO("Periotic Update Received");
+
+                //print the frame to formated string
+                // ROS_INFO("ID: %x", frame.can_id);
+                parsePeriodicData(canBus, frame);
+            }
+            else {
+                //handle other frames
+            }
+
+            
+            //optional wait a little bit
+            // std::this_thread::sleep_for(std::chrono::milliseconds(1));//
+        }
+    }
+}
+
+void CANDriver::parsePeriodicData(int canBus, can_frame frame)
+{
+    // length, dataout[1], dataout[2], dataout[3], dataout[4], dataout[5], dataout[6], dataout[7]
+    // 8, Motor Velocity LSB, Motor Velocity MID_L, Motor Velocity MID_H, Motor Velocity MSB, Motor Temperature, Motor Voltage LSB, Motor Current LSB 4 bits Motor Voltage MSB 4 bits, Motor Current MSB
+
+    //parse the data
+    PeriodicUpdateData pdata;
+    uint32_t velocityFloat = (frame.data[0] | (frame.data[1] << 8) | (frame.data[2] << 16) | (frame.data[3] << 24));
+    pdata.velocity = *(reinterpret_cast<float*>(&velocityFloat));
+    pdata.temperature = frame.data[4];
+    pdata.voltage = (frame.data[5] | ((frame.data[6] & 0x0F) << 8));
+    pdata.current = ((frame.data[6] & 0xF0) | (frame.data[7] << 4));
+
+    auto motorID = frame.can_id - perioticUpdateCanIDBase;
+
+    RCLCPP_INFO(node->get_logger(), "CAN ID %d, velocity %.3f, temperature %i, voltage %i, current %i",motorID,pdata.velocity,pdata.temperature,pdata.voltage,pdata.current);
+    
+    //assign the data to the correct motor
+    {
+        auto data = canStaticData[canBus].lock();
+        
+        auto motorPtr = data->canIDMap[motorID];
+
+        if (motorPtr) {
+            motorPtr->lastPeriodicData = pdata; 
+        }
+        //todo broadcast ros messages with new data
+
+    }
+}
+
+CANDriver::CANDriver(int busNum, int canID) {
     assert(busNum < 2 && busNum >= 0);
     this->canBus = busNum;
+    this->canID = canID;
 
     if (setupCAN(busNum)) {
+         {
+            auto data = canStaticData[busNum].lock();
+            data->canIDMap[canID] = this;
+        }
         RCLCPP_INFO(rclcpp::get_logger("CANDriver"), "CAN setup successful");
     } else {
         RCLCPP_WARN(rclcpp::get_logger("CANDriver"), "Cannot setup CAN");
@@ -95,7 +182,7 @@ CANDriver::~CANDriver() {
     }
 }
 
-SparkMax::SparkMax(int canBUS, int canID) : CANDriver(canBUS), canID(canID) {}
+SparkMax::SparkMax(int canBUS, int canID) : CANDriver(canBUS, canID) {}
 
 bool SparkMax::sendHeartbeat() {
     can_frame frame{};
@@ -126,7 +213,23 @@ void SparkMax::sendPowerCMD(float power) {
     }
 }
 
-void SparkMax::ident() {
+void SparkMax::pidTick()
+{
+    if (pidControlled) {
+        double currentVel = 0;
+
+        {
+            auto data = canStaticData[canBus].lock();
+            currentVel = lastPeriodicData.velocity / 16 * 2 * 3.14159265 / 60;
+        }
+
+        double val = pidController.calculate(pidSetpoint,currentVel);
+        sendPowerCMD(val);
+    }
+}
+
+void SparkMax::ident()
+{
     can_frame frame{};
     frame.can_id = 0x2051D80 + canID;
     frame.can_dlc = 0;

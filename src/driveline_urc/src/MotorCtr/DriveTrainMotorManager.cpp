@@ -94,6 +94,13 @@ void DriveTrainMotorManager::heartbeatThread()
     }
 }
 
+void DriveTrainMotorManager::pidUpdate()
+{
+    for (auto &motor : motors) {
+        motor.pidTick();
+    }
+}
+
 void DriveTrainMotorManager::parseDriveCommands(const cross_pkg_messages::msg::RoverComputerDriveCMD::SharedPtr msg)
 {
     RCLCPP_INFO(node->get_logger(), "Drive Commands Received with L: %f, R: %f", msg->cmd_l.x, msg->cmd_r.x);

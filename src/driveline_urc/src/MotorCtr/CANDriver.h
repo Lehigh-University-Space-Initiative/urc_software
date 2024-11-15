@@ -15,10 +15,23 @@
 #include <vector>
 #include <pigpio.h>
 #include "cs_plain_guarded.h"
+#include "PID/pid.h"
+#include "Limits.h"
 
 class CANDriver {
 protected:
     int canBus;
+    int canID;
+
+    struct PeriodicUpdateData {
+        float velocity;
+        uint8_t temperature;
+        uint16_t voltage;
+        uint16_t current;
+    };
+
+    PeriodicUpdateData lastPeriodicData{};
+
 
     struct CANStaticData {
         ifreq ifr;
@@ -26,6 +39,9 @@ protected:
         int soc;
 
         bool canBussesSetup;
+
+        //map each can id to a CANDriver pointer
+        std::map<int, CANDriver*> canIDMap;
     };
 
     typedef libguarded::plain_guarded<CANStaticData> CANStaticDataGuarded;
@@ -37,19 +53,30 @@ protected:
     static void closeCAN(int canBus);
 
     static bool sendMSG(int canBus, can_frame frame);
+    static bool receiveMSG(int canBus, can_frame& frame);
+    static void startCanReadThread(int canBus);
+    static void parsePeriodicData(int canBus, can_frame frame);
 
 public:
-    CANDriver(int busNum);
+    CANDriver(int busNum, int canID);
     virtual ~CANDriver();
 };
 
 class SparkMax : CANDriver {
-protected:
-    int canID;
 public:
     SparkMax(int canBUS, int canID);
     bool sendHeartbeat();
     void sendPowerCMD(float power);
+
+    bool pidControlled = true;
+    // velocity in ___ / ___
+    float pidSetpoint = 0;
+    //should be called every Dt
+    void pidTick();
+    // float dt = 0.01;
+
+    PID pidController = PID(0.01,MAX_DRIVE_POWER,-MAX_DRIVE_POWER,0.1,0,0);
+
     void ident();
 };
 
