@@ -8,7 +8,7 @@ DriveTrainMotorManager::DriveTrainMotorManager()
     setupMotors();
 
     // Start heartbeat thread
-    heartbeatThreadObj = std::thread(&DriveTrainMotorManager::heartbeatThread, this);
+    // heartbeatThreadObj = std::thread(&DriveTrainMotorManager::heartbeatThread, this);
 
     // Subscribe to drive commands
     driveCommandsSub = node->create_subscription<cross_pkg_messages::msg::RoverComputerDriveCMD>(
@@ -28,20 +28,20 @@ DriveTrainMotorManager::~DriveTrainMotorManager()
     }
 
     // Wait for the heartbeat thread to shut down
-    heartbeatThreadObj.join();
+    // heartbeatThreadObj.join();
 }
 
 void DriveTrainMotorManager::setupMotors()
 {
     // Add motors to the motors vector
     // Left side (BUS 0)
-    motors.push_back(SparkMax(1, 1)); // LF
-    motors.push_back(SparkMax(1, 2)); // LM
-    motors.push_back(SparkMax(1, 3)); // LB
+    motors.emplace_back(SparkMax(1, 1)); // LF
+    motors.emplace_back(SparkMax(1, 2)); // LM
+    motors.emplace_back(SparkMax(1, 3)); // LB
     // Right side (BUS 1)
-    motors.push_back(SparkMax(1, 4)); // RB
-    motors.push_back(SparkMax(1, 5)); // RM
-    motors.push_back(SparkMax(1, 6)); // RF
+    motors.emplace_back(SparkMax(1, 4)); // RB
+    motors.emplace_back(SparkMax(1, 5)); // RM
+    motors.emplace_back(SparkMax(1, 6)); // RF
 
     RCLCPP_INFO(node->get_logger(), "Testing Motors");
     for (auto &motor : motors) {
@@ -94,8 +94,9 @@ void DriveTrainMotorManager::heartbeatThread()
     }
 }
 
-void DriveTrainMotorManager::pidUpdate()
+void DriveTrainMotorManager::tick()
 {
+    //give pid tick
     for (auto &motor : motors) {
         motor.pidTick();
     }

@@ -24,13 +24,13 @@ protected:
     int canID;
 
     struct PeriodicUpdateData {
-        float velocity;
-        uint8_t temperature;
-        uint16_t voltage;
-        uint16_t current;
+        float velocity = 0;
+        uint8_t temperature = 0;
+        uint16_t voltage = 0;
+        uint16_t current = 0;
     };
 
-    PeriodicUpdateData lastPeriodicData{};
+    libguarded::plain_guarded<PeriodicUpdateData> lastPeriodicData;
 
 
     struct CANStaticData {
@@ -38,7 +38,7 @@ protected:
         sockaddr_can socketAddress;
         int soc;
 
-        bool canBussesSetup;
+        bool canBussesSetup = 0;
 
         //map each can id to a CANDriver pointer
         std::map<int, CANDriver*> canIDMap;
@@ -60,6 +60,8 @@ protected:
 
 public:
     CANDriver(int busNum, int canID);
+    CANDriver(const CANDriver& other);
+    CANDriver& operator=(const CANDriver& other);
     virtual ~CANDriver();
 };
 
@@ -71,7 +73,7 @@ public:
 
     bool pidControlled = false;
     // velocity in ___ / ___
-    float pidSetpoint = 0;
+    double pidSetpoint = 0;
     //should be called every Dt
     void pidTick();
     // float dt = 0.01;

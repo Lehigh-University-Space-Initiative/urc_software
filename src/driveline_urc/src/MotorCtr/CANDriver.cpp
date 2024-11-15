@@ -20,8 +20,15 @@ std::thread CANDriver::canReadThread;
 bool CANDriver::setupCAN(int canBus) {
     auto data = canStaticData[canBus].lock();
 
-    if (data->canBussesSetup)
+    if (data->canBussesSetup) {
+        {
+            auto data = canStaticDataUsers[canBus].lock();
+            *data += 1;
+        }
         return true;
+    }
+
+    RCLCPP_INFO(node->get_logger(), "Settting up CAN %d",canBus);
 
     data->soc = socket(PF_CAN, SOCK_RAW, CAN_RAW);
     if (data->soc < 0) {
@@ -53,6 +60,11 @@ bool CANDriver::setupCAN(int canBus) {
 
     // CANDriver::canReadThread = std::thread(&CANDriver::startCanReadThread, canBus);   
     data->canBussesSetup = true;
+
+    {
+        auto data = canStaticDataUsers[canBus].lock();
+        *data = 1;
+    }
 
     return true;
 }
@@ -146,7 +158,7 @@ void CANDriver::parsePeriodicData(int canBus, can_frame frame)
         auto motorPtr = data->canIDMap[motorID];
 
         if (motorPtr) {
-            motorPtr->lastPeriodicData = pdata; 
+            *motorPtr->lastPeriodicData.lock() = pdata; 
         }
         //todo broadcast ros messages with new data
 
@@ -155,18 +167,28 @@ void CANDriver::parsePeriodicData(int canBus, can_frame frame)
 
 CANDriver::CANDriver(int busNum, int canID) {
     assert(busNum < 2 && busNum >= 0);
+    assert(canID > 0);
     this->canBus = busNum;
     this->canID = canID;
 
     if (setupCAN(busNum)) {
-        // {
-        //     auto data = canStaticData[busNum].lock();
-        //     data->canIDMap[canID] = this;
-        // }
-        RCLCPP_INFO(rclcpp::get_logger("CANDriver"), "CAN setup successful");
+        {
+            auto data = canStaticData[busNum].lock();
+            data->canIDMap[canID] = this;
+        }
+        RCLCPP_INFO(rclcpp::get_logger("CANDriver"), "CAN (%d,%d) setup successful",busNum,canID);
     } else {
         RCLCPP_WARN(rclcpp::get_logger("CANDriver"), "Cannot setup CAN");
     }
+}
+
+CANDriver::CANDriver(const CANDriver &other)
+{
+    this->canBus = other.canBus;
+    this->canID = other.canID;
+
+    auto data = canStaticDataUsers[canBus].lock();
+    *data = *data + 1;
 }
 
 void CANDriver::closeCAN(int canBus) {
@@ -180,7 +202,16 @@ void CANDriver::closeCAN(int canBus) {
     data->canBussesSetup = false;
 }
 
-CANDriver::~CANDriver() {
+CANDriver& CANDriver::operator=(const CANDriver &other)
+{
+    canBus = other.canBus;
+    canID = other.canID;
+
+    return *this;
+}
+
+CANDriver::~CANDriver()
+{
     auto data = canStaticDataUsers[canBus].lock();
     *data = *data - 1;
 
@@ -227,8 +258,8 @@ void SparkMax::pidTick()
         double currentVel = 0;
 
         {
-            auto data = canStaticData[canBus].lock();
-            currentVel = lastPeriodicData.velocity / 16 * 2 * 3.14159265 / 60;
+            auto data = lastPeriodicData.lock();
+            currentVel = data->velocity / 15 * 2 * 3.14159265 / 60;
         }
 
         double val = pidController.calculate(pidSetpoint,currentVel);

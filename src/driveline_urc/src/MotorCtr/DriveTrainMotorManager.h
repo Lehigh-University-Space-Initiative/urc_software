@@ -33,5 +33,5 @@ public:
     DriveTrainMotorManager();
     virtual ~DriveTrainMotorManager();
     void sendHeartbeats();
-    void pidUpdate();
+    void tick();
 };

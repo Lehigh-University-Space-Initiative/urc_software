@@ -44,15 +44,14 @@ int main(int argc, char** argv) {
     rclcpp::Rate loop_rate(100);
 
     // Subscriber for rover drive commands
-    auto driveCommandsSub = node->create_subscription<cross_pkg_messages::msg::RoverComputerDriveCMD>(
-        "/roverDriveCommands", 10, callback);
+    // auto driveCommandsSub = node->create_subscription<cross_pkg_messages::msg::RoverComputerDriveCMD>(
+        // "/roverDriveCommands", 10, callback);
 
     // Main loop
     while (rclcpp::ok()) {
         rclcpp::spin_some(node);
 
-        driveTrainManager.sendHeartbeats();  // Send heartbeat signals to motors
-        driveTrainManager.pidUpdate();
+        driveTrainManager.tick();
         loop_rate.sleep();  // Maintain the loop rate
     }
 

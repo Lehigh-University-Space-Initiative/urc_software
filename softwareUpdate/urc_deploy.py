@@ -58,13 +58,14 @@ def run_docker_build():
     for line in iter(stdout.readline, ""):
         print(line, end="")
 
-    error_output = stderr.read().decode()
-    if error_output:
-        print("Docker Build Errors:\n", error_output)
+    # error_output = stderr.read().decode()
+    # if error_output:
+        # print("Docker Build Errors:\n", error_output)
+        # return 1
 
     print("Pushing to Main Computer Docker Registry")
 
-    docker_command = f'docker push localhost:65000/{DOCKER_IMAGE_NAME}'
+    docker_command = f'docker push 10.0.0.10:65000/{DOCKER_IMAGE_NAME}'
     stdin, stdout, stderr = ssh.exec_command(docker_command)
 
     print("Docker Push in progress...")
@@ -107,7 +108,9 @@ def deploy(args):
     if args.rsync or args.docker or args.full:
         rsync_files()
     if args.docker or args.full:
-        run_docker_build()
+        if run_docker_build() == 10:
+            print("Build failed exiting early!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+            return
     if args.deploy or args.full:
         t1 = threading.Thread(target=restart_lusi_software,args=(MAIN_COMPUTER_IP,USERNAME,PASSWORD))
         t2 = threading.Thread(target=restart_lusi_software,args=(DRIVELINE_COMPUTER_IP,"pi",PASSWORD))

@@ -15,6 +15,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libglfw3-dev \
     libglew-dev \
     libgps-dev \
+    iproute2 net-tools \
     x11-apps \
     iputils-ping \
     && rm -rf /var/lib/apt/lists/*
@@ -28,7 +29,7 @@ FROM urc_software_base AS urc_software_builder
 # Set the working directory
 WORKDIR /ros2_ws
 
-# Copy the entire project
+# Copy the libs
 COPY ./libs /ros2_ws/libs
 
 # Build pigpio from the submodule
@@ -41,11 +42,11 @@ FROM urc_software_base AS urc_software
 
 # copy built binaries
 WORKDIR /ros2_ws
-#COPY ./build /ros2_ws/build
 COPY ./install /ros2_ws/install
+COPY ./libs /ros2_ws/libs
 COPY ./run_nodes.sh /ros2_ws/run_nodes.sh
 
-
+RUN cd /ros2_ws/libs/pigpio && make && make install
 
 # Default command
 ENTRYPOINT ["/ros2_ws/run_nodes.sh"]
