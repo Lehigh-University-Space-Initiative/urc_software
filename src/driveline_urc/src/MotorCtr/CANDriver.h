@@ -93,7 +93,7 @@ public:
 
     double lastVelocityAsRadPerSec();
 
-    bool pidControlled = true;
+    bool pidControlled = false;
 
     //when LOS happens disable motor
     bool motorLocked = false;
