@@ -2,4 +2,4 @@
 
 //Motor Limits
 #define MAX_DRIVE_POWER 0.5f
-#define DRIVE_DEADBAND 0.02
+#define DRIVE_DEADBAND 0.0f

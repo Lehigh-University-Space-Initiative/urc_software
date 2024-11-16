@@ -17,6 +17,8 @@ DriveTrainMotorManager::DriveTrainMotorManager()
             *lock = std::chrono::system_clock::now();
             parseDriveCommands(msg);
         });
+
+    wheelVelPub = node->create_publisher<cross_pkg_messages::msg::RoverComputerDriveCMD>("motorVels", 10);
 }
 
 DriveTrainMotorManager::~DriveTrainMotorManager()
@@ -52,7 +54,8 @@ void DriveTrainMotorManager::setupMotors()
 void DriveTrainMotorManager::stopAllMotors()
 {
     for (auto &motor : motors) {
-        motor.sendPowerCMD(0);
+        // motor.motorLocked = true;
+        // motor.sendPowerCMD(0);
     }
 }
 
@@ -96,22 +99,48 @@ void DriveTrainMotorManager::heartbeatThread()
 
 void DriveTrainMotorManager::tick()
 {
+
+    static uint64_t loopItr = 0;
+    loopItr++;
+
+    //read any can message
+    CANDriver::doCanReadIter(1);
+
+    if (loopItr % 30 != 0) return;
+
     //give pid tick
     for (auto &motor : motors) {
+        motor.sendHeartbeat();
         motor.pidTick();
     }
+
+    // publish wheel data
+    cross_pkg_messages::msg::RoverComputerDriveCMD speedMsg;
+    speedMsg.cmd_l.x = motors[0].lastVelocityAsRadPerSec();
+    speedMsg.cmd_l.y = motors[1].lastVelocityAsRadPerSec();
+    speedMsg.cmd_l.z = motors[2].lastVelocityAsRadPerSec();
+
+    speedMsg.cmd_r.x = motors[3].lastVelocityAsRadPerSec();
+    speedMsg.cmd_r.y = motors[4].lastVelocityAsRadPerSec();
+    speedMsg.cmd_r.z = motors[5].lastVelocityAsRadPerSec();
+
+    wheelVelPub->publish(speedMsg);
 }
 
 void DriveTrainMotorManager::parseDriveCommands(const cross_pkg_messages::msg::RoverComputerDriveCMD::SharedPtr msg)
 {
-    RCLCPP_INFO(node->get_logger(), "Drive Commands Received with L: %f, R: %f", msg->cmd_l.x, msg->cmd_r.x);
+    // RCLCPP_INFO(node->get_logger(), "Drive Commands Received with L: %f, R: %f", msg->cmd_l.x, msg->cmd_r.x);
+
+    // for (auto m : motors) {
+    //     m.motorLocked = false;
+    // }
 
     // Send power commands to motors based on drive command message
-    motors[0].sendPowerCMD(msg->cmd_l.x);
-    motors[1].sendPowerCMD(msg->cmd_l.y);
-    motors[2].sendPowerCMD(msg->cmd_l.z);
+    motors[0].setPIDSetpoint(-msg->cmd_l.x);
+    motors[1].setPIDSetpoint(-msg->cmd_l.y);
+    motors[2].setPIDSetpoint(-msg->cmd_l.z);
 
-    motors[3].sendPowerCMD(msg->cmd_r.x);
-    motors[4].sendPowerCMD(msg->cmd_r.y);
-    motors[5].sendPowerCMD(msg->cmd_r.z);
+    motors[3].setPIDSetpoint(msg->cmd_r.x);
+    motors[4].setPIDSetpoint(msg->cmd_r.y);
+    motors[5].setPIDSetpoint(msg->cmd_r.z);
 }

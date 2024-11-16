@@ -40,8 +40,8 @@ int main(int argc, char** argv) {
 
     DriveTrainMotorManager driveTrainManager{}; 
 
-    // Set loop rate to 800 Hz
-    rclcpp::Rate loop_rate(100);
+    // Set loop rate to 100 Hz
+    rclcpp::Rate loop_rate(30000);
 
     // Subscriber for rover drive commands
     // auto driveCommandsSub = node->create_subscription<cross_pkg_messages::msg::RoverComputerDriveCMD>(

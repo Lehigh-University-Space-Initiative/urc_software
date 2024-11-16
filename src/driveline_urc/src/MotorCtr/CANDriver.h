@@ -23,6 +23,13 @@ protected:
     int canBus;
     int canID;
 
+    // struct PeriodicUpdateData {
+    //     std::atomic<float> velocity = 0;
+    //     std::atomic<uint8_t> temperature = 0;
+    //     std::atomic<uint16_t> voltage = 0;
+    //     std::atomic<uint16_t> current = 0;
+    // };
+
     struct PeriodicUpdateData {
         float velocity = 0;
         uint8_t temperature = 0;
@@ -30,7 +37,8 @@ protected:
         uint16_t current = 0;
     };
 
-    libguarded::plain_guarded<PeriodicUpdateData> lastPeriodicData;
+    // static std::mutex lastPeriodicMutex;
+    PeriodicUpdateData lastPeriodicData;
 
 
     struct CANStaticData {
@@ -59,6 +67,9 @@ protected:
     static void parsePeriodicData(int canBus, can_frame frame);
 
 public:
+
+    static void doCanReadIter(int canBus);
+
     CANDriver(int busNum, int canID);
     CANDriver(const CANDriver& other);
     CANDriver& operator=(const CANDriver& other);
@@ -66,19 +77,32 @@ public:
 };
 
 class SparkMax : CANDriver {
+protected:
+    // velocity in rad / s
+    double pidSetpoint = 0;
+
+
+    double lastVel = 0;
+
 public:
     SparkMax(int canBUS, int canID);
     bool sendHeartbeat();
     void sendPowerCMD(float power);
+    // in rad/s
+    void setPIDSetpoint(double pidSetpoint);
 
-    bool pidControlled = false;
-    // velocity in ___ / ___
-    double pidSetpoint = 0;
+    double lastVelocityAsRadPerSec();
+
+    bool pidControlled = true;
+
+    //when LOS happens disable motor
+    bool motorLocked = false;
+
     //should be called every Dt
     void pidTick();
     // float dt = 0.01;
 
-    PID pidController = PID(0.01,MAX_DRIVE_POWER,-MAX_DRIVE_POWER,0.1,0,0);
+    PID pidController = PID(0.01,MAX_DRIVE_POWER,-MAX_DRIVE_POWER,0.06,0.001,0.05);
 
     void ident();
 };

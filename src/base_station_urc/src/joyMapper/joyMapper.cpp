@@ -15,7 +15,7 @@ public:
 
     drive_pub_ = this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", 10);
 
-    this->declare_parameter("swap_joysticks", false);
+    this->declare_parameter("swap_joysticks", true);
   }
 
 private:

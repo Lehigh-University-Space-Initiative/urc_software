@@ -83,7 +83,7 @@ void TelemetryPanel::drawBody() {
     ImGui::Text("Angular Velocity CMD: %.1f deg/s",lastCmdVel.angular.y);
     signedProgressBar(lastCmdVel.angular.y / 120, " ");
 
-    static bool joy_swap = false;
+    static bool joy_swap = true;
 
     if (ImGui::Checkbox("Swap Joysticks", &joy_swap)) {
         joyMapParamClient_->set_parameters({rclcpp::Parameter("swap_joysticks", joy_swap)},
@@ -213,8 +213,10 @@ void TelemetryPanel::setup() {
         this->lastCmdVel = *msg;
     };
 
+    // sub = node_->create_subscription<cross_pkg_messages::msg::RoverComputerDriveCMD>(
+    //     "roverDriveCommands", 10, f);
     sub = node_->create_subscription<cross_pkg_messages::msg::RoverComputerDriveCMD>(
-        "roverDriveCommands", 10, f);
+        "motorVels", 10, f);
     sub2 = node_->create_subscription<cross_pkg_messages::msg::RoverComputerDriveCMD>(
         "manualArmControl", 10, f2);
 
