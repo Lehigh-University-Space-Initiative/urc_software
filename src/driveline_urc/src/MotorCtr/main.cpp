@@ -23,6 +23,9 @@ left trigger: close end effector
 right trigger: open end effector
 */
 
+
+std::shared_ptr<rclcpp::Node> node;
+
 // Callback function
 void callback(const cross_pkg_messages::msg::RoverComputerDriveCMD::SharedPtr msg) {
    RCLCPP_INFO(rclcpp::get_logger("Motor_CTR"), "Received command with CMD_R.z: %f", msg->cmd_r.z);
@@ -31,24 +34,24 @@ void callback(const cross_pkg_messages::msg::RoverComputerDriveCMD::SharedPtr ms
 
 int main(int argc, char** argv) {
     rclcpp::init(argc, argv);
-    auto node = rclcpp::Node::make_shared("motor_ctr");
+    node = rclcpp::Node::make_shared("motor_ctr");
 
     RCLCPP_INFO(node->get_logger(), "Motor CTR startup");
 
     DriveTrainMotorManager driveTrainManager{}; 
 
-    // Set loop rate to 800 Hz
-    rclcpp::Rate loop_rate(800);
+    // Set loop rate to 100 Hz
+    rclcpp::Rate loop_rate(30000);
 
     // Subscriber for rover drive commands
-    auto driveCommandsSub = node->create_subscription<cross_pkg_messages::msg::RoverComputerDriveCMD>(
-        "/roverDriveCommands", 10, callback);
+    // auto driveCommandsSub = node->create_subscription<cross_pkg_messages::msg::RoverComputerDriveCMD>(
+        // "/roverDriveCommands", 10, callback);
 
     // Main loop
     while (rclcpp::ok()) {
         rclcpp::spin_some(node);
 
-        driveTrainManager.sendHeartbeats();  // Send heartbeat signals to motors
+        driveTrainManager.tick();
         loop_rate.sleep();  // Maintain the loop rate
     }
 

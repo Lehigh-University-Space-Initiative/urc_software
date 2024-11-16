@@ -1,5 +1,11 @@
 # URC Software
 
+## Running on Linux
+
+`xhost +`
+
+run `./src/base_station_urc/launch/launchScript.sh`
+
 ## Running on Windows
 
 ```bash

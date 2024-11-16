@@ -12,6 +12,8 @@ void Panel::renderToScreen() {
     // TODO: add window hiding
 
     ImGui::Begin(name.c_str());
+    //prevent window from being removed from viewport
+    ImGui::SetNextWindowViewport(ImGui::GetMainViewport()->ID);
     drawBody();
     ImGui::End();
 }

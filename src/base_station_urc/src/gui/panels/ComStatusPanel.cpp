@@ -74,10 +74,10 @@ ImU32 ComStatusPanel::conColor(size_t hostIndex) {
 }
 
 void ComStatusPanel::setup() {
-    hosts.push_back(new ComStatusChecker("192.168.1.3", "Jetson"));
-    hosts.push_back(new ComStatusChecker("192.168.1.5", "Pi"));
-    hosts.push_back(new ComStatusChecker("192.168.1.160", "Rover Antenna"));
-    hosts.push_back(new ComStatusChecker("192.168.1.159", "Base Station"));
+    hosts.push_back(new ComStatusChecker("10.0.0.10", "Main Computer"));
+    hosts.push_back(new ComStatusChecker("10.0.0.20", "Driveline Pi"));
+    hosts.push_back(new ComStatusChecker("10.0.0.1", "Rover Antenna"));
+    hosts.push_back(new ComStatusChecker("10.1.0.1", "Base Station"));
 
     if (!node_->get_parameter("hootl", hootl)) {
         RCLCPP_ERROR(node_->get_logger(), "Failed to get hootl param");

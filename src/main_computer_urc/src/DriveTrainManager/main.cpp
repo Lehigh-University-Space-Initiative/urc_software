@@ -1,33 +1,49 @@
 #include "rclcpp/rclcpp.hpp"
-#include "cross_pkg_messages/msg/manual_drive_cmd.hpp"
+#include "geometry_msgs/msg/twist.hpp"
 #include "cross_pkg_messages/msg/rover_computer_drive_cmd.hpp"
 
 // Global variables
 cross_pkg_messages::msg::RoverComputerDriveCMD currentDriveCommand{};
 rclcpp::Publisher<cross_pkg_messages::msg::RoverComputerDriveCMD>::SharedPtr driveTrainPublisher;
 
+std::shared_ptr<rclcpp::Node> node;
+
 void sendDrivePowers() {
     driveTrainPublisher->publish(currentDriveCommand);
 }
 
-void manualInputCallback(const cross_pkg_messages::msg::ManualDriveCMD::SharedPtr msg) {
-    // Process incoming manual drive command and update drive powers
-    currentDriveCommand.cmd_l.x = msg->value.x;
-    currentDriveCommand.cmd_l.y = msg->value.x;
-    currentDriveCommand.cmd_l.z = msg->value.x;
+void manualInputCallback(const geometry_msgs::msg::Twist::SharedPtr msg) {
 
-    currentDriveCommand.cmd_r.x = msg->value.y;
-    currentDriveCommand.cmd_r.y = msg->value.y;
-    currentDriveCommand.cmd_r.z = msg->value.y;
+    //kinimatic data (metric system)
+    const float roverWidth = 0.5; //meters
+    const float wheelRadius = 0.1143; //meters
+
+    // breakdown commanded lin and ang vel into left and right side vels
+    float leftSideVel = msg->linear.x + msg->angular.y * 3.14 / 180 * roverWidth;
+    float rightSideVel = msg->linear.x - msg->angular.y * 3.14 / 180 * roverWidth;
+
+
+    float leftSideAlpha = leftSideVel / wheelRadius;
+    float rightSideAlpha = rightSideVel / wheelRadius;
+
+
+    currentDriveCommand.cmd_l.x = leftSideAlpha;
+    currentDriveCommand.cmd_l.y = leftSideAlpha;
+    currentDriveCommand.cmd_l.z = leftSideAlpha;
+
+    currentDriveCommand.cmd_r.x = rightSideAlpha;
+    currentDriveCommand.cmd_r.y = rightSideAlpha;
+    currentDriveCommand.cmd_r.z = rightSideAlpha;
 
     sendDrivePowers();
 }
+
 
 int main(int argc, char** argv) {
     rclcpp::init(argc, argv);
 
     // Create ROS2 node
-    auto node = rclcpp::Node::make_shared("DriveTrainManager");
+    node = rclcpp::Node::make_shared("DriveTrainManager");
 
     RCLCPP_INFO(node->get_logger(), "DriveTrainManager is running");
 
@@ -35,8 +51,8 @@ int main(int argc, char** argv) {
     driveTrainPublisher = node->create_publisher<cross_pkg_messages::msg::RoverComputerDriveCMD>("roverDriveCommands", 10);
 
     // Create the subscriber
-    auto subscription = node->create_subscription<cross_pkg_messages::msg::ManualDriveCMD>(
-        "manualCommands", 10, manualInputCallback);
+    auto subscription = node->create_subscription<geometry_msgs::msg::Twist>(
+        "cmd_vel", 10, manualInputCallback);
 
     rclcpp::Rate loop_rate(10);  // Set rate to 10 Hz
 

@@ -15,17 +15,41 @@
 #include <vector>
 #include <pigpio.h>
 #include "cs_plain_guarded.h"
+#include "PID/pid.h"
+#include "Limits.h"
 
 class CANDriver {
 protected:
     int canBus;
+    int canID;
+
+    // struct PeriodicUpdateData {
+    //     std::atomic<float> velocity = 0;
+    //     std::atomic<uint8_t> temperature = 0;
+    //     std::atomic<uint16_t> voltage = 0;
+    //     std::atomic<uint16_t> current = 0;
+    // };
+
+    struct PeriodicUpdateData {
+        float velocity = 0;
+        uint8_t temperature = 0;
+        uint16_t voltage = 0;
+        uint16_t current = 0;
+    };
+
+    // static std::mutex lastPeriodicMutex;
+    PeriodicUpdateData lastPeriodicData;
+
 
     struct CANStaticData {
         ifreq ifr;
         sockaddr_can socketAddress;
         int soc;
 
-        bool canBussesSetup;
+        bool canBussesSetup = 0;
+
+        //map each can id to a CANDriver pointer
+        std::map<int, CANDriver*> canIDMap;
     };
 
     typedef libguarded::plain_guarded<CANStaticData> CANStaticDataGuarded;
@@ -36,20 +60,50 @@ protected:
     static bool setupCAN(int canBus);
     static void closeCAN(int canBus);
 
+    static std::thread canReadThread;
     static bool sendMSG(int canBus, can_frame frame);
+    static bool receiveMSG(int canBus, can_frame& frame);
+    static void startCanReadThread(int canBus);
+    static void parsePeriodicData(int canBus, can_frame frame);
 
 public:
-    CANDriver(int busNum);
+
+    static void doCanReadIter(int canBus);
+
+    CANDriver(int busNum, int canID);
+    CANDriver(const CANDriver& other);
+    CANDriver& operator=(const CANDriver& other);
     virtual ~CANDriver();
 };
 
 class SparkMax : CANDriver {
 protected:
-    int canID;
+    // velocity in rad / s
+    double pidSetpoint = 0;
+
+
+    double lastVel = 0;
+
 public:
     SparkMax(int canBUS, int canID);
     bool sendHeartbeat();
     void sendPowerCMD(float power);
+    // in rad/s
+    void setPIDSetpoint(double pidSetpoint);
+
+    double lastVelocityAsRadPerSec();
+
+    bool pidControlled = false;
+
+    //when LOS happens disable motor
+    bool motorLocked = false;
+
+    //should be called every Dt
+    void pidTick();
+    // float dt = 0.01;
+
+    PID pidController = PID(0.01,MAX_DRIVE_POWER,-MAX_DRIVE_POWER,0.06,0.001,0.05);
+
     void ident();
 };
 

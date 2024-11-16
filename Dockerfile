@@ -1,5 +1,6 @@
+# https://github.com/pcewing/docker-incremental-compile-demo
 # Use the official ROS 2 base image
-FROM ros:humble-ros-base-jammy
+FROM ros:humble-ros-base-jammy AS urc_software_base
 
 # Install ROS 2 and other necessary packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -14,37 +15,38 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libglfw3-dev \
     libglew-dev \
     libgps-dev \
+    iproute2 net-tools \
     x11-apps \
     iputils-ping \
     && rm -rf /var/lib/apt/lists/*
-
-# Set the working directory
-WORKDIR /ros2_ws
-
-# Copy the entire project
-COPY ./ /ros2_ws/
-
-# Build pigpio from the submodule
-RUN cd /ros2_ws/libs/pigpio && make && make install
-
-# Build and install the cross_pkg_messages package
-RUN /bin/bash -c '. /opt/ros/humble/setup.sh && colcon build --symlink-install --packages-select cross_pkg_messages'
-
-# Build and install the base_station_urc, main_computer_urc, and driveline_urc
-RUN /bin/bash -c 'source install/setup.bash && colcon build --symlink-install --packages-select base_station_urc main_computer_urc driveline_urc ground_input_urc'
-
-# Set environment variables for build
-ENV CPLUS_INCLUDE_PATH=/ros2_ws/src/base_station_urc/include/cs_libguarded:$CPLUS_INCLUDE_PATH
-ENV AMENT_PREFIX_PATH=/ros2_ws/install/ground_input_urc:/ros2_ws/install/driveline_urc:/ros2_ws/install/main_computer_urc:/ros2_ws/install/base_station_urc:/ros2_ws/install/cross_pkg_messages:/opt/ros/humble:$AMENT_PREFIX_PATH
-ENV CMAKE_PREFIX_PATH=/ros2_ws/install/cross_pkg_messages:$CMAKE_PREFIX_PATH
-
-# Source the workspace in bashrc
-RUN echo "export AMENT_PREFIX_PATH=/ros2_ws/install/ground_input_urc:/ros2_ws/install/driveline_urc:/ros2_ws/install/main_computer_urc:/ros2_ws/install/base_station_urc:/ros2_ws/install/cross_pkg_messages:/opt/ros/humble:\$AMENT_PREFIX_PATH" >> ~/.bashrc
-RUN echo "source /ros2_ws/install/setup.bash" >> ~/.bashrc
 
 # Copy the urcAssets directory to the home directory in the container
 RUN mkdir -p /home/urcAssets
 COPY urcAssets /home/urcAssets
 
+FROM urc_software_base AS urc_software_builder
+
+# Set the working directory
+WORKDIR /ros2_ws
+
+# Copy the libs
+COPY ./libs /ros2_ws/libs
+
+# Build pigpio from the submodule
+RUN cd /ros2_ws/libs/pigpio && make && make install
+
+
+# https://medium.com/codex/a-practical-guide-to-containerize-your-c-application-with-docker-50abb197f6d4
+FROM urc_software_base AS urc_software 
+
+# copy built binaries
+WORKDIR /ros2_ws
+COPY ./install /ros2_ws/install
+COPY ./libs /ros2_ws/libs
+COPY ./run_nodes.sh /ros2_ws/run_nodes.sh
+
+RUN cd /ros2_ws/libs/pigpio && make && make install
+
 # Default command
 ENTRYPOINT ["/ros2_ws/run_nodes.sh"]
+#  ENTRYPOINT ["bash"]
