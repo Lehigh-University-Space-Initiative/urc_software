@@ -37,7 +37,6 @@ RUN cd /ros2_ws/libs/pigpio && make && make install
 
 
 # https://medium.com/codex/a-practical-guide-to-containerize-your-c-application-with-docker-50abb197f6d4
-# TODO: make multi stage docker image to dramatically reduce image size
 FROM urc_software_base AS urc_software 
 
 # copy built binaries

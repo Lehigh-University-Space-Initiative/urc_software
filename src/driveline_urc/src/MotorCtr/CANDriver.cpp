@@ -288,7 +288,12 @@ CANDriver::~CANDriver()
 double SparkMax::lastVelocityAsRadPerSec()
 {
     // in rad / second
-    return  lastPeriodicData.velocity / 14 * 2 * 3.14159265 / 60;
+
+    // each wheel has a 3:1 and a 4:1 gear box leading ot a total of 12:1
+    double gearRatio = 12;
+    double rpmToRadPerSec = 2 * 3.14159265 / 60;
+
+    return  lastPeriodicData.velocity / gearRatio * rpmToRadPerSec;
 }
 
 SparkMax::SparkMax(int canBUS, int canID) : CANDriver(canBUS, canID) {}

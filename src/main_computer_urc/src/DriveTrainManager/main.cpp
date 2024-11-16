@@ -19,7 +19,6 @@ void manualInputCallback(const geometry_msgs::msg::Twist::SharedPtr msg) {
     const float wheelRadius = 0.1143; //meters
 
     // breakdown commanded lin and ang vel into left and right side vels
-    //TODO: fix this is wrong kinimatics
     float leftSideVel = msg->linear.x + msg->angular.y * 3.14 / 180 * roverWidth;
     float rightSideVel = msg->linear.x - msg->angular.y * 3.14 / 180 * roverWidth;
 

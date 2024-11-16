@@ -3,12 +3,8 @@
 
 DriveTrainMotorManager::DriveTrainMotorManager()
 {
-    // auto node = rclcpp::Node::make_shared("drive_train_motor_manager");
 
     setupMotors();
-
-    // Start heartbeat thread
-    // heartbeatThreadObj = std::thread(&DriveTrainMotorManager::heartbeatThread, this);
 
     // Subscribe to drive commands
     driveCommandsSub = node->create_subscription<cross_pkg_messages::msg::RoverComputerDriveCMD>(
@@ -23,14 +19,6 @@ DriveTrainMotorManager::DriveTrainMotorManager()
 
 DriveTrainMotorManager::~DriveTrainMotorManager()
 {
-    // Signal heartbeat thread to shut down
-    {
-        auto lock = heartbeatThreadShutDown.lock();
-        *lock = true;
-    }
-
-    // Wait for the heartbeat thread to shut down
-    // heartbeatThreadObj.join();
 }
 
 void DriveTrainMotorManager::setupMotors()
@@ -54,8 +42,8 @@ void DriveTrainMotorManager::setupMotors()
 void DriveTrainMotorManager::stopAllMotors()
 {
     for (auto &motor : motors) {
-        // motor.motorLocked = true;
-        // motor.sendPowerCMD(0);
+        motor.motorLocked = true;
+        motor.sendPowerCMD(0);
     }
 }
 
@@ -66,47 +54,26 @@ void DriveTrainMotorManager::sendHeartbeats()
     }
 }
 
-void DriveTrainMotorManager::heartbeatThread()
-{
-    rclcpp::Rate loop_rate(50);  // 50 Hz loop rate
-    while (rclcpp::ok()) {
-        {  // lock block
-            auto lock = heartbeatThreadShutDown.lock();
-            if (*lock) {
-                return;
-            }
-        }
-
-        {  // lock block
-            auto lock = sendHeartbeatsFlag.lock();
-            if (*lock) {
-                sendHeartbeats();
-            }
-        }
-
-        {  // lock block for LOS safety stop
-            auto lock = lastManualCommandTime.lock();
-            auto now = std::chrono::system_clock::now();
-            if (now - *lock > manualCommandTimeout) {
-                RCLCPP_WARN(node->get_logger(), "LOS Safety Stop");
-                stopAllMotors();
-            }
-        }
-
-        loop_rate.sleep();
-    }
-}
-
 void DriveTrainMotorManager::tick()
 {
 
     static uint64_t loopItr = 0;
     loopItr++;
 
-    //read any can message
+    //read any can message at a much higher rate than all other update tasks
+    //TODO: URC-102: should move this back 
     CANDriver::doCanReadIter(1);
 
     if (loopItr % 30 != 0) return;
+
+    {  // lock block for LOS safety stop
+        auto lock = lastManualCommandTime.lock();
+        auto now = std::chrono::system_clock::now();
+        if (now - *lock > manualCommandTimeout) {
+            RCLCPP_WARN(node->get_logger(), "LOS Safety Stop");
+            stopAllMotors();
+        }
+    }
 
     //give pid tick
     for (auto &motor : motors) {
