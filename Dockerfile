@@ -50,3 +50,5 @@ RUN cd /ros2_ws/libs/pigpio && make && make install
 # Default command
 ENTRYPOINT ["/ros2_ws/run_nodes.sh"]
 #  ENTRYPOINT ["bash"]
+
+# added
