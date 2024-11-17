@@ -58,8 +58,8 @@ void TelemetryPanel::drawBody() {
             }
             ImGui::SetCursorScreenPos(sliderStart);
             // auto sliderSide = side ? lastDriveCMD.cmd_r : lastDriveCMD.cmd_l;
-            auto velSide = side == 0 ? lastDriveCMD.vel_l : lastDriveCMD.vel_r;
-            auto curSide = side == 0 ? lastDriveCMD.cur_l : lastDriveCMD.cur_r;
+            auto velSide = side == 0 ? lastDriveStatus.vel_l : lastDriveStatus.vel_r;
+            auto curSide = side == 0 ? lastDriveStatus.cur_l : lastDriveStatus.cur_r;
 
             float sliderVal = 0;
             float currentVal = 0;
@@ -126,13 +126,23 @@ void TelemetryPanel::setup() {
       return;
     }
 
-    auto f = [this](const cross_pkg_messages::msg::RoverComputerDriveCMD::SharedPtr msg) {
-        this->lastDriveCMD = *msg;
+    // auto f = [this](const cross_pkg_messages::msg::RoverComputerDriveCMD::SharedPtr msg) {
+    //     this->lastDriveCMD = *msg;
 
-        // Invert right side
-        this->lastDriveCMD.cmd_r.x *= -1;
-        this->lastDriveCMD.cmd_r.y *= -1;
-        this->lastDriveCMD.cmd_r.z *= -1;
+    //     // Invert right side
+    //     this->lastDriveCMD.cmd_r.x *= -1;
+    //     this->lastDriveCMD.cmd_r.y *= -1;
+    //     this->lastDriveCMD.cmd_r.z *= -1;
+    // };
+
+    auto driveStatusCallback = [this](const cross_pkg_messages::msg::RoverComputerDriveStatus::SharedPtr msg) {
+        this->lastDriveStatus = *msg;
+
+        // Log voltage to the terminal
+        RCLCPP_INFO(node_->get_logger(), "Voltage Left: [%d, %d, %d] V",
+            msg->volt_l.x, msg->volt_l.y, msg->volt_l.z);
+        RCLCPP_INFO(node_->get_logger(), "Voltage Right: [%d, %d, %d] V",
+            msg->volt_r.x, msg->volt_r.y, msg->volt_r.z);
     };
 
     auto f2 = [this](const cross_pkg_messages::msg::RoverComputerDriveCMD::SharedPtr msg) {
