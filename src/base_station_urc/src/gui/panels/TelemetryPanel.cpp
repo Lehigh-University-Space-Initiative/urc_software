@@ -51,10 +51,14 @@ void TelemetryPanel::drawBody() {
             ImVec2 wheelMax = {wheelCenter.x + wheelSize.x / 2,wheelCenter.y + wheelSize.y / 2};
             draw_list->AddRectFilled(wheelMin,wheelMax,outlineColor);
 
-            ImVec2 sliderSize = {50, wheelSize.y};
+            ImVec2 sliderSize = {70, wheelSize.y};
+            ImVec2 textSize = {30, wheelSize.y};
+
             ImVec2 sliderStart = {wheelCenter.x - 30 - sliderSize.x, wheelCenter.y - sliderSize.y / 2};
+            ImVec2 textStart = {sliderStart.x - 40, sliderStart.y};
             if (side) {
                 sliderStart.x = wheelCenter.x + 30;
+                textStart.x = sliderStart.x + sliderSize.x + 10;
             }
             ImGui::SetCursorScreenPos(sliderStart);
             // auto sliderSide = side ? lastDriveCMD.cmd_r : lastDriveCMD.cmd_l;
@@ -77,9 +81,14 @@ void TelemetryPanel::drawBody() {
                 currentVal = curSide.z;
             }
 
-            signedProgressBar(sliderVal / 25, "V", sliderSize);
-            ImGui::SetCursorScreenPos(currentSliderStart);
-            signedProgressBar(currentVal / 200.0f, "C", currentSliderSize);
+            char overlayText[16];
+            std::sprintf(overlayText, "%.2f rpm", sliderVal / 2 / 3.14159265 * 60);
+            signedProgressBar(sliderVal / 25, overlayText, sliderSize);
+            ImGui::SetCursorScreenPos(sliderSize);
+
+            //signedProgressBar(currentVal / 0.0f, "C", sliderSize);
+            ImGui::SetCursorScreenPos(textStart);
+            ImGui::Text("%.1f A", currentVal);
 
         }
         
@@ -126,23 +135,17 @@ void TelemetryPanel::setup() {
       return;
     }
 
-    // auto f = [this](const cross_pkg_messages::msg::RoverComputerDriveCMD::SharedPtr msg) {
-    //     this->lastDriveCMD = *msg;
+    auto f = [this](const cross_pkg_messages::msg::RoverComputerDriveCMD::SharedPtr msg) {
+        this->lastDriveCMD = *msg;
 
-    //     // Invert right side
-    //     this->lastDriveCMD.cmd_r.x *= -1;
-    //     this->lastDriveCMD.cmd_r.y *= -1;
-    //     this->lastDriveCMD.cmd_r.z *= -1;
-    // };
+        // Invert right side
+        this->lastDriveCMD.cmd_r.x *= -1;
+        this->lastDriveCMD.cmd_r.y *= -1;
+        this->lastDriveCMD.cmd_r.z *= -1;
+    };
 
     auto driveStatusCallback = [this](const cross_pkg_messages::msg::RoverComputerDriveStatus::SharedPtr msg) {
         this->lastDriveStatus = *msg;
-
-        // Log voltage to the terminal
-        RCLCPP_INFO(node_->get_logger(), "Voltage Left: [%d, %d, %d] V",
-            msg->volt_l.x, msg->volt_l.y, msg->volt_l.z);
-        RCLCPP_INFO(node_->get_logger(), "Voltage Right: [%d, %d, %d] V",
-            msg->volt_r.x, msg->volt_r.y, msg->volt_r.z);
     };
 
     auto f2 = [this](const cross_pkg_messages::msg::RoverComputerDriveCMD::SharedPtr msg) {

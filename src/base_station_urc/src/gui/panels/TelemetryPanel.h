@@ -7,10 +7,11 @@
 #include "std_msgs/msg/string.hpp"
 #include "geometry_msgs/msg/twist.hpp"
 #include "cross_pkg_messages/msg/rover_computer_drive_cmd.hpp"
+#include "cross_pkg_messages/msg/rover_computer_drive_status.hpp"
 
 class TelemetryPanel: public Panel {
 protected:
-    // cross_pkg_messages::msg::RoverComputerDriveCMD lastDriveCMD;
+    cross_pkg_messages::msg::RoverComputerDriveCMD lastDriveCMD;
     cross_pkg_messages::msg::RoverComputerDriveStatus lastDriveStatus;
     geometry_msgs::msg::Twist lastCmdVel;
     cross_pkg_messages::msg::RoverComputerDriveCMD lastArmCMD;

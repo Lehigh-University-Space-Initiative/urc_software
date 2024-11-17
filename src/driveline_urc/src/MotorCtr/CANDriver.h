@@ -79,7 +79,7 @@ public:
     uint16_t getVoltage() const;
 };
 
-class SparkMax : CANDriver {
+class SparkMax : public CANDriver {
 protected:
     // velocity in rad / s
     double pidSetpoint = 0;
