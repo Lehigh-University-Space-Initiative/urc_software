@@ -125,7 +125,7 @@ void DriveTrainMotorManager::tick()
     statusMsg.volt_r.y = motors[4].getVoltage();
     statusMsg.volt_r.z = motors[5].getVoltage();
 
-    driveStatusPub->publish(speedMsg);
+    driveStatusPub->publish(statusMsg);
 }
 
 void DriveTrainMotorManager::parseDriveCommands(const cross_pkg_messages::msg::RoverComputerDriveCMD::SharedPtr msg)
