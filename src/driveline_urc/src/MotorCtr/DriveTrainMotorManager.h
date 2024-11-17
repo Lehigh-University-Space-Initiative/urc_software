@@ -24,6 +24,8 @@ private:
 
     rclcpp::Publisher<cross_pkg_messages::msg::RoverComputerDriveCMD>::SharedPtr wheelVelPub;
 
+    rclcpp::Publisher<cross_pkg_messages::msg::RoverComputerDriveStatus>::SharedPtr driveStatusPub;
+
     void parseDriveCommands(const cross_pkg_messages::msg::RoverComputerDriveCMD::SharedPtr msg);
 
 public:

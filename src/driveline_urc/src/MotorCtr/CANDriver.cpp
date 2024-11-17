@@ -285,6 +285,14 @@ CANDriver::~CANDriver()
     }
 }
 
+uint16_t CANDriver::getCurrent() const {
+    return lastPeriodicData.current;
+}
+
+uint16_t CANDriver::getVoltage() const {
+    return lastPeriodicData.voltage;
+}
+
 double SparkMax::lastVelocityAsRadPerSec()
 {
     // in rad / second

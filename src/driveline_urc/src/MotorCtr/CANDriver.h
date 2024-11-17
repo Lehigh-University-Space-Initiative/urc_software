@@ -74,6 +74,9 @@ public:
     CANDriver(const CANDriver& other);
     CANDriver& operator=(const CANDriver& other);
     virtual ~CANDriver();
+
+    uint16_t getCurrent() const;
+    uint16_t getVoltage() const;
 };
 
 class SparkMax : CANDriver {

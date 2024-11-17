@@ -15,6 +15,7 @@ DriveTrainMotorManager::DriveTrainMotorManager()
         });
 
     wheelVelPub = node->create_publisher<cross_pkg_messages::msg::RoverComputerDriveCMD>("motorVels", 10);
+    driveStatusPub = node->create_publisher<cross_pkg_messages::msg::RoverComputerDriveStatus>("driveStatus", 10);
 }
 
 DriveTrainMotorManager::~DriveTrainMotorManager()
@@ -92,6 +93,39 @@ void DriveTrainMotorManager::tick()
     speedMsg.cmd_r.z = motors[5].lastVelocityAsRadPerSec();
 
     wheelVelPub->publish(speedMsg);
+
+    // Publish new drive status message
+    cross_pkg_messages::msg::RoverComputerDriveStatus statusMsg;
+    statusMsg.header.stamp = node->now();
+    statusMsg.header.frame_id = "drive_status";
+
+    // Populate velocity fields
+    statusMsg.vel_l.x = motors[0].lastVelocityAsRadPerSec();
+    statusMsg.vel_l.y = motors[1].lastVelocityAsRadPerSec();
+    statusMsg.vel_l.z = motors[2].lastVelocityAsRadPerSec();
+
+    statusMsg.vel_r.x = motors[3].lastVelocityAsRadPerSec();
+    statusMsg.vel_r.y = motors[4].lastVelocityAsRadPerSec();
+    statusMsg.vel_r.z = motors[5].lastVelocityAsRadPerSec();
+
+    // Populate current and voltage fields
+    statusMsg.cur_l.x = motors[0].getCurrent();
+    statusMsg.cur_l.y = motors[1].getCurrent();
+    statusMsg.cur_l.z = motors[2].getCurrent();
+
+    statusMsg.cur_r.x = motors[3].getCurrent();
+    statusMsg.cur_r.y = motors[4].getCurrent();
+    statusMsg.cur_r.z = motors[5].getCurrent();
+
+    statusMsg.volt_l.x = motors[0].getVoltage();
+    statusMsg.volt_l.y = motors[1].getVoltage();
+    statusMsg.volt_l.z = motors[2].getVoltage();
+
+    statusMsg.volt_r.x = motors[3].getVoltage();
+    statusMsg.volt_r.y = motors[4].getVoltage();
+    statusMsg.volt_r.z = motors[5].getVoltage();
+
+    driveStatusPub->publish(statusMsg);
 }
 
 void DriveTrainMotorManager::parseDriveCommands(const cross_pkg_messages::msg::RoverComputerDriveCMD::SharedPtr msg)
