@@ -7,6 +7,7 @@
 #include <vector>
 #include <cs_plain_guarded.h>
 #include "cross_pkg_messages/msg/rover_computer_drive_cmd.hpp"
+#include "cross_pkg_messages/msg/rover_computer_drive_status.hpp"
 
 
 class DriveTrainMotorManager {
