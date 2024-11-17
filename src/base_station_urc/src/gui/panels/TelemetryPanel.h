@@ -11,12 +11,12 @@
 
 class TelemetryPanel: public Panel {
 protected:
-    cross_pkg_messages::msg::RoverComputerDriveCMD lastDriveCMD;
+    // cross_pkg_messages::msg::RoverComputerDriveCMD lastDriveCMD;
     cross_pkg_messages::msg::RoverComputerDriveStatus lastDriveStatus;
     geometry_msgs::msg::Twist lastCmdVel;
     cross_pkg_messages::msg::RoverComputerDriveCMD lastArmCMD;
 
-    rclcpp::Subscription<cross_pkg_messages::msg::RoverComputerDriveCMD>::SharedPtr sub;
+    rclcpp::Subscription<cross_pkg_messages::msg::RoverComputerDriveStatus>::SharedPtr sub;
     rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmdVelSub;
     rclcpp::Subscription<cross_pkg_messages::msg::RoverComputerDriveCMD>::SharedPtr sub2;
 

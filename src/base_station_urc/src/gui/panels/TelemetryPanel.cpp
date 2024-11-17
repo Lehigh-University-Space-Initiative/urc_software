@@ -135,17 +135,13 @@ void TelemetryPanel::setup() {
       return;
     }
 
-    auto f = [this](const cross_pkg_messages::msg::RoverComputerDriveCMD::SharedPtr msg) {
-        this->lastDriveCMD = *msg;
+    auto f = [this](const cross_pkg_messages::msg::RoverComputerDriveStatus::SharedPtr msg) {
+        this->lastDriveStatus = *msg;
 
         // Invert right side
-        this->lastDriveCMD.cmd_r.x *= -1;
-        this->lastDriveCMD.cmd_r.y *= -1;
-        this->lastDriveCMD.cmd_r.z *= -1;
-    };
-
-    auto driveStatusCallback = [this](const cross_pkg_messages::msg::RoverComputerDriveStatus::SharedPtr msg) {
-        this->lastDriveStatus = *msg;
+        this->lastDriveStatus.vel_r.x *= -1;
+        this->lastDriveStatus.vel_r.y *= -1;
+        this->lastDriveStatus.vel_r.z *= -1;
     };
 
     auto f2 = [this](const cross_pkg_messages::msg::RoverComputerDriveCMD::SharedPtr msg) {
@@ -158,7 +154,7 @@ void TelemetryPanel::setup() {
 
     // sub = node_->create_subscription<cross_pkg_messages::msg::RoverComputerDriveCMD>(
     //     "roverDriveCommands", 10, f);
-    sub = node_->create_subscription<cross_pkg_messages::msg::RoverComputerDriveCMD>(
+    sub = node_->create_subscription<cross_pkg_messages::msg::RoverComputerDriveStatus>(
         "motorVels", 10, f);
     sub2 = node_->create_subscription<cross_pkg_messages::msg::RoverComputerDriveCMD>(
         "manualArmControl", 10, f2);
