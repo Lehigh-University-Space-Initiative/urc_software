@@ -10,7 +10,8 @@
 
 class TelemetryPanel: public Panel {
 protected:
-    cross_pkg_messages::msg::RoverComputerDriveCMD lastDriveCMD;
+    // cross_pkg_messages::msg::RoverComputerDriveCMD lastDriveCMD;
+    cross_pkg_messages::msg::RoverComputerDriveStatus lastDriveCMD;
     geometry_msgs::msg::Twist lastCmdVel;
     cross_pkg_messages::msg::RoverComputerDriveCMD lastArmCMD;
 

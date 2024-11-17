@@ -22,7 +22,7 @@ private:
 
     rclcpp::Subscription<cross_pkg_messages::msg::RoverComputerDriveCMD>::SharedPtr driveCommandsSub;
 
-    rclcpp::Publisher<cross_pkg_messages::msg::RoverComputerDriveCMD>::SharedPtr wheelVelPub;
+    // rclcpp::Publisher<cross_pkg_messages::msg::RoverComputerDriveCMD>::SharedPtr wheelVelPub;
 
     rclcpp::Publisher<cross_pkg_messages::msg::RoverComputerDriveStatus>::SharedPtr driveStatusPub;
 
