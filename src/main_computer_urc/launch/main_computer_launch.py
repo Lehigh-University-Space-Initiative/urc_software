@@ -15,4 +15,10 @@ def generate_launch_description():
             name='StatusLED',
             output='screen'
         ),
+        Node(
+            package='main_computer_urc',
+            executable='VideoStreamer_node',
+            name='VideoStreamer',
+            output='screen'
+        ),
     ])
