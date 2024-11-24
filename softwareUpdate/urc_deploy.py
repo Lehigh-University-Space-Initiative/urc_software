@@ -10,7 +10,7 @@ MAIN_COMPUTER_IP = '10.0.0.10'
 DRIVELINE_COMPUTER_IP = '10.0.0.20'
 MAIN_COMPUTER_PATH = '/home/lusi/urc_software_deploy'
 # LOCAL_PATH = '/mnt/c/Users/phamd/urc_software'
-LOCAL_PATH = '/home/parallels/lusi/urc_software'
+LOCAL_PATH = '/home/todd/urc_software'
 DOCKER_IMAGE_NAME = 'urc_software'
 
 def rsync_files():
