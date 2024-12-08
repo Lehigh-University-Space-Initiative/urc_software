@@ -3,14 +3,14 @@ import subprocess
 import argparse
 import os
 import threading
+from pathlib import Path
 
 USERNAME = 'lusi'
 PASSWORD = 'lusi'
 MAIN_COMPUTER_IP = '10.0.0.10'
 DRIVELINE_COMPUTER_IP = '10.0.0.20'
 MAIN_COMPUTER_PATH = '/home/lusi/urc_software_deploy'
-# LOCAL_PATH = '/mnt/c/Users/phamd/urc_software'
-LOCAL_PATH = '/home/todd/urc_software'
+LOCAL_PATH = Path(__file__).resolve().parent.parent
 DOCKER_IMAGE_NAME = 'urc_software'
 
 def rsync_files():
