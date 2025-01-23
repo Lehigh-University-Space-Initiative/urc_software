@@ -18,7 +18,25 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     iproute2 net-tools \
     x11-apps \
     iputils-ping \
+    # for opencv
+     wget g++ unzip \ 
     && rm -rf /var/lib/apt/lists/*
+
+# install opencv
+
+RUN mkdir -p /home/opencv
+RUN cd /home/opencv
+
+RUN wget -O opencv.zip https://github.com/opencv/opencv/archive/4.x.zip
+RUN unzip opencv.zip
+
+RUN mkdir -p build && cd build
+ 
+# Configure
+RUN cmake  ../opencv-4.x
+ 
+# Build
+RUN cmake --build .
 
 # Copy the urcAssets directory to the home directory in the container
 RUN mkdir -p /home/urcAssets
