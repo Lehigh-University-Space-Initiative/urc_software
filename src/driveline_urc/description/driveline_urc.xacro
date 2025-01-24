@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<robot name="rover_drivetrain">
+    <ros2_control name="DriveTrainHardware" type="system">
+        <hardware>
+            <plugin></plugin>
+        </hardware>
+        <joint name="lf_wheel_joint">
+            <command_interface name="velocity"/>
+            <state_interface name="velocity"/>
+            <state_interface name="position"/>
+        </joint>
+        <joint name="lm_wheel_joint">
+            <command_interface name="velocity"/>
+            <state_interface name="velocity"/>
+            <state_interface name="position"/>
+        </joint>
+        <joint name="lb_wheel_joint">
+            <command_interface name="velocity"/>
+            <state_interface name="velocity"/>
+            <state_interface name="position"/>
+        </joint>
+        <joint name="rf_wheel_joint">
+            <command_interface name="velocity"/>
+            <state_interface name="velocity"/>
+            <state_interface name="position"/>
+        </joint>
+        <joint name="rm_wheel_joint">
+            <command_interface name="velocity"/>
+            <state_interface name="velocity"/>
+            <state_interface name="position"/>
+        </joint>
+        <joint name="rb_wheel_joint">
+            <command_interface name="velocity"/>
+            <state_interface name="velocity"/>
+            <state_interface name="position"/>
+        </joint>
+    </ros2_control>
+</robot>
