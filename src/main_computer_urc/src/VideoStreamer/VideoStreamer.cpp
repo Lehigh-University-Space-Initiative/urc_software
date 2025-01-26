@@ -11,8 +11,8 @@
 class VideoStreamer : public rclcpp::Node {
 public:
     VideoStreamer() : Node("video_streamer") {
-        declare_parameter<bool>("lusi_vision_mode", true);
-        declare_parameter<int>("stream_cam", 0);
+        declare_parameter<bool>("lusi_vision_mode", false);
+        declare_parameter<int>("stream_cam", 1);
 
         image_pub_ = image_transport::create_publisher(this, "/video_stream");
         image_pub_3d_ = image_transport::create_publisher(this, "/video_stream_3d");
@@ -43,7 +43,8 @@ private:
                 return;
             }
 
-            int actual_cam = cam_map_[current_streaming_cam_];
+            int actual_cam = 0; //cam_map_[current_streaming_cam_];
+            RCLCPP_WARN(this->get_logger(), "Print testing");
             cap_.open(actual_cam, cv::CAP_V4L2);
 
             if (!cap_.isOpened()) {
@@ -64,6 +65,7 @@ private:
 
         if (!frame.empty()) {
             auto msg = cv_bridge::CvImage(std_msgs::msg::Header(), "bgr8", frame).toImageMsg();
+            RCLCPP_WARN(this->get_logger(), "Print testing frame");
             image_pub_.publish(*msg);
         } else {
             RCLCPP_WARN(this->get_logger(), "No frame data");

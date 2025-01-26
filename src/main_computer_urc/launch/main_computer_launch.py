@@ -21,4 +21,16 @@ def generate_launch_description():
             name='VideoStreamer',
             output='screen'
         ),
+        Node(
+            package='image_transport',
+            executable='republish',
+            name='republish',
+            output='screen',
+            arguments=[
+                'compressed',  # Input transport type
+                '--ros-args',
+                '--remap', 'in:=/video_stream',
+                '--remap', 'out/compressed:=/video_stream/compressed',
+            ],
+        ),
     ])

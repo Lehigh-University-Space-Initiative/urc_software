@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-humble-geometry-msgs \
     ros-humble-sensor-msgs \
     ros-humble-image-transport \
+    # ros-humble-image-transport-plugins \
     ros-humble-cv-bridge \
     ros-humble-joy \
     libglfw3-dev \
@@ -42,6 +43,12 @@ RUN cmake --build .
 RUN mkdir -p /home/urcAssets
 COPY urcAssets /home/urcAssets
 
+FROM ros:humble-ros-base-jammy AS plugin_installer
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ros-humble-image-transport-plugins \
+    && rm -rf /var/lib/apt/lists/*
+
 FROM urc_software_base AS urc_software_builder
 
 # Set the working directory
@@ -51,7 +58,7 @@ WORKDIR /ros2_ws
 COPY ./libs /ros2_ws/libs
 
 # Build pigpio from the submodule
-RUN cd /ros2_ws/libs/pigpio && make && make install
+RUN cd /ros2_ws/libs/pigpio && make && make install && echo "Hello 1"
 
 
 # https://medium.com/codex/a-practical-guide-to-containerize-your-c-application-with-docker-50abb197f6d4
@@ -59,11 +66,12 @@ FROM urc_software_base AS urc_software
 
 # copy built binaries
 WORKDIR /ros2_ws
+COPY --from=plugin_installer /opt/ros/humble /opt/ros/humble
 COPY ./install /ros2_ws/install
 COPY ./libs /ros2_ws/libs
 COPY ./run_nodes.sh /ros2_ws/run_nodes.sh
 
-RUN cd /ros2_ws/libs/pigpio && make && make install
+RUN cd /ros2_ws/libs/pigpio && make && make install && echo "hello"
 
 # Default command
 ENTRYPOINT ["/ros2_ws/run_nodes.sh"]
