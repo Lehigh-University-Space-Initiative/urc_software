@@ -1,0 +1,5 @@
+<library path="libdriveline_urc_hw.so">
+  <class name="driveline_urc/DrivelineHardware"
+         type="driveline_urc::DrivelineHardware"
+         base_class_type="hardware_interface::SystemInterface"/>
+</library>

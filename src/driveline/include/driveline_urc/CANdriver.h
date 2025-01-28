@@ -15,8 +15,8 @@
 #include <vector>
 #include <pigpio.h>
 #include "cs_plain_guarded.h"
-#include "PID/pid.h"
-#include "Limits.h"
+#include "driveline_urc/pid.h"
+#include "driveline_urc/Limits.h"
 
 class CANDriver {
 protected:

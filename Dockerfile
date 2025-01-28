@@ -1,72 +1,37 @@
-# https://github.com/pcewing/docker-incremental-compile-demo
-# Use the official ROS 2 base image
-FROM ros:humble-ros-base-jammy AS urc_software_base
+# Use ROS 2 Humble base image
+FROM ros:humble-ros-base-jammy
 
-# Install ROS 2 and other necessary packages
+# Install dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-humble-ros-base=0.10.0-1* \
     ros-humble-rclcpp \
     ros-humble-std-msgs \
     ros-humble-geometry-msgs \
     ros-humble-sensor-msgs \
-    ros-humble-image-transport \
-    ros-humble-cv-bridge \
-    ros-humble-joy \
-    libglfw3-dev \
-    libglew-dev \
-    libgps-dev \
-    iproute2 net-tools \
-    x11-apps \
-    iputils-ping \
-    # for opencv
-     wget g++ unzip \ 
     && rm -rf /var/lib/apt/lists/*
-
-# install opencv
-
-RUN mkdir -p /home/opencv
-RUN cd /home/opencv
-
-RUN wget -O opencv.zip https://github.com/opencv/opencv/archive/4.x.zip
-RUN unzip opencv.zip
-
-RUN mkdir -p build && cd build
- 
-# Configure
-RUN cmake  ../opencv-4.x
- 
-# Build
-RUN cmake --build .
-
-# Copy the urcAssets directory to the home directory in the container
-RUN mkdir -p /home/urcAssets
-COPY urcAssets /home/urcAssets
-
-FROM urc_software_base AS urc_software_builder
 
 # Set the working directory
 WORKDIR /ros2_ws
 
 # Copy the libs
-COPY ./libs /ros2_ws/libs
+# COPY libs/pigpio /ros2_ws/libs
 
-# Build pigpio from the submodule
-RUN cd /ros2_ws/libs/pigpio && make && make install
+# # Build pigpio from the submodule
+# RUN cd /ros2_ws/libs/pigpio && make && make install
 
+# # Copy the package into the container
+COPY src/driveline /ros2_ws//src/driveline_urc
+COPY src/cross_pkg_messages_urc /ros2_ws//src/cross_pkg_messages_urc
 
-# https://medium.com/codex/a-practical-guide-to-containerize-your-c-application-with-docker-50abb197f6d4
-FROM urc_software_base AS urc_software 
+# # Set the library path in the CMake configuration
+# ENV CMAKE_PREFIX_PATH=/workspace/libs/pigpio:$CMAKE_PREFIX_PATH
 
-# copy built binaries
-WORKDIR /ros2_ws
-COPY ./install /ros2_ws/install
-COPY ./libs /ros2_ws/libs
-COPY ./run_nodes.sh /ros2_ws/run_nodes.sh
+# # Build the custom dependency package
+# RUN . /opt/ros/humble/setup.sh && \
+#     colcon build --symlink-install --packages-select cross_pkg_messagesdriveline_urc
 
-RUN cd /ros2_ws/libs/pigpio && make && make install
+# # Source the workspace by default
+# RUN echo "source /workspace/install/setup.bash" >> ~/.bashrc
 
-# Default command
-ENTRYPOINT ["/ros2_ws/run_nodes.sh"]
-#  ENTRYPOINT ["bash"]
-
-# added
+# Set the default command
+CMD ["bash"]
