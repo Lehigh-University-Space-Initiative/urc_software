@@ -14,7 +14,7 @@
 #include <array>
 #include <vector>
 #include <pigpio.h>
-#include "cs_plain_guarded.h"
+#include "cs_libguarded/cs_plain_guarded.h"
 #include "driveline_urc/pid.h"
 #include "driveline_urc/Limits.h"
 

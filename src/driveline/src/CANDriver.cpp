@@ -1,5 +1,6 @@
 #include "driveline_urc/CANDriver.h"
 #include "driveline_urc/Limits.h"
+#include "main.h"
 #include <string>
 
 #define MAX_PWM 2000
