@@ -1,10 +1,10 @@
-<library path="libdriveline_urc_hw.so">
+<library path="driveline_urc_hw.so">
   <class name="driveline_urc/DrivelineHardware"
          type="driveline_urc::DrivelineHardware"
          base_class_type="hardware_interface::SystemInterface">
 
     <description>
-      shut up i will be written soon hopefully
+     Driveline hardware interface
     </description>
   </class>
 </library>

@@ -4,6 +4,7 @@ project(driveline_urc)
 # Find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(controller_manager REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(hardware_interface REQUIRED) 
 find_package(std_msgs REQUIRED)
