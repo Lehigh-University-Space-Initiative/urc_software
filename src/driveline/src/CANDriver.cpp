@@ -1,6 +1,6 @@
 #include "driveline_urc/CANDriver.h"
 #include "driveline_urc/Limits.h"
-#include "main.h"
+#include "DrivelineNode.h"
 #include <string>
 
 #define MAX_PWM 2000
@@ -28,7 +28,7 @@ bool CANDriver::setupCAN(int canBus) {
         return true;
     }
 
-    RCLCPP_INFO(node->get_logger(), "Settting up CAN %d",canBus);
+    RCLCPP_INFO(node->get_logger(), "Setting up CAN %d",canBus);
 
     data->soc = socket(PF_CAN, SOCK_RAW, CAN_RAW);
     if (data->soc < 0) {

@@ -1,9 +1,8 @@
 #include "driveline_urc/DriveTrainMotorManager.h"
-#include "main.h"
+#include "DrivelineNode.h"
 
 DriveTrainMotorManager::DriveTrainMotorManager()
 {
-
     setupMotors();
 
     // Subscribe to drive commands
@@ -53,6 +52,11 @@ void DriveTrainMotorManager::sendHeartbeats()
         motor.sendHeartbeat();
     }
 }
+
+std::vector<SparkMax>& DriveTrainMotorManager::getMotors() {
+    return motors;
+}
+
 
 void DriveTrainMotorManager::tick()
 {

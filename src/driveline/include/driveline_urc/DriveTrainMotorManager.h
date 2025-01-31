@@ -31,4 +31,5 @@ public:
     virtual ~DriveTrainMotorManager();
     void sendHeartbeats();
     void tick();
+    std::vector<SparkMax>& getMotors();
 };

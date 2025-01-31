@@ -2,7 +2,7 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="rover_drivetrain">
     <ros2_control name="DriveTrainHardware" type="system">
         <hardware>
-            <plugin></plugin>
+            <plugin>driveline_urc/DrivelineHardware</plugin>
         </hardware>
         <joint name="lf_wheel_joint">
             <command_interface name="velocity"/>
