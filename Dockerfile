@@ -61,7 +61,7 @@ COPY ./libs /ros2_ws/libs
 
 # Build pigpio from the submodule
 RUN cd /ros2_ws/libs/pigpio && make && make install
-
+COPY --from=plugin_installer /opt/ros/humble /opt/ros/humble
 
 # https://medium.com/codex/a-practical-guide-to-containerize-your-c-application-with-docker-50abb197f6d4
 FROM urc_software_base AS urc_software 
