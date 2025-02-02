@@ -1,75 +1,57 @@
-#include <libgpsmm.h>
-#include <ctime>
-#include <iomanip>
-#include <iostream>
+#include <cstdio>
+#include <rclcpp/rclcpp.hpp>
+#include <std_msgs/msg/string.hpp>
 #include <sstream>
-#include <thread>
-#include <gps.h>
+#include "cross_pkg_messages/msg/rover_computer_drive_cmd.hpp"
+#include "geometry_msgs/msg/vector3.hpp"
+#include "driveline_urc/CANDriver.h"
+#include "driveline_urc/DriveTrainMotorManager.h"
 
-#include "rclcpp/rclcpp.hpp"
-#include "cross_pkg_messages/msg/gps_data.hpp"
+/*
+Note 
+Left stick:
+pitch: pitch
+roll: base rotate
+yaw: M3 rist pitch
+
+right stick:
+pitch: elbow pitch
+roll: rist roll
+yaw: rist/ yaw
+
+left trigger: close end effector
+right trigger: open end effector
+*/
+
+
+std::shared_ptr<rclcpp::Node> node;
+
+// Callback function
+void callback(const cross_pkg_messages::msg::RoverComputerDriveCMD::SharedPtr msg) {
+   RCLCPP_INFO(rclcpp::get_logger("Motor_CTR"), "Received command with CMD_R.z: %f", msg->cmd_r.z);
+   // wrist_yaw.setVelocity(msg->cmd_r.z);  // Uncomment and set velocity when integrating
+}
 
 int main(int argc, char** argv) {
     rclcpp::init(argc, argv);
-    auto node = rclcpp::Node::make_shared("gps_driver");
+    node = rclcpp::Node::make_shared("motor_ctr");
 
-    RCLCPP_INFO(node->get_logger(), "GPS Driver");
+    RCLCPP_INFO(node->get_logger(), "Motor CTR startup");
 
-    auto gpsPublisher = node->create_publisher<cross_pkg_messages::msg::GPSData>("/gps_data", 10);
+    DriveTrainMotorManager driveTrainManager{}; 
 
-    gpsmm gps_rec("localhost", DEFAULT_GPSD_PORT);
+    // Set loop rate to 100 Hz
+    rclcpp::Rate loop_rate(30000);
 
-    if (gps_rec.stream(WATCH_ENABLE | WATCH_JSON) == nullptr) {
-        RCLCPP_ERROR(node->get_logger(), "No GPSD running.");
-        return 1;
-    }
+    // Subscriber for rover drive commands
+    // auto driveCommandsSub = node->create_subscription<cross_pkg_messages::msg::RoverComputerDriveCMD>(
+        // "/roverDriveCommands", 10, callback);
 
-    rclcpp::Rate loop_rate(30);  // 30 Hz loop rate
-    constexpr auto kWaitingTime{1000000};  // 1 second
-
+    // Main loop
     while (rclcpp::ok()) {
-        if (!gps_rec.waiting(kWaitingTime)) {
-            continue;
-        }
+        rclcpp::spin_some(node);
 
-        struct gps_data_t* gpsd_data;
-
-        if ((gps_rec.read()) == nullptr) {
-            RCLCPP_ERROR(node->get_logger(), "GPSD read error.");
-            return 1;
-        }
-
-        while (((gpsd_data = gps_rec.read()) == nullptr) || (gpsd_data->fix.mode < MODE_2D)) {
-            // Busy wait mitigation
-            std::this_thread::sleep_for(std::chrono::seconds(1));
-        }
-
-        const auto latitude{gpsd_data->fix.latitude};
-        const auto longitude{gpsd_data->fix.longitude};
-        const auto alt(gpsd_data->fix.altitude);
-        const auto speed(gpsd_data->fix.speed);
-        const auto course(gpsd_data->fix.track);
-
-        const auto sats(gpsd_data->satellites_used);
-        const auto lat_acc(gpsd_data->fix.epy);
-        const auto lon_acc(gpsd_data->fix.epx);
-        const auto alt_acc(gpsd_data->fix.epv);
-
-        cross_pkg_messages::msg::GPSData gpsData;
-        gpsData.status = gpsd_data->fix.mode;
-        gpsData.lla.x = latitude;
-        gpsData.lla.y = longitude;
-        gpsData.lla.z = alt;
-        gpsData.speed = speed;
-        gpsData.course = course;
-
-        gpsData.sats = sats;
-        gpsData.lla_acc.x = lat_acc;
-        gpsData.lla_acc.y = lon_acc;
-        gpsData.lla_acc.z = alt_acc;
-
-        gpsPublisher->publish(gpsData);
-
+        driveTrainManager.tick();
         loop_rate.sleep();  // Maintain the loop rate
     }
 

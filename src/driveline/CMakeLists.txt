@@ -28,13 +28,14 @@ set(DRIVELINE_URC_SRC
   src/pid.cpp
   src/CANDriver.cpp
   src/DriveTrainMotorManager.cpp
-  src/driveline_hardware.cpp
+  src/main.cpp
 )
 
-add_library(${PROJECT_NAME} SHARED
-  ${DRIVELINE_URC_SRC}
+set(DRIVELINE_URC_HW_SRC
+  src/DrivelineHardware.cpp
 )
 
+add_library(driveline_urc SHARED ${DRIVELINE_URC_SRC})
 add_dependencies(${PROJECT_NAME} pigpio_build)
 
 ament_target_dependencies(${PROJECT_NAME}
@@ -45,13 +46,24 @@ ament_target_dependencies(${PROJECT_NAME}
   cross_pkg_messages
   sensor_msgs
 )
-
 target_link_libraries(${PROJECT_NAME} pigpio)
+
+add_library(driveline_urc_hw SHARED ${DRIVELINE_URC_HW_SRC})
+set_target_properties(driveline_urc_hw PROPERTIES OUTPUT_NAME "driveline_urc_hw")
+ament_target_dependencies(driveline_urc_hw
+  rclcpp
+  hardware_interface
+  pluginlib
+  cross_pkg_messages
+)
+target_link_libraries(driveline_urc_hw pigpio driveline_urc)
+
 
 pluginlib_export_plugin_description_file(hardware_interface plugin.xml)
 
 install(TARGETS
-  ${PROJECT_NAME}
+  driveline_urc
+  driveline_urc_hw
   DESTINATION lib
 )
 

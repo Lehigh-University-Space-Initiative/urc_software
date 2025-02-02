@@ -1,8 +1,8 @@
-#include "driveline_urc/driveline_hardware.hpp"
+#include "driveline_urc/DrivelineHardware.hpp"
 #include <pluginlib/class_list_macros.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <algorithm>
-#include "DrivelineNode.h"
+#include "main.h"
 
 namespace driveline_urc
 {
@@ -38,7 +38,7 @@ DrivelineHardware::on_configure(const rclcpp_lifecycle::State & /*previous_state
 {
   // Create a node specifically for hardware
   node_ = std::make_shared<rclcpp::Node>("driveline_hw_node");
-  node = node_;
+//   node = node_;
 
   // Construct the manager with this node
   manager_ = std::make_unique<DriveTrainMotorManager>();
@@ -107,5 +107,6 @@ DrivelineHardware::write(const rclcpp::Time & /*time*/, const rclcpp::Duration &
 }
 
 }
+#include "pluginlib/class_list_macros.hpp"
 
 PLUGINLIB_EXPORT_CLASS(driveline_urc::DrivelineHardware, hardware_interface::SystemInterface)
