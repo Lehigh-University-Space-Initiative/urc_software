@@ -4,6 +4,8 @@
 #include <algorithm>
 #include "main.h"
 
+std::shared_ptr<rclcpp::Node> node;
+
 namespace driveline_urc
 {
 

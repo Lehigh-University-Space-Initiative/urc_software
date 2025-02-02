@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-humble-ros2-controllers \
     ros-humble-xacro \
     libgps-dev \
+    gdb \
     && rm -rf /var/lib/apt/lists/*
 
 # Set the working directory
