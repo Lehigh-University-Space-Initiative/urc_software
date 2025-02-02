@@ -38,7 +38,7 @@ DrivelineHardware::on_configure(const rclcpp_lifecycle::State & /*previous_state
 {
   // Create a node specifically for hardware
   node_ = std::make_shared<rclcpp::Node>("driveline_hw_node");
-//   node = node_;
+  node = node_;
 
   // Construct the manager with this node
   manager_ = std::make_unique<DriveTrainMotorManager>();
