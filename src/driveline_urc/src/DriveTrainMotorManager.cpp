@@ -9,11 +9,17 @@ DriveTrainMotorManager::DriveTrainMotorManager()
     hw_positions_.resize(6, 0.0);
     hw_velocities_.resize(6, 0.0);
     hw_commands_.resize(6, 0.0);
+  
+  {
+    auto lock = lastManualCommandTime.lock();
+    *lock = std::chrono::system_clock::now();
+  }
 }
 
 DriveTrainMotorManager::~DriveTrainMotorManager()
 {
 }
+
 
 void DriveTrainMotorManager::setupMotors()
 {
@@ -56,7 +62,7 @@ void DriveTrainMotorManager::readMotors(const rclcpp::Duration period) {
     }
 }
 
-void DriveTrainMotorManager::readMotors() {
+void DriveTrainMotorManager::writeMotors() {
     for (size_t i = 0; i < motors.size(); i++) {
       // direct power
       motors[i].sendPowerCMD(hw_commands_[i]);
@@ -113,21 +119,10 @@ void DriveTrainMotorManager::tick()
         motor.sendHeartbeat();
         motor.pidTick();
     }
-
-    // publish wheel data
-    cross_pkg_messages::msg::RoverComputerDriveCMD speedMsg;
-    speedMsg.cmd_l.x = motors[0].lastVelocityAsRadPerSec();
-    speedMsg.cmd_l.y = motors[1].lastVelocityAsRadPerSec();
-    speedMsg.cmd_l.z = motors[2].lastVelocityAsRadPerSec();
-
-    speedMsg.cmd_r.x = motors[3].lastVelocityAsRadPerSec();
-    speedMsg.cmd_r.y = motors[4].lastVelocityAsRadPerSec();
-    speedMsg.cmd_r.z = motors[5].lastVelocityAsRadPerSec();
-
-    //wheelVelPub->publish(speedMsg);
 }
 
-void DriveTrainMotorManager::parseDriveCommands(const cross_pkg_messages::msg::RoverComputerDriveCMD::SharedPtr msg)
+
+void DriveTrainMotorManager::setCommands(const std::vector<double> & commands)
 {
     RCLCPP_INFO(dl_logger, "DriveTrainMotorManager: Drive Commands Received with L: %f, R: %f", msg->cmd_l.x, msg->cmd_r.x);
 
@@ -152,6 +147,30 @@ void DriveTrainMotorManager::parseDriveCommands(const cross_pkg_messages::msg::R
     motors[3].sendPowerCMD(msg->cmd_r.x / 20);
     motors[4].sendPowerCMD(msg->cmd_r.y / 20);
     motors[5].sendPowerCMD(msg->cmd_r.z / 20);
+  if (commands.size() != motors.size()) {
+    RCLCPP_ERROR(rclcpp::get_logger("DriveTrainMotorManager"),
+                 "Invalid number of commands: expected %zu, got %zu",
+                 motors.size(), commands.size());
+    return;
+  }
 
 
+  resetLOSTimeout();
+
+
+  motors[0].sendPowerCMD(-commands[0] / 20.0);
+  motors[1].sendPowerCMD(-commands[1] / 20.0);
+  motors[2].sendPowerCMD(-commands[2] / 20.0);
+  motors[3].sendPowerCMD( commands[3] / 20.0);
+  motors[4].sendPowerCMD( commands[4] / 20.0);
+  motors[5].sendPowerCMD( commands[5] / 20.0);
 }
+
+
+// Public API to reset the LOS timeout (e.g. call this from another context if needed).
+void DriveTrainMotorManager::resetLOSTimeout()
+{
+  auto lock = lastManualCommandTime.lock();
+  *lock = std::chrono::system_clock::now();
+}
+

@@ -19,8 +19,7 @@ private:
     std::vector<double> hw_commands_;
 
     void setupMotors();
-    void stopAllMotors();
-
+    
     libguarded::plain_guarded<std::chrono::time_point<std::chrono::system_clock>> lastManualCommandTime{std::chrono::system_clock::now()};
     std::chrono::milliseconds manualCommandTimeout{1500};
 
@@ -42,4 +41,7 @@ public:
     size_t getMotorCount();
     std::vector<hardware_interface::StateInterface> getStateInterfaces(std::vector<hardware_interface::ComponentInfo>& joints);
     std::vector<hardware_interface::CommandInterface> getCommandInterface(std::vector<hardware_interface::ComponentInfo>& joints);
+    void setCommands(const std::vector<double>& commands);
+    void resetLOSTimeout();
+    void stopAllMotors();
 };

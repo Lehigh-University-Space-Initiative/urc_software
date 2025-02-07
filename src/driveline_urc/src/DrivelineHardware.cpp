@@ -5,19 +5,19 @@
 #include "driveline_urc/Logger.h"
 
 rclcpp::Logger dl_logger = rclcpp::get_logger("driveline logger");
+#include "driveline_urc/CANDriver.h"
+#include "driveline_urc/DriveTrainMotorManager.h"
 
 namespace driveline_urc
 {
 
-hardware_interface::CallbackReturn
-  DrivelineHardware::on_init(const hardware_interface::HardwareInfo &info)
+
+hardware_interface::CallbackReturn DrivelineHardware::on_init(const hardware_interface::HardwareInfo &info)
 {
-  // Let SystemInterface store info_ internally
   if (hardware_interface::SystemInterface::on_init(info) != hardware_interface::CallbackReturn::SUCCESS) {
     return hardware_interface::CallbackReturn::ERROR;
   }
 
-  // We expect 6 joints for a 6-wheel rover
   if (info_.joints.size() != 6) {
     RCLCPP_ERROR(dl_logger, "Driveline: Expected 6 joints in URDF, found %zu", info_.joints.size());
     return hardware_interface::CallbackReturn::ERROR;
@@ -83,6 +83,9 @@ hardware_interface::return_type
   DrivelineHardware::write(const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/)
 {
   manager_->writeMotors();
+  //
+  // NOTE: would setCommands() be better? Could writeMotors() be improved like setCommands?
+  //
 
   return hardware_interface::return_type::OK;
 }
