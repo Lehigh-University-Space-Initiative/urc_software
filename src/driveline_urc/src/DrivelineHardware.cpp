@@ -2,7 +2,9 @@
 #include <pluginlib/class_list_macros.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <algorithm>
-#include "main.h"
+#include "driveline_urc/Logger.h"
+
+rclcpp::Logger dl_logger = rclcpp::get_logger("driveline logger");
 
 namespace driveline_urc
 {
@@ -17,91 +19,70 @@ hardware_interface::CallbackReturn
 
   // We expect 6 joints for a 6-wheel rover
   if (info_.joints.size() != 6) {
-    RCLCPP_ERROR(rclcpp::get_logger("DrivelineHardware"),
-                 "Expected 6 joints in URDF, found %zu", info_.joints.size());
+    RCLCPP_ERROR(dl_logger, "Driveline: Expected 6 joints in URDF, found %zu", info_.joints.size());
     return hardware_interface::CallbackReturn::ERROR;
   }
 
-  // Resize vectors for position, velocity, command
-  hw_positions_.resize(6, 0.0);
-  hw_velocities_.resize(6, 0.0);
-  hw_commands_.resize(6, 0.0);
-
-
-  // RCLCPP_INFO(rclcpp::get_logger("DrivelineHardware"),
-  //             "on_init: command clamp [%.2f, %.2f]", cmd_min_, cmd_max_);
+  RCLCPP_INFO(dl_logger, "Driveline on_init: command clamp [%.2f, %.2f]", -MAX_DRIVE_POWER, MAX_DRIVE_POWER);
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 
 hardware_interface::CallbackReturn
-DrivelineHardware::on_configure(const rclcpp_lifecycle::State & /*previous_state*/)
+  DrivelineHardware::on_configure(const rclcpp_lifecycle::State & /*previous_state*/)
 {
-  // Create a node specifically for hardware
-  node_ = std::make_shared<rclcpp::Node>("driveline_hw_node");
-  node = node_;
+  // Create a logger for the driveline hardware
+  // rclcpp::Logger dl_logger = rclcpp::get_logger("driveline logger");
 
-  // Construct the manager with this node
+  // Construct the manager
   manager_ = std::make_unique<DriveTrainMotorManager>();
 
-  RCLCPP_INFO(node_->get_logger(), "DrivelineHardware on_configure done");
+  RCLCPP_INFO(dl_logger, "DrivelineHardware on_configure done");
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 
 std::vector<hardware_interface::StateInterface>
-DrivelineHardware::export_state_interfaces()
+  DrivelineHardware::export_state_interfaces()
 {
-  std::vector<hardware_interface::StateInterface> interfaces;
-  for (size_t i = 0; i < 6; i++) {
-    interfaces.emplace_back(hardware_interface::StateInterface(
-      info_.joints[i].name, /*hardware_interface::HW_IF_POSITION*/ "position", &hw_positions_[i]));
-    interfaces.emplace_back(hardware_interface::StateInterface(
-      info_.joints[i].name, /*hardware_interface::HW_IF_VELOCITY*/ "velocity", &hw_velocities_[i]));
-  }
+  // std::vector<hardware_interface::StateInterface> interfaces;
+  // for (size_t i = 0; i < 6; i++) {
+  //   interfaces.emplace_back(hardware_interface::StateInterface(
+  //     info_.joints[i].name, /*hardware_interface::HW_IF_POSITION*/ "position", &hw_positions_[i]));
+  //   interfaces.emplace_back(hardware_interface::StateInterface(
+  //     info_.joints[i].name, /*hardware_interface::HW_IF_VELOCITY*/ "velocity", &hw_velocities_[i]));
+  // }
+
+  std::vector<hardware_interface::StateInterface> interfaces = manager_->getStateInterfaces(info_.joints);
+
   return interfaces;
 }
 
 std::vector<hardware_interface::CommandInterface>
-DrivelineHardware::export_command_interfaces()
+  DrivelineHardware::export_command_interfaces()
 {
-  std::vector<hardware_interface::CommandInterface> interfaces;
-  for (size_t i = 0; i < 6; i++) {
-    interfaces.emplace_back(hardware_interface::CommandInterface(
-      info_.joints[i].name, /*hardware_interface::HW_IF_VELOCITY*/ "velocity", &hw_commands_[i]));
-  }
+  // std::vector<hardware_interface::CommandInterface> interfaces;
+  // for (size_t i = 0; i < 6; i++) {
+  //   interfaces.emplace_back(hardware_interface::CommandInterface(
+  //     info_.joints[i].name, /*hardware_interface::HW_IF_VELOCITY*/ "velocity", &hw_commands_[i]));
+  // }
+  std::vector<hardware_interface::CommandInterface> interfaces = manager_->getCommandInterface(info_.joints);
   return interfaces;
 }
 
 hardware_interface::return_type
-DrivelineHardware::read(const rclcpp::Time & /*time*/, const rclcpp::Duration &period)
+  DrivelineHardware::read(const rclcpp::Time & /*time*/, const rclcpp::Duration &period)
 {
   manager_->tick();
 
   // read the actual velocities from the motors
-  auto & motors = manager_->getMotors();
-  for (size_t i = 0; i < 6; i++) {
-    double velocity = motors[i].lastVelocityAsRadPerSec();
-    hw_velocities_[i] = velocity;
-
-    // Integrate velocity -> position 
-    hw_positions_[i] += velocity * period.seconds();
-  }
+  manager_->readMotors(period);
 
   return hardware_interface::return_type::OK;
 }
 
 hardware_interface::return_type
-DrivelineHardware::write(const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/)
+  DrivelineHardware::write(const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/)
 {
-  // You can interpret these hw_commands_ however you'd like. If you want
-  // the /roverDriveCommands approach to remain primary, you can ignore them.
-  // Or if you want to accept velocity commands from a standard controller, do:
-  auto & motors = manager_->getMotors();
-
-  // For demonstration, let's apply each hw_commands_[i] as a power or velocity setpoint:
-  for (size_t i = 0; i < 6; i++) {
-    // direct power
-    motors[i].sendPowerCMD(hw_commands_[i]);
-  }
+  manager_->writeMotors();
 
   return hardware_interface::return_type::OK;
 }

@@ -13,6 +13,7 @@ namespace driveline_urc
 class DrivelineHardware : public hardware_interface::SystemInterface
 {
 public:
+
   hardware_interface::CallbackReturn on_init(const hardware_interface::HardwareInfo &info) override;
   hardware_interface::CallbackReturn on_configure(const rclcpp_lifecycle::State &previous_state) override;
 
@@ -23,13 +24,7 @@ public:
   hardware_interface::return_type write(const rclcpp::Time &time, const rclcpp::Duration &period) override;
 
 private:
-  rclcpp::Node::SharedPtr node_;
-
   std::unique_ptr<DriveTrainMotorManager> manager_;
-
-  std::vector<double> hw_positions_;
-  std::vector<double> hw_velocities_;
-  std::vector<double> hw_commands_;
 };
 
 }  // namespace driveline_urc

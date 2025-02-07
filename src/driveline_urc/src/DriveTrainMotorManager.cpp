@@ -1,19 +1,14 @@
 #include "driveline_urc/DriveTrainMotorManager.h"
-#include "main.h"
+#include "driveline_urc/Logger.h"
 
 DriveTrainMotorManager::DriveTrainMotorManager()
 {
     setupMotors();
 
-    // Subscribe to drive commands
-    driveCommandsSub = node->create_subscription<cross_pkg_messages::msg::RoverComputerDriveCMD>(
-        "/roverDriveCommands", 10, [this](const cross_pkg_messages::msg::RoverComputerDriveCMD::SharedPtr msg) {
-            auto lock = lastManualCommandTime.lock();
-            *lock = std::chrono::system_clock::now();
-            parseDriveCommands(msg);
-        });
-
-    wheelVelPub = node->create_publisher<cross_pkg_messages::msg::RoverComputerDriveCMD>("motorVels", 10);
+    // Resize vectors for position, velocity, command
+    hw_positions_.resize(6, 0.0);
+    hw_velocities_.resize(6, 0.0);
+    hw_commands_.resize(6, 0.0);
 }
 
 DriveTrainMotorManager::~DriveTrainMotorManager()
@@ -32,7 +27,7 @@ void DriveTrainMotorManager::setupMotors()
     motors.emplace_back(SparkMax(1, 5)); // RM
     motors.emplace_back(SparkMax(1, 6)); // RF
 
-    RCLCPP_INFO(node->get_logger(), "Testing Motors");
+    RCLCPP_INFO(dl_logger, "DrivelineMotorManager: Testing Motors");
     for (auto &motor : motors) {
         motor.ident();
     }
@@ -53,9 +48,43 @@ void DriveTrainMotorManager::sendHeartbeats()
     }
 }
 
-std::vector<SparkMax>& DriveTrainMotorManager::getMotors() {
-    return motors;
+void DriveTrainMotorManager::readMotors(const rclcpp::Duration period) {
+    for (size_t i = 0; i < motors.size(); i++) {
+        double velocity = motors[i].lastVelocityAsRadPerSec();
+        hw_velocities_[i] = velocity;
+        hw_positions_[i] += velocity * period.seconds();
+    }
 }
+
+void DriveTrainMotorManager::readMotors() {
+    for (size_t i = 0; i < motors.size(); i++) {
+      // direct power
+      motors[i].sendPowerCMD(hw_commands_[i]);
+    }
+}
+
+size_t DriveTrainMotorManager::getMotorCount() { return motors.size(); }
+
+std::vector<hardware_interface::StateInterface> DriveTrainMotorManager::getStateInterfaces(std::vector<hardware_interface::ComponentInfo>& joints) {
+    std::vector<hardware_interface::StateInterface> interfaces;
+    for (size_t i = 0; i < motors.size(); i++) {
+        interfaces.emplace_back(hardware_interface::StateInterface(
+            joints[i].name, /*hardware_interface::HW_IF_POSITION*/ "position", &hw_positions_[i]));
+        interfaces.emplace_back(hardware_interface::StateInterface(
+            joints[i].name, /*hardware_interface::HW_IF_VELOCITY*/ "velocity", &hw_velocities_[i]));
+    }
+    return interfaces;
+}
+
+std::vector<hardware_interface::CommandInterface> DriveTrainMotorManager::getCommandInterface(std::vector<hardware_interface::ComponentInfo>& joints) {
+    std::vector<hardware_interface::CommandInterface> interfaces;
+    for (size_t i = 0; i < motors.size(); i++) {
+        interfaces.emplace_back(hardware_interface::CommandInterface(
+        joints[i].name, /*hardware_interface::HW_IF_VELOCITY*/ "velocity", &hw_commands_[i]));
+    }
+    return interfaces;
+}
+
 
 
 void DriveTrainMotorManager::tick()
@@ -74,7 +103,7 @@ void DriveTrainMotorManager::tick()
         auto lock = lastManualCommandTime.lock();
         auto now = std::chrono::system_clock::now();
         if (now - *lock > manualCommandTimeout) {
-            RCLCPP_WARN(node->get_logger(), "LOS Safety Stop");
+            RCLCPP_WARN(dl_logger, "DriveTrainMotorManager: LOS Safety Stop");
             stopAllMotors();
         }
     }
@@ -95,12 +124,12 @@ void DriveTrainMotorManager::tick()
     speedMsg.cmd_r.y = motors[4].lastVelocityAsRadPerSec();
     speedMsg.cmd_r.z = motors[5].lastVelocityAsRadPerSec();
 
-    wheelVelPub->publish(speedMsg);
+    //wheelVelPub->publish(speedMsg);
 }
 
 void DriveTrainMotorManager::parseDriveCommands(const cross_pkg_messages::msg::RoverComputerDriveCMD::SharedPtr msg)
 {
-    // RCLCPP_INFO(node->get_logger(), "Drive Commands Received with L: %f, R: %f", msg->cmd_l.x, msg->cmd_r.x);
+    RCLCPP_INFO(dl_logger, "DriveTrainMotorManager: Drive Commands Received with L: %f, R: %f", msg->cmd_l.x, msg->cmd_r.x);
 
     // for (auto m : motors) {
     //     m.motorLocked = false;
