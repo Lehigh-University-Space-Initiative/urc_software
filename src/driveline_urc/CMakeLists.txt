@@ -28,6 +28,7 @@ set(DRIVELINE_URC_SRC
   src/pid.cpp
   src/CANDriver.cpp
   src/DriveTrainMotorManager.cpp
+  src/main.cpp
 )
 
 set(DRIVELINE_URC_HW_SRC
