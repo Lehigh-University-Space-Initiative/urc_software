@@ -11,10 +11,10 @@
 
 
 class MotorManager {
-private:
+protected:
     std::vector<SparkMax> motors_;
     size_t motor_count_;
-
+private:
     std::vector<double> hw_positions_;
     std::vector<double> hw_velocities_;
     std::vector<double> hw_commands_;
