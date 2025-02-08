@@ -3,14 +3,14 @@ import subprocess
 import argparse
 import os
 import threading
+import pathlib
 
 USERNAME = 'lusi'
 PASSWORD = 'lusi'
 MAIN_COMPUTER_IP = '10.0.0.10'
 DRIVELINE_COMPUTER_IP = '10.0.0.20'
 MAIN_COMPUTER_PATH = '/home/lusi/urc_software_deploy'
-# LOCAL_PATH = '/mnt/c/Users/phamd/urc_software'
-LOCAL_PATH = '/home/parallels/lusi/urc_software'
+LOCAL_PATH = pathlib.Path(__file__).parent.parent.resolve()
 DOCKER_IMAGE_NAME = 'urc_software'
 
 def rsync_files():
@@ -32,6 +32,8 @@ def rsync_files():
         f'--exclude=".gitconfig" '
         f'--exclude="imgui.ini" '
         f'--exclude="nul" '
+        f'--exclude="libs/pigpio/*.so*" '
+        f'--exclude="libs/pigpio/*.o" '
         f'{LOCAL_PATH}/ {USERNAME}@{MAIN_COMPUTER_IP}:{MAIN_COMPUTER_PATH}/'
     )
     subprocess.run(rsync_command, shell=True)
