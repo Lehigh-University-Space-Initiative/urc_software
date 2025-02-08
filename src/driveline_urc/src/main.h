@@ -1,3 +1,3 @@
 #pragma once
 
-extern std::shared_ptr<rclcpp::Node> node;
+extern rclcpp::Logger dl_logger;

@@ -4,8 +4,8 @@
 #include <sstream>
 #include "cross_pkg_messages/msg/rover_computer_drive_cmd.hpp"
 #include "geometry_msgs/msg/vector3.hpp"
-#include "driveline_urc/CANDriver.h"
-#include "driveline_urc/DriveTrainMotorManager.h"
+#include "CANDriver.h"
+#include "DriveTrainMotorManager.h"
 
 /*
 Note 

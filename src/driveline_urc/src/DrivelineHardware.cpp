@@ -1,9 +1,10 @@
-#include "driveline_urc/DrivelineHardware.hpp"
+#include "DrivelineHardware.h"
 #include <pluginlib/class_list_macros.hpp>
 #include <rclcpp/rclcpp.hpp>
-#include "driveline_urc/CANDriver.h"
-#include "driveline_urc/DriveTrainMotorManager.h"
+#include "CANDriver.h"
+#include "DriveTrainMotorManager.h"
 
+rclcpp::Logger dl_logger = rclcpp::get_logger("driveline logger");
 namespace driveline_urc
 {
 
@@ -20,17 +21,19 @@ hardware_interface::CallbackReturn DrivelineHardware::on_init(const hardware_int
     return hardware_interface::CallbackReturn::ERROR;
   }
 
+  hw_positions_.resize(6, 0.0);
+  hw_velocities_.resize(6, 0.0);
+  hw_commands_.resize(6, 0.0);
+
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 
 
 hardware_interface::CallbackReturn DrivelineHardware::on_configure(const rclcpp_lifecycle::State & /*previous_state*/)
 {
-  node_ = std::make_shared<rclcpp::Node>("driveline_hw_node");
-
   manager_ = std::make_unique<DriveTrainMotorManager>();
 
-  RCLCPP_INFO(node_->get_logger(), "DrivelineHardware on_configure completed");
+  RCLCPP_INFO(dl_logger, "DrivelineHardware on_configure completed");
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 

@@ -1,4 +1,4 @@
-#include "driveline_urc/DriveTrainMotorManager.h"
+#include "DriveTrainMotorManager.h"
 #include "main.h"
 
 DriveTrainMotorManager::DriveTrainMotorManager()
@@ -27,7 +27,7 @@ void DriveTrainMotorManager::setupMotors()
     motors.emplace_back(SparkMax(1, 5)); // RM
     motors.emplace_back(SparkMax(1, 6)); // RF
 
-    RCLCPP_INFO(node->get_logger(), "Testing Motors");
+    RCLCPP_INFO(dl_logger, "Testing Motors");
     for (auto &motor : motors) {
         motor.ident();
     }
@@ -68,7 +68,7 @@ void DriveTrainMotorManager::tick()
         auto lock = lastManualCommandTime.lock();
         auto now = std::chrono::system_clock::now();
         if (now - *lock > manualCommandTimeout) {
-            RCLCPP_WARN(node->get_logger(), "LOS Safety Stop");
+            RCLCPP_WARN(dl_logger, "LOS Safety Stop");
             stopAllMotors();
         }
     }
