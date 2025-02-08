@@ -41,7 +41,7 @@ public:
     size_t getMotorCount();
     std::vector<hardware_interface::StateInterface> getStateInterfaces(std::vector<hardware_interface::ComponentInfo>& joints);
     std::vector<hardware_interface::CommandInterface> getCommandInterface(std::vector<hardware_interface::ComponentInfo>& joints);
-    void setCommands(const std::vector<double>& commands);
+    void setCommands(const cross_pkg_messages::msg::RoverComputerDriveCMD::SharedPtr msg);
     void resetLOSTimeout();
     void stopAllMotors();
 };

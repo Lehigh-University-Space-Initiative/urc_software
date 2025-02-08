@@ -122,7 +122,7 @@ void DriveTrainMotorManager::tick()
 }
 
 
-void DriveTrainMotorManager::setCommands(const std::vector<double> & commands)
+void DriveTrainMotorManager::setCommands(const cross_pkg_messages::msg::RoverComputerDriveCMD::SharedPtr msg)
 {
     RCLCPP_INFO(dl_logger, "DriveTrainMotorManager: Drive Commands Received with L: %f, R: %f", msg->cmd_l.x, msg->cmd_r.x);
 
@@ -147,23 +147,18 @@ void DriveTrainMotorManager::setCommands(const std::vector<double> & commands)
     motors[3].sendPowerCMD(msg->cmd_r.x / 20);
     motors[4].sendPowerCMD(msg->cmd_r.y / 20);
     motors[5].sendPowerCMD(msg->cmd_r.z / 20);
-  if (commands.size() != motors.size()) {
-    RCLCPP_ERROR(rclcpp::get_logger("DriveTrainMotorManager"),
-                 "Invalid number of commands: expected %zu, got %zu",
-                 motors.size(), commands.size());
-    return;
-  }
 
 
-  resetLOSTimeout();
+    resetLOSTimeout();
 
 
-  motors[0].sendPowerCMD(-commands[0] / 20.0);
-  motors[1].sendPowerCMD(-commands[1] / 20.0);
-  motors[2].sendPowerCMD(-commands[2] / 20.0);
-  motors[3].sendPowerCMD( commands[3] / 20.0);
-  motors[4].sendPowerCMD( commands[4] / 20.0);
-  motors[5].sendPowerCMD( commands[5] / 20.0);
+    motors[0].sendPowerCMD(-msg->cmd_l.x / 20);
+    motors[1].sendPowerCMD(-msg->cmd_l.y / 20);
+    motors[2].sendPowerCMD(-msg->cmd_l.z / 20);
+
+    motors[3].sendPowerCMD(msg->cmd_r.x / 20);
+    motors[4].sendPowerCMD(msg->cmd_r.y / 20);
+    motors[5].sendPowerCMD(msg->cmd_r.z / 20);
 }
 
 
