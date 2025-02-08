@@ -1,6 +1,6 @@
 #pragma once
 
-#include "driveline_urc/CANDriver.h"
+#include "CANDriver.h"
 #include "rclcpp/rclcpp.hpp"
 #include <chrono>
 #include <thread>
@@ -10,29 +10,25 @@
 #include <hardware_interface/system_interface.hpp>
 
 
-class DriveTrainMotorManager {
+class MotorManager {
 private:
-    std::vector<SparkMax> motors;
+    std::vector<SparkMax> motors_;
+    size_t motor_count_;
 
     std::vector<double> hw_positions_;
     std::vector<double> hw_velocities_;
     std::vector<double> hw_commands_;
 
-    void setupMotors();
+    virtual void setupMotors() = 0;
     
     libguarded::plain_guarded<std::chrono::time_point<std::chrono::system_clock>> lastManualCommandTime{std::chrono::system_clock::now()};
     std::chrono::milliseconds manualCommandTimeout{1500};
 
-
-    //rclcpp::Subscription<cross_pkg_messages::msg::RoverComputerDriveCMD>::SharedPtr driveCommandsSub;
-
-    // rclcpp::Publisher<cross_pkg_messages::msg::RoverComputerDriveCMD>::SharedPtr wheelVelPub;
-
     void parseDriveCommands(const cross_pkg_messages::msg::RoverComputerDriveCMD::SharedPtr msg);
 
 public:
-    DriveTrainMotorManager();
-    virtual ~DriveTrainMotorManager();
+    MotorManager();
+    virtual ~MotorManager();
     void sendHeartbeats();
     void tick();
     void readMotors(const rclcpp::Duration period);

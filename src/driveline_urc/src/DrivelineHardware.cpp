@@ -5,8 +5,7 @@
 #include "driveline_urc/Logger.h"
 
 rclcpp::Logger dl_logger = rclcpp::get_logger("driveline logger");
-#include "driveline_urc/CANDriver.h"
-#include "driveline_urc/DriveTrainMotorManager.h"
+#include "driveline_urc/DrivelineMotorManager.h"
 
 namespace driveline_urc
 {
@@ -34,7 +33,7 @@ hardware_interface::CallbackReturn
   // rclcpp::Logger dl_logger = rclcpp::get_logger("driveline logger");
 
   // Construct the manager
-  manager_ = std::make_unique<DriveTrainMotorManager>();
+  manager_ = std::make_unique<DrivelineMotorManager>();
 
   RCLCPP_INFO(dl_logger, "DrivelineHardware on_configure done");
   return hardware_interface::CallbackReturn::SUCCESS;

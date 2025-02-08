@@ -14,6 +14,7 @@ find_package(sensor_msgs REQUIRED)
 # Include directories (Added path for cs_libguarded)
 include_directories(
   include
+  ../shared_code
   ${CMAKE_CURRENT_SOURCE_DIR}/include/cs_libguarded  # Include path for cs_plain_guarded.h
   ${CMAKE_CURRENT_SOURCE_DIR}/../../libs/pigpio      # pigpio path
   ${rclcpp_INCLUDE_DIRS}
@@ -26,8 +27,7 @@ add_custom_target(pigpio_build ALL
 
 set(DRIVELINE_URC_SRC
   src/pid.cpp
-  src/CANDriver.cpp
-  src/DriveTrainMotorManager.cpp
+  src/DrivelineMotorManager.cpp
 )
 
 set(DRIVELINE_URC_HW_SRC
