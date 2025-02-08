@@ -10,6 +10,8 @@ find_package(sensor_msgs REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(image_transport REQUIRED)
 find_package(OpenCV REQUIRED)
+find_package(pluginlib REQUIRED)
+find_package(controller_interface REQUIRED)
 
 # Include directories
 include_directories(
@@ -17,9 +19,26 @@ include_directories(
   ${rclcpp_INCLUDE_DIRS}
 )
 
+set(DRIVE_TRAIN_MANAGER_SRC
+  src/DriveTrainManager/main.cpp
+)
+
 # Declare the DriveTrainManager executable
-add_executable(DriveTrainManager_node src/DriveTrainManager/main.cpp)
-ament_target_dependencies(DriveTrainManager_node rclcpp cross_pkg_messages std_msgs)
+#add_executable(DriveTrainManager_node src/DriveTrainManager/main.cpp)
+#ment_target_dependencies(DriveTrainManager_node rclcpp cross_pkg_messages std_msgs)
+
+add_library(DriveTrainManager_node SHARED ${DRIVE_TRAIN_MANAGER_SRC})
+set_target_properties(DriveTrainManager_node PROPERTIES OUTPUT_NAME "DriveTrainManager_node")
+ament_target_dependencies(DriveTrainManager_node
+  rclcpp
+  pluginlib
+  controller_interface
+  cross_pkg_messages
+)
+target_link_libraries(DriveTrainManager_node)
+
+
+pluginlib_export_plugin_description_file(controller_interface plugin.xml)
 
 # Declare the StatusLED executable
 add_executable(StatusLED_node src/StatusLED/StatusLED.cpp)

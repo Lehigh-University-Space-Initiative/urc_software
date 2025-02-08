@@ -1,0 +1,10 @@
+<library path="DriveTrainManager">
+  <class name="main_computer_urc/DriveTrainManager"
+         type="main_computer_urc::DriveTrainManager"
+         base_class_type="controller_interface::ControllerInterface">
+
+    <description>
+     Drive train controller
+    </description>
+  </class>
+</library>

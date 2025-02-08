@@ -17,6 +17,7 @@ def generate_launch_description():
             package='controller_manager',
             executable='ros2_control_node',
             output='screen',
-            parameters=[{'robot_description': Command(['xacro ', urdf_file])}],
+            parameters=[{'robot_description': Command(['xacro ', urdf_file])},
+                        os.path.join(get_package_share_directory('driveline_urc'), 'config', 'driveline_urc.yaml')],
         ),
     ])

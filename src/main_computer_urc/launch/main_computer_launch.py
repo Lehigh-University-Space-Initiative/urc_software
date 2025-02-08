@@ -4,7 +4,8 @@ from launch_ros.actions import Node
 def generate_launch_description():
     return LaunchDescription([
         Node(
-            package='main_computer_urc',
+            package='controller_manager',
+            # executable='ros2_control_node',
             executable='DriveTrainManager_node',
             name='DriveTrainManager',
             output='screen'
