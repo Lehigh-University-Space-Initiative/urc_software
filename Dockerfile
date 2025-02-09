@@ -58,7 +58,7 @@ WORKDIR /ros2_ws
 COPY ./libs /ros2_ws/libs
 
 # Build pigpio from the submodule
-RUN cd /ros2_ws/libs/pigpio && make && make install && echo "Hello 1"
+RUN cd /ros2_ws/libs/pigpio && make && make install
 
 
 # https://medium.com/codex/a-practical-guide-to-containerize-your-c-application-with-docker-50abb197f6d4
@@ -71,7 +71,7 @@ COPY ./install /ros2_ws/install
 COPY ./libs /ros2_ws/libs
 COPY ./run_nodes.sh /ros2_ws/run_nodes.sh
 
-RUN cd /ros2_ws/libs/pigpio && make && make install && echo "hello"
+RUN cd /ros2_ws/libs/pigpio && make && make install
 
 # Default command
 ENTRYPOINT ["/ros2_ws/run_nodes.sh"]
