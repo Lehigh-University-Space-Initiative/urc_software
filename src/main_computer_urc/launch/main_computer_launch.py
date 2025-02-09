@@ -1,13 +1,34 @@
 from launch import LaunchDescription
 from launch_ros.actions import Node
+from launch.substitutions import Command, PathJoinSubstitution, FindExecutable
+from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
+    urdf_file = PathJoinSubstitution(
+        [FindPackageShare("main_computer_urc"), "description", "urdf", "robot.urdf.xacro"]
+    )
+    ros2_control_config = PathJoinSubstitution(
+        [FindPackageShare("main_computer_urc"), "description", "config", "ros2_control.yaml"]
+    )
+
+    robot_description_content = Command([
+        'xacro ',
+        urdf_file
+    ])
+    robot_description = {"robot_description": robot_description_content}
+
     return LaunchDescription([
         Node(
-            package='main_computer_urc',
-            executable='DriveTrainManager_node',
-            name='DriveTrainManager',
-            output='screen'
+            package="controller_manager",
+            executable="ros2_control_node",
+            parameters=[ros2_control_config],
+            output="screen",
+        ),
+        Node(
+            package="robot_state_publisher",
+            executable="robot_state_publisher",
+            output="screen",
+            parameters=[robot_description],
         ),
         Node(
             package='main_computer_urc',
