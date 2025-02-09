@@ -57,6 +57,9 @@ ament_target_dependencies(arm_urc_hw
 )
 target_link_libraries(arm_urc_hw pigpio arm_urc)
 
+# Declare the arm_urc_pwm executable
+add_executable(arm_urc_pwm src/pwm_reader/main.cpp)
+ament_target_dependencies(arm_urc_pwm rclcpp cross_pkg_messages std_msgs)
 
 pluginlib_export_plugin_description_file(hardware_interface plugin.xml)
 
@@ -64,6 +67,7 @@ install(TARGETS
   arm_urc
   arm_urc_hw
   DESTINATION lib
+  arm_urc_pwm
 )
 
 install(FILES plugin.xml
