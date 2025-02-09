@@ -14,6 +14,7 @@ std::vector<int> gpiopins;
 
 std::vector<std::chrono::steady_clock::time_point> last_edges;
 void gpio_callback(int gpio, int level, uint32_t tick);
+void free_gpio();
 
 void setup_pins() {
     //GPIO pins for each PWM reader
@@ -74,6 +75,7 @@ int main(int argc, char** argv)
         loop_rate.sleep();
     }
 
+    free_gpio();
     rclcpp::shutdown();
     return 0;
 }
@@ -91,4 +93,9 @@ void gpio_callback(int gpio, int level, uint32_t tick) {
             break;
         }
     }
+}
+
+void free_gpio() {
+    for(int pin : gpiopins)
+        gpioSetAlertFunc(pin, 0);
 }

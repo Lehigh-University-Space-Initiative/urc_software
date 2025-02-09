@@ -14,9 +14,8 @@ def generate_launch_description():
 
     return LaunchDescription([
         Node(
-            package='controller_manager',
-            executable='ros2_control_node',
-            output='screen',
-            parameters=[{'robot_description': Command(['xacro ', urdf_file])}],
+            package='pwm_reader',
+            executable='arm_urc_pwm',
+            output='screen'
         ),
     ])
