@@ -32,6 +32,7 @@ public:
       "cmd_vel", 10, callback);
 
 
+    RCLCPP_INFO(get_node()->get_logger(), "DriveTrainController configured and subscribed to /cmd_vel");
     return controller_interface::CallbackReturn::SUCCESS;
   }
 
@@ -42,12 +43,12 @@ public:
     controller_interface::InterfaceConfiguration config;
     config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
     config.names = {
-      "lf_wheel_joint",
-      "lm_wheel_joint",
-      "lb_wheel_joint",
-      "rf_wheel_joint",
-      "rm_wheel_joint",
-      "rb_wheel_joint"
+      "lf_wheel_joint/velocity",
+      "lm_wheel_joint/velocity",
+      "lb_wheel_joint/velocity",
+      "rf_wheel_joint/velocity",
+      "rm_wheel_joint/velocity",
+      "rb_wheel_joint/velocity"
     };
     return config;
   }
@@ -64,7 +65,7 @@ public:
   // Process the incoming Twist message and update command interfaces.
   void processCommand(const geometry_msgs::msg::Twist::SharedPtr msg)
   {
-    // kinematic data (metric system)
+    // Kinematic data (metric system)
     const float roverWidth = 0.5;    // meters
     const float wheelRadius = 0.1143; // meters
 
@@ -78,16 +79,20 @@ public:
     float rightSideAlpha = rightSideVel / wheelRadius;
 
 
+    RCLCPP_INFO(get_node()->get_logger(), "Processing /cmd_vel: leftAlpha=%f, rightAlpha=%f", leftSideAlpha, rightSideAlpha);
+
     // Write the computed commands into the six command interfaces:
     if (command_interfaces_.size() >= 6) {
-      // First three joints are on the left side.
+      // First three interfaces (left side)
       command_interfaces_[0].set_value(leftSideAlpha);
       command_interfaces_[1].set_value(leftSideAlpha);
       command_interfaces_[2].set_value(leftSideAlpha);
-      // Last three joints are on the right side.
+      // Last three interfaces (right side)
       command_interfaces_[3].set_value(rightSideAlpha);
       command_interfaces_[4].set_value(rightSideAlpha);
       command_interfaces_[5].set_value(rightSideAlpha);
+    } else {
+      RCLCPP_ERROR(get_node()->get_logger(), "Command interfaces not properly initialized. Size: %zu", command_interfaces_.size());
     }
   }
 

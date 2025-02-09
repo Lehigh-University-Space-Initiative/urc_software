@@ -21,15 +21,6 @@ public:
     }
 
 
-    // Initialize wheel velocity variables for 6 joints.
-    lf_wheel_velocity_ = 0.0;
-    lm_wheel_velocity_ = 0.0;
-    lb_wheel_velocity_ = 0.0;
-    rf_wheel_velocity_ = 0.0;
-    rm_wheel_velocity_ = 0.0;
-    rb_wheel_velocity_ = 0.0;
-
-
     // Create a ROS node and publisher to publish drive commands.
     rclcpp::NodeOptions options;
     node_ = rclcpp::Node::make_shared("drive_train_hardware", options);
@@ -37,6 +28,7 @@ public:
       "roverDriveCommands", 10);
 
 
+    RCLCPP_INFO(node_->get_logger(), "DriveTrainHardware initialized. Publisher created for /roverDriveCommands");
     return hardware_interface::CallbackReturn::SUCCESS;
   }
 
@@ -73,6 +65,7 @@ public:
   hardware_interface::CallbackReturn on_activate(
     const rclcpp_lifecycle::State & /*previous_state*/) override
   {
+    RCLCPP_INFO(node_->get_logger(), "DriveTrainHardware activated");
     return hardware_interface::CallbackReturn::SUCCESS;
   }
 
@@ -97,7 +90,7 @@ public:
   hardware_interface::return_type write(
     const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/) override
   {
-   
+    // Prepare the drive command using the left-side (lf_wheel) and right-side (rf_wheel) velocities.
     cross_pkg_messages::msg::RoverComputerDriveCMD driveCommand;
     driveCommand.cmd_l.x = lf_wheel_velocity_;
     driveCommand.cmd_l.y = lf_wheel_velocity_;
@@ -108,6 +101,9 @@ public:
     driveCommand.cmd_r.y = rf_wheel_velocity_;
     driveCommand.cmd_r.z = rf_wheel_velocity_;
 
+
+    RCLCPP_INFO(node_->get_logger(), "Publishing /roverDriveCommands: left=%f, right=%f", 
+                lf_wheel_velocity_, rf_wheel_velocity_);
 
     command_publisher_->publish(driveCommand);
     return hardware_interface::return_type::OK;

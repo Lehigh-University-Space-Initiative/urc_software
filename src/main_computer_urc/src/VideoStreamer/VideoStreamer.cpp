@@ -65,7 +65,7 @@ private:
 
         if (!frame.empty()) {
             auto msg = cv_bridge::CvImage(std_msgs::msg::Header(), "bgr8", frame).toImageMsg();
-            RCLCPP_WARN(this->get_logger(), "Print testing frame");
+            // RCLCPP_WARN(this->get_logger(), "Print testing frame");
             image_pub_.publish(*msg);
         } else {
             RCLCPP_WARN(this->get_logger(), "No frame data");

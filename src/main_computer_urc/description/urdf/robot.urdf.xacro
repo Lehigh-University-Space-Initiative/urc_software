@@ -74,42 +74,36 @@
     <joint name="lf_wheel_joint">
       <command_interface name="velocity"/>
       <state_interface name="velocity"/>
-      <state_interface name="position"/>
     </joint>
 
 
     <joint name="lm_wheel_joint">
       <command_interface name="velocity"/>
       <state_interface name="velocity"/>
-      <state_interface name="position"/>
     </joint>
 
 
     <joint name="lb_wheel_joint">
       <command_interface name="velocity"/>
       <state_interface name="velocity"/>
-      <state_interface name="position"/>
     </joint>
 
 
     <joint name="rf_wheel_joint">
       <command_interface name="velocity"/>
       <state_interface name="velocity"/>
-      <state_interface name="position"/>
     </joint>
 
 
     <joint name="rm_wheel_joint">
       <command_interface name="velocity"/>
       <state_interface name="velocity"/>
-      <state_interface name="position"/>
     </joint>
 
 
     <joint name="rb_wheel_joint">
       <command_interface name="velocity"/>
       <state_interface name="velocity"/>
-      <state_interface name="position"/>
     </joint>
 
 
