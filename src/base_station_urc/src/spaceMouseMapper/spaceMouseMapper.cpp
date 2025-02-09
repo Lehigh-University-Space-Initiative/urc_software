@@ -1,6 +1,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <geometry_msgs/msg/twist.hpp>
 #include <sensor_msgs/msg/joy.hpp>
+#include "cross_pkg_messages/msg/arm_input_raw.hpp"
 #include <linux/input.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -12,7 +13,7 @@ class SpaceMouseMapper : public rclcpp::Node
 public:
   SpaceMouseMapper() : Node("SpaceMouseMapper")
   {
-    drive_pub_ = this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", 10);
+    drive_pub_ = this->create_publisher<cross_pkg_messages::msg::ArmInputRaw>("/armInputRaw", 10);
 
     loadJoystick();
   }
@@ -54,6 +55,7 @@ private:
         if (ID.vendor == 0x256f)
         {
           printf("Using device: %s\n", fname);
+          RCLCPP_INFO(get_logger(), "Found a Space Mouse: %s",fname);
           break;
         }
       }
@@ -64,9 +66,46 @@ private:
     }
   }
 
-  void processEventInput(int axes[6]) {
+  float fixAxis(int axis) {
+    const float axisBounds = 350;
+    const float deadband = 50.0 / 350;
 
+    float val = static_cast<float>(axis) / axisBounds;
+    bool neg = val < 0;
+    if (abs(val) < deadband) {
+      val = 0;
+    } else {
+      val = (abs(val) - deadband) / (1 - deadband);
+    }
+    val = val * val;
+    if (neg) {
+      val = -val;
+    }
+    return val;
   }
+
+  float lerp(float a, float b, float t) {
+    return a + (b - a) * t;
+  }
+
+  void processEventInput(const std::vector<int>& axes) {
+
+    cross_pkg_messages::msg::ArmInputRaw msg;
+
+    //numbers are in wrong orders to map axes to our linear xyz, angular xyz system
+    msg.linear_input.x = fixAxis(-axes[1]);
+    msg.linear_input.y = fixAxis(-axes[0]);
+    msg.linear_input.z = fixAxis(-axes[2]);
+
+    msg.angular_input.x = fixAxis(-axes[4]);
+    msg.angular_input.y = fixAxis(-axes[3]);
+    msg.angular_input.z = fixAxis(-axes[5]);
+
+    drive_pub_->publish(msg);
+    // RCLCPP_INFO(get_logger(), "Sending with L1: %d, %.2f",axes[0],msg.linear_input.x);
+  }
+
+  std::vector<int> axes = {0, 0, 0, 0, 0, 0};
 
   void readEvents()
   {
@@ -74,7 +113,6 @@ private:
     if (joyFd == 0)
       return;
 
-    int axes[6] = {0, 0, 0, 0, 0, 0};
 
     struct input_event ev;
 
@@ -126,7 +164,7 @@ private:
     // drive_pub_->publish(cmd);
   }
 
-  rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr drive_pub_;
+  rclcpp::Publisher<cross_pkg_messages::msg::ArmInputRaw>::SharedPtr drive_pub_;
 
   // 100% forward thottle should be this speed m/s
   const double linearSensativity = 0.5;
@@ -145,7 +183,6 @@ int main(int argc, char** argv)
     joy_mapper->tick();
     rclcpp::spin_some(joy_mapper);
 
-    loop_rate.sleep();
   }
   rclcpp::shutdown();
   return 0;
