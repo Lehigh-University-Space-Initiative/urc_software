@@ -11,8 +11,13 @@
 class VideoStreamer : public rclcpp::Node {
 public:
     VideoStreamer() : Node("video_streamer") {
+<<<<<<< HEAD
         declare_parameter<bool>("lusi_vision_mode", true);
         declare_parameter<int>("stream_cam", 0);
+=======
+        declare_parameter<bool>("lusi_vision_mode", false);
+        declare_parameter<int>("stream_cam", 1);
+>>>>>>> origin/URC-338-ros2_control-for-jetson
 
         image_pub_ = image_transport::create_publisher(this, "/video_stream");
         image_pub_3d_ = image_transport::create_publisher(this, "/video_stream_3d");
@@ -43,7 +48,12 @@ private:
                 return;
             }
 
+<<<<<<< HEAD
             int actual_cam = cam_map_[current_streaming_cam_];
+=======
+            int actual_cam = 0; //cam_map_[current_streaming_cam_];
+            RCLCPP_WARN(this->get_logger(), "Print testing");
+>>>>>>> origin/URC-338-ros2_control-for-jetson
             cap_.open(actual_cam, cv::CAP_V4L2);
 
             if (!cap_.isOpened()) {
@@ -64,6 +74,10 @@ private:
 
         if (!frame.empty()) {
             auto msg = cv_bridge::CvImage(std_msgs::msg::Header(), "bgr8", frame).toImageMsg();
+<<<<<<< HEAD
+=======
+            // RCLCPP_WARN(this->get_logger(), "Print testing frame");
+>>>>>>> origin/URC-338-ros2_control-for-jetson
             image_pub_.publish(*msg);
         } else {
             RCLCPP_WARN(this->get_logger(), "No frame data");

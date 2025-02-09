@@ -44,7 +44,7 @@ void VideoViewPanel::setupSubscriber() {
     };
 
     RCLCPP_INFO(node_->get_logger(), "Setting up video subscriber");
-    sub = node_->create_subscription<sensor_msgs::msg::Image>("/videoStream/image_raw", 10, callback);
+    sub = node_->create_subscription<sensor_msgs::msg::Image>("/video_stream/image_raw", 10, callback);
 }
 
 void VideoViewPanel::setNewIMG() {

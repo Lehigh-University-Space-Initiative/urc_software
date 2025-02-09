@@ -1,0 +1,27 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 10
+
+    drive_train_controller:
+      type: drive_train_controller/DriveTrainController
+
+drive_train_controller:
+  ros__parameters:
+    joints:
+      - lf_wheel_joint
+      - lm_wheel_joint
+      - lb_wheel_joint
+      - rf_wheel_joint
+      - rm_wheel_joint
+      - rb_wheel_joint
+
+drive_train_hardware:
+  ros__parameters:
+    joints:
+      - lf_wheel_joint
+      - lm_wheel_joint
+      - lb_wheel_joint
+      - rf_wheel_joint
+      - rm_wheel_joint
+      - rb_wheel_joint
+

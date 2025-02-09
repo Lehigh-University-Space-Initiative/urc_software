@@ -42,4 +42,17 @@ def generate_launch_description():
             output='screen',
             # parameters=[{'/hootl': False}] 
         ),
+        Node(
+            package='image_transport',
+            executable='republish',
+            name='republish',
+            output='screen',
+            arguments=[
+                'compressed',  # Input transport type
+                '--ros-args',
+                '--remap', 'in/compressed:=/video_stream/compressed',
+                '--remap', 'out:=/video_stream/image_raw',
+            ],
+        ),
+        # ros2 run image_transport republish compressed --ros-args --remap in/compressed:=camera/image_raw/compressed --remap out:=image
     ])

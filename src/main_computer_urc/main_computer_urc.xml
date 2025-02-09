@@ -1,0 +1,17 @@
+<library path="drive_train_controller">
+    <class name="drive_train_controller/DriveTrainController"
+           type="drive_train_controller::DriveTrainController"
+           base_class_type="controller_interface::ControllerInterface">
+        <description>DriveTrain Controller subscribing to cmd_vel and sending wheel velocities</description>
+    </class>
+</library>
+
+<library path="drive_train_hardware">
+    <class name="drive_train_hardware/DriveTrainHardware"
+           type="drive_train_hardware::DriveTrainHardware"
+           base_class_type="hardware_interface::SystemInterface">
+        <description>Fake hardware interface publishing wheel velocities instead of real hardware control</description>
+    </class>
+</library>
+
+
