@@ -72,6 +72,10 @@ ament_target_dependencies(GroundStationGUI
   cross_pkg_messages
 )
 
+# Declare the DriveTrainManager executable
+add_executable(SpaceMouseMapper_node src/spaceMouseMapper/spaceMouseMapper.cpp)
+ament_target_dependencies(SpaceMouseMapper_node rclcpp cross_pkg_messages std_msgs)
+
 # Install and export
 install(DIRECTORY
   launch
@@ -82,6 +86,7 @@ install(TARGETS
   JoyMapper_node
   # TelemetryPanel_node
   GroundStationGUI
+  SpaceMouseMapper_node
   DESTINATION lib/${PROJECT_NAME}
 )
 
