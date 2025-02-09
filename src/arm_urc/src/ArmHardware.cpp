@@ -2,7 +2,7 @@
 #include <pluginlib/class_list_macros.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <algorithm>
-#include "arm_urc/Logger.h"
+#include "arm_urc/main.h"
 
 rclcpp::Logger arm_logger = rclcpp::get_logger("arm logger");
 #include "arm_urc/ArmMotorManager.h"
@@ -18,11 +18,11 @@ hardware_interface::CallbackReturn ArmHardware::on_init(const hardware_interface
   }
 
   if (info_.joints.size() != 6) {
-    RCLCPP_ERROR(dl_logger, "Arm: Expected 6 joints in URDF, found %zu", info_.joints.size());
+    RCLCPP_ERROR(node->get_logger(), "Arm: Expected 6 joints in URDF, found %zu", info_.joints.size());
     return hardware_interface::CallbackReturn::ERROR;
   }
 
-  RCLCPP_INFO(dl_logger, "Arm on_init: command clamp [%.2f, %.2f]", -MAX_DRIVE_POWER, MAX_DRIVE_POWER);
+  RCLCPP_INFO(node->get_logger(), "Arm on_init: command clamp [%.2f, %.2f]", -MAX_DRIVE_POWER, MAX_DRIVE_POWER);
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 
@@ -35,7 +35,7 @@ hardware_interface::CallbackReturn
   // Construct the manager
   manager_ = std::make_unique<ArmMotorManager>();
 
-  RCLCPP_INFO(dl_logger, "ArmHardware on_configure done");
+  RCLCPP_INFO(node->get_logger(), "ArmHardware on_configure done");
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 

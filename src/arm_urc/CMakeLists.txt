@@ -20,6 +20,11 @@ include_directories(
   ${rclcpp_INCLUDE_DIRS}
 )
 
+# Declare the ArmMotorManager executable
+add_executable(arm_node src/main.cpp src/ArmMotorManager.cpp src/MotorManager.cpp ../shared_code/pid.cpp src/CANDriver.cpp )
+target_link_libraries(arm_node pigpio)
+ament_target_dependencies(arm_node rclcpp cross_pkg_messages std_msgs)
+
 # Add custom target to build pigpio
 add_custom_target(pigpio_build ALL
   COMMAND make -C ${CMAKE_CURRENT_SOURCE_DIR}/../../libs/pigpio
@@ -47,33 +52,33 @@ ament_target_dependencies(${PROJECT_NAME}
 )
 target_link_libraries(${PROJECT_NAME} pigpio)
 
-add_library(arm_urc_hw SHARED ${ARM_URC_HW_SRC})
-set_target_properties(arm_urc_hw PROPERTIES OUTPUT_NAME "arm_urc_hw")
-ament_target_dependencies(arm_urc_hw
-  rclcpp
-  hardware_interface
-  pluginlib
-  cross_pkg_messages
-)
-target_link_libraries(arm_urc_hw pigpio arm_urc)
+#add_library(arm_urc_hw SHARED ${ARM_URC_HW_SRC})
+#set_target_properties(arm_urc_hw PROPERTIES OUTPUT_NAME "arm_urc_hw")
+#ament_target_dependencies(arm_urc_hw
+#  rclcpp
+#  hardware_interface
+#  pluginlib
+#  cross_pkg_messages
+#)
+#target_link_libraries(arm_urc_hw pigpio arm_urc)
 
 
-pluginlib_export_plugin_description_file(hardware_interface plugin.xml)
+#pluginlib_export_plugin_description_file(hardware_interface plugin.xml)
 
 install(TARGETS
   arm_urc
-  arm_urc_hw
+#  arm_urc_hw
   DESTINATION lib
 )
 
-install(FILES plugin.xml
-  DESTINATION share/${PROJECT_NAME}
-)
+#install(FILES plugin.xml
+#  DESTINATION share/${PROJECT_NAME}
+#)
 
-install(DIRECTORY
-  urdf
-  launch
-  DESTINATION share/${PROJECT_NAME}
-)
+#install(DIRECTORY
+#  urdf
+#  launch
+#  DESTINATION share/${PROJECT_NAME}
+#)
 
 ament_package()
