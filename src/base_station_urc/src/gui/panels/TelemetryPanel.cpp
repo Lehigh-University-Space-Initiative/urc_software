@@ -155,20 +155,31 @@ void TelemetryPanel::drawBody() {
                 ImGui::SetCursorScreenPos(sliderStart);
                 auto sliderSide = side ? lastArmCMD.angular_input : lastArmCMD.linear_input;
                 float sliderVal = 0;
+                std::string label = "";
+
+                if (side) {
+                    label += "Rotate ";
+                } else {
+                    label += "Move ";
+                }
 
                 if (wheel == 0)
                 {
                     sliderVal = sliderSide.x;
+                    label += "X";
                 }
                 else if (wheel == 1)
                 {
                     sliderVal = sliderSide.y;
+                    label += "Y";
                 }
                 else
                 {
                     sliderVal = sliderSide.z;
+                    label += "Z";
                 }
-
+                // ImGui::Text(label.c_str());
+                // ImGui::SameLine():
                 signedProgressBar(sliderVal, " ", sliderSize);
             }
         }
