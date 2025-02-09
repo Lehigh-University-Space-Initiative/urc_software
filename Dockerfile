@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-humble-geometry-msgs \
     ros-humble-sensor-msgs \
     ros-humble-image-transport \
+    # ros-humble-image-transport-plugins \
     ros-humble-cv-bridge \
     ros-humble-joy \
     libglfw3-dev \
@@ -18,11 +19,35 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     iproute2 net-tools \
     x11-apps \
     iputils-ping \
+    # for opencv
+     wget g++ unzip \ 
     && rm -rf /var/lib/apt/lists/*
+
+# install opencv
+
+RUN mkdir -p /home/opencv
+RUN cd /home/opencv
+
+RUN wget -O opencv.zip https://github.com/opencv/opencv/archive/4.x.zip
+RUN unzip opencv.zip
+
+RUN mkdir -p build && cd build
+ 
+# Configure
+RUN cmake  ../opencv-4.x
+ 
+# Build
+RUN cmake --build .
 
 # Copy the urcAssets directory to the home directory in the container
 RUN mkdir -p /home/urcAssets
 COPY urcAssets /home/urcAssets
+
+FROM ros:humble-ros-base-jammy AS plugin_installer
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ros-humble-image-transport-plugins \
+    && rm -rf /var/lib/apt/lists/*
 
 FROM urc_software_base AS urc_software_builder
 
@@ -41,6 +66,7 @@ FROM urc_software_base AS urc_software
 
 # copy built binaries
 WORKDIR /ros2_ws
+COPY --from=plugin_installer /opt/ros/humble /opt/ros/humble
 COPY ./install /ros2_ws/install
 COPY ./libs /ros2_ws/libs
 COPY ./run_nodes.sh /ros2_ws/run_nodes.sh
