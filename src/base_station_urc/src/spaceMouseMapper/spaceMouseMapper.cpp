@@ -142,28 +142,6 @@ private:
     // printf("%d %d %d %d %d %d\n", axes[0], axes[1], axes[2], axes[3], axes[4], axes[5]);
   }
 
-  void sendCommand()
-  {
-    // if (last_joy0_msg_.axes.empty() || last_joy1_msg_.axes.empty())
-    //   return;
-
-    // // Rover Centric Coordinate System: +X is rover front, +Y is rover top, Right Handed
-    // geometry_msgs::msg::Twist cmd;
-
-    // auto joy_left = last_joy0_msg_.axes[1];
-    // auto joy_right = last_joy1_msg_.axes[1];
-
-    // auto flip_joystics = this->get_parameter("swap_joysticks");
-    // if (flip_joystics.as_bool()) {
-    //   std::swap(joy_left,joy_right);
-    // }
-    
-    // cmd.linear.x = (joy_left + joy_right) / 2 * linearSensativity;
-    // cmd.angular.y = (joy_right - joy_left) / 2 * angularSensativity;
-
-    // drive_pub_->publish(cmd);
-  }
-
   rclcpp::Publisher<cross_pkg_messages::msg::ArmInputRaw>::SharedPtr drive_pub_;
 
   // 100% forward thottle should be this speed m/s
