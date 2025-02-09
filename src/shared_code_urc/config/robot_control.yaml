@@ -1,0 +1,10 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 10  # Hz
+
+    driveline_controller:
+      type: "main_computer_urc/DriveTrainManager"
+
+driveline_hardware:
+  ros__parameters:
+    type: "driveline_urc/DrivelineHardware"

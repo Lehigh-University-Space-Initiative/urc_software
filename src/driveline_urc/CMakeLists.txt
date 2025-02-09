@@ -60,10 +60,22 @@ target_link_libraries(driveline_urc_hw pigpio driveline_urc)
 
 pluginlib_export_plugin_description_file(hardware_interface plugin.xml)
 
+file(GLOB Driveline_src
+     "src/*.cpp"
+)
+add_executable(Driveline_node ${Driveline_src})
+ament_target_dependencies(Driveline_node 
+  rclcpp
+  hardware_interface
+  pluginlib
+  cross_pkg_messages
+)
+target_link_libraries(Driveline_node driveline_urc_hw)
+
 install(TARGETS
-  driveline_urc
   driveline_urc_hw
-  DESTINATION lib
+  Driveline_node
+  DESTINATION lib/${PROJECT_NAME}
 )
 
 install(FILES plugin.xml
@@ -71,7 +83,6 @@ install(FILES plugin.xml
 )
 
 install(DIRECTORY
-  urdf
   launch
   DESTINATION share/${PROJECT_NAME}
 )

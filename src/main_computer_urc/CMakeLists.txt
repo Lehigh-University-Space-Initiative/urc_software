@@ -11,7 +11,7 @@ find_package(cv_bridge REQUIRED)
 find_package(image_transport REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(pluginlib REQUIRED)
-find_package(controller_interface REQUIRED)
+find_package(controller_manager REQUIRED)
 
 # Include directories
 include_directories(
