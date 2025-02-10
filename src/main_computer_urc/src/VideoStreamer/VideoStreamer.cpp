@@ -43,12 +43,7 @@ private:
                 return;
             }
 
-<<<<<<< HEAD
             int actual_cam = cam_map_[current_streaming_cam_];
-=======
-            int actual_cam = 0; //cam_map_[current_streaming_cam_];
-            RCLCPP_WARN(this->get_logger(), "Print testing");
->>>>>>> origin/URC-338-ros2_control-for-jetson
             cap_.open(actual_cam, cv::CAP_V4L2);
 
             if (!cap_.isOpened()) {
@@ -69,10 +64,7 @@ private:
 
         if (!frame.empty()) {
             auto msg = cv_bridge::CvImage(std_msgs::msg::Header(), "bgr8", frame).toImageMsg();
-<<<<<<< HEAD
-=======
             // RCLCPP_WARN(this->get_logger(), "Print testing frame");
->>>>>>> origin/URC-338-ros2_control-for-jetson
             image_pub_.publish(*msg);
         } else {
             RCLCPP_WARN(this->get_logger(), "No frame data");
