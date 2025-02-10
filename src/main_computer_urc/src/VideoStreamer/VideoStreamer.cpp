@@ -11,13 +11,8 @@
 class VideoStreamer : public rclcpp::Node {
 public:
     VideoStreamer() : Node("video_streamer") {
-<<<<<<< HEAD
-        declare_parameter<bool>("lusi_vision_mode", true);
-        declare_parameter<int>("stream_cam", 0);
-=======
         declare_parameter<bool>("lusi_vision_mode", false);
         declare_parameter<int>("stream_cam", 1);
->>>>>>> origin/URC-338-ros2_control-for-jetson
 
         image_pub_ = image_transport::create_publisher(this, "/video_stream");
         image_pub_3d_ = image_transport::create_publisher(this, "/video_stream_3d");
