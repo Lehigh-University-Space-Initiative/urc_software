@@ -8,6 +8,55 @@
 #include <opencv2/videoio/videoio_c.h>
 #include <chrono>
 
+#include <opencv2/aruco.hpp>
+
+
+// Create a dictionary and parameters for marker detection
+cv::Ptr<cv::aruco::Dictionary> dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_4X4_50);
+cv::Ptr<cv::aruco::DetectorParameters> parameters = cv::aruco::DetectorParameters::create();
+
+
+void performArucoDetection(cv::Mat& frame) {
+    // Perform marker detection
+    std::vector<int> markerIds;
+    std::vector<std::vector<cv::Point2f>> markerCorners, rejectedCandidates;
+    cv::aruco::detectMarkers(frame, dictionary, markerCorners, markerIds, parameters, rejectedCandidates);
+
+    // Draw detected markers
+    if (!markerIds.empty())
+    {
+        cv::aruco::drawDetectedMarkers(frame, markerCorners, markerIds);
+
+        // Additional processing (like determining the center or drawing more details)
+        for (size_t i = 0; i < markerCorners.size(); ++i)
+        {
+            // Marker corners are automatically provided as a vector of points
+            const auto &corners = markerCorners[i];
+            if (corners.size() == 4)
+            {
+                cv::Point topLeft = corners[0];
+                cv::Point topRight = corners[1];
+                cv::Point bottomRight = corners[2];
+                cv::Point bottomLeft = corners[3];
+
+                // Draw lines (optional, since drawDetectedMarkers already does this)
+                cv::line(frame, topLeft, topRight, cv::Scalar(0, 255, 0), 2);
+                cv::line(frame, topRight, bottomRight, cv::Scalar(0, 255, 0), 2);
+                cv::line(frame, bottomRight, bottomLeft, cv::Scalar(0, 255, 0), 2);
+                cv::line(frame, bottomLeft, topLeft, cv::Scalar(0, 255, 0), 2);
+
+                // Find and draw the center of the marker
+                cv::Point center((topLeft.x + bottomRight.x) / 2, (topLeft.y + bottomRight.y) / 2);
+                cv::circle(frame, center, 4, cv::Scalar(0, 0, 255), -1);
+
+                // Annotate with the marker ID
+                cv::putText(frame, std::to_string(markerIds[i]), cv::Point(topLeft.x, topLeft.y - 10),
+                            cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255, 255, 255), 2);
+            }
+        }
+    }
+}
+
 class VideoStreamer : public rclcpp::Node {
 public:
     VideoStreamer() : Node("video_streamer") {
@@ -18,7 +67,7 @@ public:
         image_pub_3d_ = image_transport::create_publisher(this, "/video_stream_3d");
 
         timer_ = create_wall_timer(
-            std::chrono::milliseconds(33),  // ~30 Hz
+            std::chrono::milliseconds(60),  // ~30 Hz
             std::bind(&VideoStreamer::timer_callback, this)
         );
 
@@ -43,9 +92,9 @@ private:
                 return;
             }
 
-            int actual_cam = 0; //cam_map_[current_streaming_cam_];
+            int actual_cam = 2; //cam_map_[current_streaming_cam_];
             RCLCPP_WARN(this->get_logger(), "Print testing");
-            cap_.open(actual_cam, cv::CAP_V4L2);
+            cap_.open("/dev/video0", cv::CAP_V4L2);
 
             if (!cap_.isOpened()) {
                 RCLCPP_WARN(this->get_logger(), "Failed to open camera %d", actual_cam);
@@ -55,6 +104,10 @@ private:
 
         cv::Mat frame, frame_3d;
         cap_ >> frame;
+
+
+        //perform aruco detection
+        performArucoDetection(frame);
 
         if (lusi_vision_3d) {
             if (!cap_3d_.isOpened()) {

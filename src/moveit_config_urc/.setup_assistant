@@ -5,14 +5,15 @@ moveit_setup_assistant_config:
   srdf:
     relative_path: config/2dof_robot.srdf
   package_settings:
-    author_name: LUSI Software
+    author_name: LUSI
     author_email: inspace@lehigh.edu
-    generated_timestamp: 1739569434
+    generated_timestamp: 1740773730
   control_xacro:
     command:
       - position
     state:
       - position
+      - velocity
   modified_urdf:
     xacros:
       - control_xacro
@@ -21,3 +22,4 @@ moveit_setup_assistant_config:
       - position
     state:
       - position
+      - velocity

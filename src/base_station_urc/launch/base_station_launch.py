@@ -49,6 +49,13 @@ def generate_launch_description():
             output='screen',
             # parameters=[{'/hootl': False}] 
         ),
+        # Node(
+        #     package='base_station_urc',
+        #     executable='ArmCommandEncoder_node',
+        #     name='arm_command_encoder',
+        #     output='screen',
+        #     # parameters=[{'/hootl': False}] 
+        # ),
         Node(
             package='image_transport',
             executable='republish',

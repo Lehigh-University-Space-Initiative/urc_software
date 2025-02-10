@@ -1,11 +1,36 @@
 from launch import LaunchDescription
 from launch_ros.actions import Node
 from launch.substitutions import Command, PathJoinSubstitution, FindExecutable, LaunchConfiguration
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, SetEnvironmentVariable
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, SetEnvironmentVariable, ExecuteProcess
 from launch_ros.substitutions import FindPackageShare 
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from moveit_configs_utils import MoveItConfigsBuilder
 from launch.conditions import IfCondition, UnlessCondition
+from ament_index_python.packages import get_package_share_directory
+
+
+import os
+import yaml
+
+def load_file(package_name, file_path):
+    package_path = get_package_share_directory(package_name)
+    absolute_file_path = os.path.join(package_path, file_path)
+
+    try:
+        with open(absolute_file_path, "r") as file:
+            return file.read()
+    except EnvironmentError:  # parent of IOError, OSError *and* WindowsError where available
+        return None
+
+def load_yaml(package_name, file_path):
+    package_path = get_package_share_directory(package_name)
+    absolute_file_path = os.path.join(package_path, file_path)
+
+    try:
+        with open(absolute_file_path, "r") as file:
+            return yaml.safe_load(file)
+    except EnvironmentError:  # parent of IOError, OSError *and* WindowsError where available
+        return None
 
 
 def generate_launch_description():
@@ -25,6 +50,10 @@ def generate_launch_description():
     urdf_file = PathJoinSubstitution(
         [FindPackageShare("main_computer_urc"), "description", "robot.urdf.xacro"]
     )
+    initial_file = PathJoinSubstitution(
+        [FindPackageShare("moveit_config_urc"), "config", "initial_positions.yaml"]
+        # [FindPackageShare("moveit_config_urc"), "config", "moveit.rviz"]
+    )
     # rviz_file = PathJoinSubstitution(
     #     [FindPackageShare("main_computer_urc"), "description", "robot.rviz"]
     # )
@@ -35,9 +64,10 @@ def generate_launch_description():
     #     [FindPackageShare("main_computer_urc"), "description", "config", "ros2_control.yaml"]
     # )
 
+
     robot_description_content = Command([
         'xacro ',
-        urdf_file
+        urdf_file,
     ])
     robot_description = {"robot_description": robot_description_content}    
 
@@ -54,7 +84,7 @@ def generate_launch_description():
         MoveItConfigsBuilder(
             "gen3", package_name="moveit_config_urc"
         )
-        # .robot_description(mappings=launch_arguments)
+        # .robot_description(file_path=urdf_file, mappings={"initial_positions_file": "config/initial_positions.yaml"})
         .trajectory_execution(file_path="config/moveit_controllers.yaml")
         .planning_scene_monitor(
             publish_robot_description=True, publish_robot_description_semantic=True
@@ -71,13 +101,19 @@ def generate_launch_description():
         output="both",
         parameters=[robot_description],
     )
+    #https://github.com/moveit/moveit2/issues/3339
     rviz_node = Node(
         package="rviz2",
         executable="rviz2",
         name="rviz2",
         output="log",
         arguments=["-d", rviz_file],
-        condition=IfCondition(gui_only),
+        parameters = [
+            moveit_config.joint_limits,
+            moveit_config.robot_description_kinematics,
+            moveit_config.planning_pipelines,
+        ],
+        # condition=IfCondition(gui_only),
     )
     joint_state_publisher_node = Node(
         package="joint_state_publisher_gui",
@@ -123,6 +159,11 @@ def generate_launch_description():
     with open(srdf_path, 'r') as f:
         semantic_content = f.read()
 
+    # Get parameters for the Servo node
+    servo_yaml = load_yaml("main_computer_urc", "config/simulation_config.yaml")
+    servo_params = {"moveit_servo": servo_yaml}
+
+
     move_group_node = Node(package='moveit_ros_move_group', executable='move_group',
                        output='screen',
                        parameters=[moveit_config.to_dict()],
@@ -151,7 +192,22 @@ def generate_launch_description():
         ],
     )
 
-    return LaunchDescription([
+
+    servo_node = Node(
+        package="moveit_servo",
+        executable="servo_node_main",
+        parameters=[
+            servo_params,
+            moveit_config.robot_description,
+            moveit_config.robot_description_semantic,
+            moveit_config.robot_description_kinematics,
+        ],
+        output="screen",
+    )
+
+
+
+    ld = LaunchDescription([
         # robot_state_publisher_node,
         rviz_node,
         # # joint_state_publisher_node,
@@ -163,37 +219,53 @@ def generate_launch_description():
         control_node,
         joint_state_broadcaster_spawner,
         arm_controller_spawner,
-        # Node(
-        #     package='main_computer_urc',
-        #     executable='DriveTrainManager_node',
-        #     name='DriveTrainManager',
-        #     output='screen'
-        # ),
+        servo_node,
+        Node(
+            package='main_computer_urc',
+            executable='DriveTrainManager_node',
+            name='DriveTrainManager',
+            output='screen'
+        ),
         # Node(
         #     package='main_computer_urc',
         #     executable='StatusLED_node',
         #     name='StatusLED',
         #     output='screen'
         # ),
-        # # Node(
-        # #     package='main_computer_urc',
-        # #     executable='VideoStreamer_node',
-        # #     name='VideoStreamer',
-        # #     output='screen'
-        # # ),
         # Node(
-        #     package='image_transport',
-        #     executable='republish',
-        #     name='republish',
-        #     output='screen',
-        #     arguments=[
-        #         'compressed',  # Input transport type
-        #         '--ros-args',
-        #         '--remap', 'in:=/video_stream',
-        #         '--remap', 'out/compressed:=/video_stream/compressed',
-        #     ],
+        #     package='main_computer_urc',
+        #     executable='VideoStreamer_node',
+        #     name='VideoStreamer',
+        #     output='screen'
         # ),
+        Node(
+            package='image_transport',
+            executable='republish',
+            name='republish',
+            output='screen',
+            arguments=[
+                'compressed',  # Input transport type
+                '--ros-args',
+                '--remap', 'in:=/video_stream',
+                '--remap', 'out/compressed:=/video_stream/compressed',
+            ],
+        ),
     ] + declared_arguments)
+
+#     ld.add_action(
+#     ExecuteProcess(
+#         cmd=[[
+#             FindExecutable(name='ros2'),
+#             " service call ",
+#             "/servo_node/start_servo ",
+#             "std_srvs/srv/Trigger ",
+#             '"{}"',
+#         ]],
+#         shell=True
+#     )
+# )
+
+    return ld;
 
 # <ros2_control name="${name}" type="system">
 #             <hardware>
