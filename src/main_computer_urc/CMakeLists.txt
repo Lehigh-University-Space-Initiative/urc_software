@@ -40,6 +40,7 @@ install(TARGETS
 # Install the launch directory
 install(DIRECTORY
   launch
+  description
   DESTINATION share/${PROJECT_NAME}/
 )
 

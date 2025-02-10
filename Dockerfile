@@ -47,6 +47,10 @@ FROM ros:humble-ros-base-jammy AS plugin_installer
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-humble-image-transport-plugins \
+    ros-humble-xacro \
+    ros-humble-moveit \
+    ros-humble-joint-state-publisher-gui \
+    libqt5widgets5 \
     && rm -rf /var/lib/apt/lists/*
 
 FROM urc_software_base AS urc_software_builder
@@ -67,6 +71,8 @@ FROM urc_software_base AS urc_software
 # copy built binaries
 WORKDIR /ros2_ws
 COPY --from=plugin_installer /opt/ros/humble /opt/ros/humble
+# for installing Qt for rviz2
+COPY --from=plugin_installer /usr/lib /usr/lib
 COPY ./install /ros2_ws/install
 COPY ./libs /ros2_ws/libs
 COPY ./run_nodes.sh /ros2_ws/run_nodes.sh
