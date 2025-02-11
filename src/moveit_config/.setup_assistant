@@ -1,0 +1,25 @@
+moveit_setup_assistant_config:
+  urdf:
+    package: main_computer_urc
+    relative_path: description/robot.urdf.xacro
+  srdf:
+    relative_path: config/2dof_robot.srdf
+  package_settings:
+    author_name: LUSI Software
+    author_email: inspace@lehigh.edu
+    generated_timestamp: 1739235076
+  control_xacro:
+    command:
+      - position
+    state:
+      - position
+      - velocity
+  modified_urdf:
+    xacros:
+      - control_xacro
+  control_xacro:
+    command:
+      - position
+    state:
+      - position
+      - velocity
