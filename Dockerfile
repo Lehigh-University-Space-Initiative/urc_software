@@ -50,6 +50,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-humble-xacro \
     ros-humble-moveit \
     ros-humble-joint-state-publisher-gui \
+    ros-humble-ros-gz \
+    ros-humble-ros-ign-bridge \
     libqt5widgets5 \
     && rm -rf /var/lib/apt/lists/*
 

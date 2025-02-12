@@ -7,7 +7,7 @@ moveit_setup_assistant_config:
   package_settings:
     author_name: LUSI Software
     author_email: inspace@lehigh.edu
-    generated_timestamp: 1739235076
+    generated_timestamp: 1739325237
   control_xacro:
     command:
       - position

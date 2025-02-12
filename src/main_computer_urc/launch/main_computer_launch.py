@@ -13,6 +13,9 @@ def generate_launch_description():
     rviz_file = PathJoinSubstitution(
         [FindPackageShare("main_computer_urc"), "description", "robot.rviz"]
     )
+    # rviz_file = PathJoinSubstitution(
+    #     [FindPackageShare("moveit_config_urc"), "config", "moveit.rviz"]
+    # )
     # ros2_control_config = PathJoinSubstitution(
     #     [FindPackageShare("main_computer_urc"), "description", "config", "ros2_control.yaml"]
     # )
