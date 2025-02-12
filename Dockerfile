@@ -52,7 +52,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-humble-joint-state-publisher-gui \
     ros-humble-ros-gz \
     ros-humble-ros-ign-bridge \
+    ros-humble-ign-ros2-control \
     libqt5widgets5 \
+    ruby \
     && rm -rf /var/lib/apt/lists/*
 
 FROM urc_software_base AS urc_software_builder
@@ -75,6 +77,9 @@ WORKDIR /ros2_ws
 COPY --from=plugin_installer /opt/ros/humble /opt/ros/humble
 # for installing Qt for rviz2
 COPY --from=plugin_installer /usr/lib /usr/lib
+# for installing gazebo
+COPY --from=plugin_installer /usr/bin /usr/bin
+COPY --from=plugin_installer /usr/share /usr/share
 COPY ./install /ros2_ws/install
 COPY ./libs /ros2_ws/libs
 COPY ./run_nodes.sh /ros2_ws/run_nodes.sh
