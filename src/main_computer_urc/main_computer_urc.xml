@@ -14,4 +14,20 @@
     </class>
 </library>
 
+<library path="arm_controller">
+    <class name="arm_controller/ArmController"
+           type="arm_controller::ArmController"
+           base_class_type="controller_interface::ControllerInterface">
+        <description>Arm Controller subscribing to cmd_vel and sending wheel velocities</description>
+    </class>
+</library>
+
+<library path="arm_hardware">
+    <class name="arm_hardware/ArmHardware"
+           type="arm_hardware::ArmHardware"
+           base_class_type="hardware_interface::SystemInterface">
+        <description>Fake hardware interface publishing motor velocities instead of real hardware control</description>
+    </class>
+</library>
+
 

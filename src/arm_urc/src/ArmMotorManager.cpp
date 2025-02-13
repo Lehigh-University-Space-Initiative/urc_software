@@ -17,7 +17,7 @@ ArmMotorManager::ArmMotorManager()
     *lock = std::chrono::system_clock::now();
   }
     // publish arm velocity
-    armVelPub = node->create_publisher<cross_pkg_messages::msg::RoverComputerArmCMD>("armMotorVels", 10);
+    armVelPub = node->create_publisher<cross_pkg_messages::msg::RoverComputerArmCMD>("/armMotorVels", 10);
 
     // Subscribe to arm commands
     armCommandsSub = node->create_subscription<cross_pkg_messages::msg::RoverComputerArmCMD>(
