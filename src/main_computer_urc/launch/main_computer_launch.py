@@ -1,7 +1,7 @@
 from launch import LaunchDescription
 from launch_ros.actions import Node
 from launch.substitutions import Command, PathJoinSubstitution, FindExecutable
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, SetEnvironmentVariable
 from launch_ros.substitutions import FindPackageShare
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 
@@ -81,6 +81,7 @@ def generate_launch_description():
         robot_state_publisher_node,
         # rviz_node,
         #joint_state_publisher_node,
+        SetEnvironmentVariable(name="LIBGL_DRI3_DISABLE", value="1"),
         gazebo,
         gz_spawn_entity,
         node_robot_state_publisher,
