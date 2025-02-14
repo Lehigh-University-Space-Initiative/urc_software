@@ -56,8 +56,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libqt5widgets5 \
     ros-humble-ros2-control \
     ros-humble-ros2-controllers \
+    ros-humble-moveit-ros-planning-interface \
     tmux \
     ruby \
+    vim nano \
+    libboost-all-dev \
     && rm -rf /var/lib/apt/lists/*
 
 FROM urc_software_base AS urc_software_builder
@@ -71,6 +74,9 @@ COPY ./libs /ros2_ws/libs
 # Build pigpio from the submodule
 RUN cd /ros2_ws/libs/pigpio && make && make install
 
+COPY --from=plugin_installer /opt/ros/humble /opt/ros/humble
+COPY --from=plugin_installer /usr/bin /usr/bin
+COPY --from=plugin_installer /usr/share /usr/share
 
 # https://medium.com/codex/a-practical-guide-to-containerize-your-c-application-with-docker-50abb197f6d4
 FROM urc_software_base AS urc_software 
