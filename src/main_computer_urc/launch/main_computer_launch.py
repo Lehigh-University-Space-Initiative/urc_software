@@ -12,12 +12,12 @@ def generate_launch_description():
     urdf_file = PathJoinSubstitution(
         [FindPackageShare("main_computer_urc"), "description", "robot.urdf.xacro"]
     )
-    rviz_file = PathJoinSubstitution(
-        [FindPackageShare("main_computer_urc"), "description", "robot.rviz"]
-    )
     # rviz_file = PathJoinSubstitution(
-    #     [FindPackageShare("moveit_config_urc"), "config", "moveit.rviz"]
+    #     [FindPackageShare("main_computer_urc"), "description", "robot.rviz"]
     # )
+    rviz_file = PathJoinSubstitution(
+        [FindPackageShare("moveit_config_urc"), "config", "moveit.rviz"]
+    )
     # ros2_control_config = PathJoinSubstitution(
     #     [FindPackageShare("main_computer_urc"), "description", "config", "ros2_control.yaml"]
     # )
@@ -46,6 +46,36 @@ def generate_launch_description():
         package="joint_state_publisher_gui",
         executable="joint_state_publisher_gui",
     )
+
+    robot_controllers = PathJoinSubstitution(
+        [
+            FindPackageShare("moveit_config_urc"),
+            "config",
+            "ros2_controllers.yaml",
+        ]
+    )
+
+    control_node = Node(
+        package="controller_manager",
+        executable="ros2_control_node",
+        parameters=[robot_controllers],
+        output="both",
+    )
+
+
+    srdf_path = "/ros2_ws/install/share/moveit_config_urc/config/2dof_robot.srdf"
+
+    with open(srdf_path, 'r') as f:
+        semantic_content = f.read()
+
+    move_group_node = Node(package='moveit_ros_move_group', executable='move_group',
+                       output='screen',
+                       parameters=[{
+                            'robot_description': robot_description_content,
+                            'robot_description_semantic': semantic_content,
+                            'publish_robot_description_semantic': True,
+                       }],
+                       )
 
 
     gazebo = IncludeLaunchDescription(
@@ -79,12 +109,15 @@ def generate_launch_description():
 
     return LaunchDescription([
         robot_state_publisher_node,
-        # rviz_node,
-        #joint_state_publisher_node,
+        rviz_node,
+        # joint_state_publisher_node,
+        # this env is for gazebo to work on M1 Mac
         SetEnvironmentVariable(name="LIBGL_DRI3_DISABLE", value="1"),
         gazebo,
         gz_spawn_entity,
         node_robot_state_publisher,
+        move_group_node,
+        control_node,
         Node(
             package='main_computer_urc',
             executable='DriveTrainManager_node',

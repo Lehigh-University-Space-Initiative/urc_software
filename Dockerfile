@@ -54,6 +54,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-humble-ros-ign-bridge \
     ros-humble-ign-ros2-control \
     libqt5widgets5 \
+    ros-humble-ros2-control \
+    ros-humble-ros2-controllers \
     ruby \
     && rm -rf /var/lib/apt/lists/*
 
