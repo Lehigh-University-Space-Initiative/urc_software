@@ -2,9 +2,6 @@
 controller_manager:
   ros__parameters:
     update_rate: 100  # Hz
-    #use sim time???????????
-    # TODO remove for non sim
-    #use_sim_time: true
 
     arm_controller:
       type: joint_trajectory_controller/JointTrajectoryController
@@ -22,4 +19,3 @@ arm_controller:
       - position
     state_interfaces:
       - position
-      #- velocity

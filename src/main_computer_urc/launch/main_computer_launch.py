@@ -38,20 +38,20 @@ def generate_launch_description():
     )
 
     # Load the robot configuration
-    # moveit_config = (
-    #     MoveItConfigsBuilder(
-    #         "gen3", package_name="moveit_config_urc"
-    #     )
-    #     # .robot_description(mappings=launch_arguments)
-    #     .trajectory_execution(file_path="config/moveit_controllers.yaml")
-    #     .planning_scene_monitor(
-    #         publish_robot_description=True, publish_robot_description_semantic=True
-    #     )
-    #     .planning_pipelines(
-    #         pipelines=["ompl", "stomp", "pilz_industrial_motion_planner"]
-    #     )
-    #     .to_moveit_configs()
-    # )
+    moveit_config = (
+        MoveItConfigsBuilder(
+            "gen3", package_name="moveit_config_urc"
+        )
+        # .robot_description(mappings=launch_arguments)
+        .trajectory_execution(file_path="config/moveit_controllers.yaml")
+        .planning_scene_monitor(
+            publish_robot_description=True, publish_robot_description_semantic=True
+        )
+        # .planning_pipelines(
+        #     pipelines=["ompl", "stomp", "pilz_industrial_motion_planner"]
+        # )
+        .to_moveit_configs()
+    )
 
     robot_state_publisher_node = Node(
         package="robot_state_publisher",
@@ -109,11 +109,7 @@ def generate_launch_description():
 
     move_group_node = Node(package='moveit_ros_move_group', executable='move_group',
                        output='screen',
-                       parameters=[{
-                            'robot_description': robot_description_content,
-                            'robot_description_semantic': semantic_content,
-                            'publish_robot_description_semantic': True,
-                       }],
+                       parameters=[moveit_config.to_dict()],
 
                        )
 
@@ -140,7 +136,7 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
-        robot_state_publisher_node,
+        # robot_state_publisher_node,
         rviz_node,
         # # joint_state_publisher_node,
         # this env is for gazebo to work on M1 Mac

@@ -13,14 +13,12 @@
                 <state_interface name="position">
                   <param name="initial_value">${initial_positions['shoulder']}</param>
                 </state_interface>
-                <state_interface name="velocity"/>
             </joint>
             <joint name="elbow">
                 <command_interface name="position"/>
                 <state_interface name="position">
                   <param name="initial_value">${initial_positions['elbow']}</param>
                 </state_interface>
-                <state_interface name="velocity"/>
             </joint>
 
         </ros2_control>
