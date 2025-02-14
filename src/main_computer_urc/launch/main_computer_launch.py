@@ -61,6 +61,9 @@ def generate_launch_description():
         parameters=[robot_controllers],
         output="both",
         # arguments = ["--ros-args", "--log-level", "debug"],
+        remappings=[
+            ("~/robot_description", "/robot_description"),
+        ],
     )
     joint_state_broadcaster_spawner = Node(
         package="controller_manager",
@@ -124,7 +127,7 @@ def generate_launch_description():
         # node_robot_state_publisher,
         # move_group_node,
         control_node,
-        joint_state_broadcaster_spawner,
+        # joint_state_broadcaster_spawner,
         # Node(
         #     package='main_computer_urc',
         #     executable='DriveTrainManager_node',

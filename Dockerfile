@@ -56,6 +56,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libqt5widgets5 \
     ros-humble-ros2-control \
     ros-humble-ros2-controllers \
+    tmux \
     ruby \
     && rm -rf /var/lib/apt/lists/*
 

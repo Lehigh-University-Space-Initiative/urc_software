@@ -16,6 +16,9 @@ https://github.com/ros-simulation/gazebo_ros_demos/blob/kinetic-devel/rrbot_desc
   <!-- Import RRBot ros2_control description -->
   <xacro:include filename="robot.ros2_control.xacro" />
 
+  <xacro:robot_ros2_control name="FakeSystem" prefix="$(arg prefix)"/>
+
+
   <!-- Used for fixing robot -->
   <link name="world"/>
 
