@@ -12,19 +12,19 @@ def generate_launch_description():
     urdf_file = PathJoinSubstitution(
         [FindPackageShare("main_computer_urc"), "description", "robot.urdf.xacro"]
     )
-    rviz_file = PathJoinSubstitution(
-        [FindPackageShare("main_computer_urc"), "description", "robot.rviz"]
-    )
     # rviz_file = PathJoinSubstitution(
-    #     [FindPackageShare("moveit_config_urc"), "config", "moveit.rviz"]
+    #     [FindPackageShare("main_computer_urc"), "description", "robot.rviz"]
     # )
+    rviz_file = PathJoinSubstitution(
+        [FindPackageShare("moveit_config_urc"), "config", "moveit.rviz"]
+    )
     # ros2_control_config = PathJoinSubstitution(
     #     [FindPackageShare("main_computer_urc"), "description", "config", "ros2_control.yaml"]
     # )
 
     robot_description_content = Command([
         'xacro ',
-        urdf_file
+        urdf_file,
     ])
     robot_description = {"robot_description": robot_description_content}    
 
@@ -46,6 +46,29 @@ def generate_launch_description():
         package="joint_state_publisher_gui",
         executable="joint_state_publisher_gui",
     )
+
+    # srdf_file = PathJoinSubstitution(
+    #     [FindPackageShare("moveit_config_urc"), "config", "2dof_robot.srdf"]
+    # )
+
+    # srdf_file_content = Command([
+    #     'xacro ',
+    #     srdf_file,
+    #     value_type=str
+    # ])
+
+    srdf_path = "/ros2_ws/install/share/moveit_config_urc/config/2dof_robot.srdf"
+
+    with open(srdf_path, 'r') as f:
+        semantic_content = f.read()
+
+    move_group_node = Node(package='moveit_ros_move_group', executable='move_group',
+                       output='screen',
+                       parameters=[{
+                            'robot_description': robot_description_content,
+                            'robot_description_semantic': semantic_content,
+                       }],
+                       )
 
 
     gazebo = IncludeLaunchDescription(
@@ -76,10 +99,13 @@ def generate_launch_description():
         parameters=[robot_description],
     )
 
+# /ros2_ws/install/share/moveit_config_urc
+
 
     return LaunchDescription([
         robot_state_publisher_node,
-        # rviz_node,
+        rviz_node,
+        move_group_node,
         #joint_state_publisher_node,
         gazebo,
         gz_spawn_entity,
