@@ -6,20 +6,20 @@ controller_manager:
     # TODO remove for non sim
     #use_sim_time: true
 
-    # arm_controller:
-    #   type: joint_trajectory_controller/JointTrajectoryController
+    arm_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
 
 
     joint_state_broadcaster:
       type: joint_state_broadcaster/JointStateBroadcaster
 
-# arm_controller:
-#   ros__parameters:
-#     joints:
-#       - shoulder
-#       - elbow
-#     command_interfaces:
-#       - position
-#     state_interfaces:
-#       - position
-#       - velocity
+arm_controller:
+  ros__parameters:
+    joints:
+      - shoulder
+      - elbow
+    command_interfaces:
+      - position
+    state_interfaces:
+      - position
+      #- velocity
