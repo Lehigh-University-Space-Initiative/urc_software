@@ -60,6 +60,12 @@ def generate_launch_description():
         executable="ros2_control_node",
         parameters=[robot_controllers],
         output="both",
+        # arguments = ["--ros-args", "--log-level", "debug"],
+    )
+    joint_state_broadcaster_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["joint_state_broadcaster"],
     )
 
 
@@ -109,45 +115,46 @@ def generate_launch_description():
 
     return LaunchDescription([
         robot_state_publisher_node,
-        rviz_node,
-        # joint_state_publisher_node,
-        # this env is for gazebo to work on M1 Mac
-        SetEnvironmentVariable(name="LIBGL_DRI3_DISABLE", value="1"),
-        gazebo,
-        gz_spawn_entity,
-        node_robot_state_publisher,
-        move_group_node,
+        # rviz_node,
+        # # joint_state_publisher_node,
+        # # this env is for gazebo to work on M1 Mac
+        # SetEnvironmentVariable(name="LIBGL_DRI3_DISABLE", value="1"),
+        # gazebo,
+        # gz_spawn_entity,
+        # node_robot_state_publisher,
+        # move_group_node,
         control_node,
-        Node(
-            package='main_computer_urc',
-            executable='DriveTrainManager_node',
-            name='DriveTrainManager',
-            output='screen'
-        ),
-        Node(
-            package='main_computer_urc',
-            executable='StatusLED_node',
-            name='StatusLED',
-            output='screen'
-        ),
+        joint_state_broadcaster_spawner,
         # Node(
         #     package='main_computer_urc',
-        #     executable='VideoStreamer_node',
-        #     name='VideoStreamer',
+        #     executable='DriveTrainManager_node',
+        #     name='DriveTrainManager',
         #     output='screen'
         # ),
-        Node(
-            package='image_transport',
-            executable='republish',
-            name='republish',
-            output='screen',
-            arguments=[
-                'compressed',  # Input transport type
-                '--ros-args',
-                '--remap', 'in:=/video_stream',
-                '--remap', 'out/compressed:=/video_stream/compressed',
-            ],
-        ),
+        # Node(
+        #     package='main_computer_urc',
+        #     executable='StatusLED_node',
+        #     name='StatusLED',
+        #     output='screen'
+        # ),
+        # # Node(
+        # #     package='main_computer_urc',
+        # #     executable='VideoStreamer_node',
+        # #     name='VideoStreamer',
+        # #     output='screen'
+        # # ),
+        # Node(
+        #     package='image_transport',
+        #     executable='republish',
+        #     name='republish',
+        #     output='screen',
+        #     arguments=[
+        #         'compressed',  # Input transport type
+        #         '--ros-args',
+        #         '--remap', 'in:=/video_stream',
+        #         '--remap', 'out/compressed:=/video_stream/compressed',
+        #     ],
+        # ),
     ])
 
 # <ros2_control name="${name}" type="system">

@@ -4,15 +4,15 @@
   <xacro:macro name="robot_ros2_control" params="name prefix use_gazebo:=^|true">
     <ros2_control name="${name}" type="system">
       <hardware>
-        <xacro:if value="${use_gazebo}">
+        <!-- <xacro:if value="${use_gazebo}"> -->
           <plugin>gz_ros2_control/GazeboSimSystem</plugin>
-        </xacro:if>
-        <xacro:unless value="${use_gazebo}">
+        <!-- </xacro:if> -->
+        <!-- <xacro:unless value="${use_gazebo}">
           <plugin>ros2_control_demo_example_9/RRBotSystemPositionOnlyHardware</plugin>
           <param name="example_param_hw_start_duration_sec">0</param>
           <param name="example_param_hw_stop_duration_sec">3.0</param>
           <param name="example_param_hw_slowdown">100</param>
-        </xacro:unless>
+        </xacro:unless> -->
       </hardware>
 
       <joint name="${prefix}shoulder">
@@ -30,6 +30,12 @@
         <state_interface name="position"/>
       </joint>
     </ros2_control>
+
+    <gazebo>
+      <plugin name="gazebo_ros2_control" filename="libgazebo_ros2_control.so">
+        <parameters>$(find moveit_config_urc)config/ros2_controllers.yaml</parameters>
+      </plugin>
+    </gazebo>
 
   </xacro:macro>
 
