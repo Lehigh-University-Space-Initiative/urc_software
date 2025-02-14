@@ -25,7 +25,7 @@ def generate_launch_description():
 
     robot_description_content = Command([
         'xacro ',
-        urdf_file
+        urdf_file,
     ])
     robot_description = {"robot_description": robot_description_content}    
 
