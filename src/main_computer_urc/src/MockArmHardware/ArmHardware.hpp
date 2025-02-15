@@ -6,6 +6,7 @@
 #include <hardware_interface/system_interface.hpp>
 #include <hardware_interface/types/hardware_interface_return_values.hpp>
 #include <rclcpp/rclcpp.hpp>
+#include "cross_pkg_messages/msg/rover_computer_arm_cmd.hpp" // TODO: figure these out
 
 extern rclcpp::Logger arm_logger;
 
@@ -25,7 +26,16 @@ public:
   hardware_interface::return_type read(const rclcpp::Time &time, const rclcpp::Duration &period) override;
   hardware_interface::return_type write(const rclcpp::Time &time, const rclcpp::Duration &period) override;
 
+  rclcpp::Publisher<cross_pkg_messages::msg::RoverComputerArmCMD>::SharedPtr armPublisher;
+  rclcpp::Subscription<cross_pkg_messages::msg::RoverComputerArmCMD>::SharedPtr armPosSubscriber;
+
 private:
+
+  rclcpp::Node::SharedPtr node_;
+
+    void onReceivePosition(const cross_pkg_messages::msg::RoverComputerArmCMD::SharedPtr msg);
+
+
     std::vector<double> hw_positions_;
     std::vector<double> hw_velocities_;
     std::vector<double> hw_commands_;

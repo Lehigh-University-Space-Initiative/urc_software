@@ -26,6 +26,12 @@ hardware_interface::CallbackReturn ArmHardware::on_init(const hardware_interface
   hw_velocities_.resize(motorCount, 0.0);
   hw_commands_.resize(motorCount, 0.0);
 
+  node_ = rclcpp::Node::make_shared("mock_arm_hardware");
+
+
+  armPublisher = node_->create_publisher<cross_pkg_messages::msg::RoverComputerArmCMD>("roverArmCommands", 10);
+  armPosSubscriber = node_->create_subscription<cross_pkg_messages::msg::RoverComputerArmCMD>("roverArmPos", 10, std::bind(&ArmHardware::onReceivePosition, this, std::placeholders::_1));
+
   RCLCPP_INFO(arm_logger, "Arm on_init: command clamp [%.2f, %.2f]", std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
   return hardware_interface::CallbackReturn::SUCCESS;
 }
@@ -73,7 +79,13 @@ hardware_interface::return_type
   // read the actual velocities from the motors
   // manager_->readMotors(period);
   // if (hw_commands_[0] != 0 || hw_commands_[1] != 0)
-  RCLCPP_INFO(arm_logger, "GOT updated arm commands: %.2f %.2f",hw_commands_[0],hw_commands_[1]);
+  // RCLCPP_INFO(arm_logger, "GOT updated arm commands: %.2f %.2f",hw_commands_[0],hw_commands_[1]);
+
+  cross_pkg_messages::msg::RoverComputerArmCMD msg{};
+  msg.cmd_s = hw_commands_[0];
+  msg.cmd_e= hw_commands_[1];
+
+  armPublisher->publish(msg);
 
   return hardware_interface::return_type::OK;
 }
@@ -87,6 +99,12 @@ hardware_interface::return_type
   //
 
   return hardware_interface::return_type::OK;
+}
+
+void ArmHardware::onReceivePosition(const cross_pkg_messages::msg::RoverComputerArmCMD::SharedPtr msg)
+{
+  hw_positions_[0] = msg.cmd_s; 
+  hw_positions_[1] = msg.cmd_e; 
 }
 
 }
