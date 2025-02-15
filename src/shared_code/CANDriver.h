@@ -93,16 +93,18 @@ public:
 
     double lastVelocityAsRadPerSec();
 
-    bool pidControlled = false;
+    bool pidControlled = true;
 
     //when LOS happens disable motor
     bool motorLocked = false;
 
     //should be called every Dt
-    void pidTick();
+    void pidTick(double currentPos);
     // float dt = 0.01;
 
-    PID pidController = PID(0.01,MAX_DRIVE_POWER,-MAX_DRIVE_POWER,0.06,0.001,0.05);
+    // PID pidController = PID(0.01,MAX_DRIVE_POWER,-MAX_DRIVE_POWER,0.06,0.001,0.05);
+    //TODO fix for driveline
+    PID pidController = PID(0.01,0.1,-0.1,0.06,0.001,0.05);
 
     void ident();
 };

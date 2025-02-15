@@ -332,15 +332,15 @@ void SparkMax::setPIDSetpoint(double pidSetpoint)
     this->pidSetpoint = pidSetpoint;
 }
 
-void SparkMax::pidTick()
+void SparkMax::pidTick(double currentPos)
 {
     if (pidControlled && !motorLocked) {
-        double currentVel = lastVelocityAsRadPerSec(); 
+        // double currentVel = lastVelocityAsRadPerSec(); 
 
-        double val = pidController.calculate(pidSetpoint,currentVel);
-        RCLCPP_INFO(rclcpp::get_logger("SparkMax"), "running pid %d with set: %f, cur: %f output: %f", canID, pidSetpoint,currentVel,val);
+        double val = pidController.calculate(pidSetpoint,currentPos);
+        RCLCPP_INFO(rclcpp::get_logger("SparkMax"), "running pid %d with set: %f, cur: %f output: %f", canID, pidSetpoint,currentPos,val);
 
-        sendPowerCMD(val);
+        //sendPowerCMD(val);
     }
 }
 

@@ -69,6 +69,11 @@ void MotorManager::readMotors(const rclcpp::Duration period) {
     }
 }
 
+std::vector<double>& MotorManager::getMotorPositions()
+{
+    return hw_positions_;
+}
+
 void MotorManager::writeMotors() {
     for (size_t i = 0; i < motor_count_; i++) {
       // direct power
@@ -124,9 +129,10 @@ void MotorManager::tick()
     }
 
     //give pid tick
-    for (auto &motor : motors_) {
+    for (auto i = 0; i < motors_.size(); i++) {
+        auto motor = motors_[i];
         motor.sendHeartbeat();
-        motor.pidTick();
+        motor.pidTick(hw_positions_[i]);
     }
 }
 

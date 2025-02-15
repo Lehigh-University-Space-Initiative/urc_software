@@ -11,7 +11,7 @@ ArmMotorManager::~ArmMotorManager()
 
 void ArmMotorManager::writeMotors() {
     for (size_t i = 0; i < motor_count_; i++) {
-      printf("Going to send power: %.2f to motor %ld",hw_commands_[i],i);
+    //   printf("Going to send power: %.2f to motor %ld\n",hw_commands_[i],i);
     }
 }
 
@@ -20,6 +20,7 @@ void ArmMotorManager::setArmCommand(const cross_pkg_messages::msg::RoverComputer
     //TODO add the rest
     hw_commands_[1] = msg->cmd_s;
     hw_commands_[2] = msg->cmd_e;
+    writeMotors();
 }
 
 void ArmMotorManager::setupMotors()

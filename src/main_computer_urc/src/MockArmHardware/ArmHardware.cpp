@@ -103,8 +103,8 @@ hardware_interface::return_type
 
 void ArmHardware::onReceivePosition(const cross_pkg_messages::msg::RoverComputerArmCMD::SharedPtr msg)
 {
-  hw_positions_[0] = msg.cmd_s; 
-  hw_positions_[1] = msg.cmd_e; 
+  hw_positions_[0] = msg->cmd_s; 
+  hw_positions_[1] = msg->cmd_e; 
 }
 
 }

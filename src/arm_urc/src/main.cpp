@@ -3,6 +3,7 @@
 #include "cross_pkg_messages/msg/rover_computer_arm_cmd.hpp" // TODO: figure these out
 #include "arm_urc/ArmMotorManager.h"
 #include "arm_urc/main.h"
+#include <chrono>
 
 // Global variables
 std::shared_ptr<rclcpp::Node> node;
@@ -29,19 +30,43 @@ int main(int argc, char **argv)
 
     // Construct the manager
     manager = std::make_unique<ArmMotorManager>();
+    manager->init();
 
         // Subscriber for rover drive commands
     auto driveCommandsSub = node->create_subscription<cross_pkg_messages::msg::RoverComputerArmCMD>(
         "/roverArmCommands", 10, callback);
 
+    auto armPosPub = node->create_publisher<cross_pkg_messages::msg::RoverComputerArmCMD>(
+        "/roverArmPos", 10);
 
     rclcpp::Rate loop_rate(10); // Set rate to 10 Hz
+    
+    std::chrono::system_clock::time_point last_update = std::chrono::system_clock::now();
+    bool firstTime = true;
 
     while (rclcpp::ok())
     {
         // Spin and process ROS callbacks
         rclcpp::spin_some(node);
         manager->tick();
+
+        // if (!firstTime) {
+        //     manager->readMotors(std::chrono::system_clock::now() - last_update);
+
+        //     auto& positions = manager->getMotorPositions();
+        //     if (positions.size() >= 2) {
+        //         cross_pkg_messages::msg::RoverComputerArmCMD msg{};
+
+        //         msg.cmd_s = positions[1];
+        //         msg.cmd_e = positions[2];
+                
+        //         // armPosPub->publish(msg);
+        //     }
+
+        // }
+        firstTime = false;
+
+        last_update = std::chrono::system_clock::now();
         loop_rate.sleep();
     }
 

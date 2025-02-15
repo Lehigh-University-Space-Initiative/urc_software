@@ -36,7 +36,7 @@ public:
     void sendHeartbeats();
     void tick();
     void readMotors(const rclcpp::Duration period);
-    void readMotors();
+    std::vector<double>& getMotorPositions();
     virtual void writeMotors();
     size_t getMotorCount();
     // std::vector<hardware_interface::StateInterface> getStateInterfaces(std::vector<hardware_interface::ComponentInfo>& joints);
