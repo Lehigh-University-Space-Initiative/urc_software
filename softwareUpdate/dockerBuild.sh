@@ -14,6 +14,8 @@ docker container run \
              source ./install/setup.bash &&
              colcon build --merge-install --packages-select base_station_urc main_computer_urc driveline_urc moveit_config_urc'
 
+#  (rosdep install --from-paths src --ignore-src --rosdistro humble -y || true) &&
+
 # copy the built binaries into the final
 docker image build -t urc_software -t 10.0.0.10:65000/urc_software --target urc_software ../
 

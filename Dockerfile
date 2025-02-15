@@ -61,6 +61,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ruby \
     vim nano \
     libboost-all-dev \
+    libboost-dev \
+    libboost-date-time-dev \
+    libboost-filesystem-dev \
+    libboost-program-options-dev libboost-system-dev libboost-thread-dev \
     && rm -rf /var/lib/apt/lists/*
 
 FROM urc_software_base AS urc_software_builder
@@ -74,9 +78,14 @@ COPY ./libs /ros2_ws/libs
 # Build pigpio from the submodule
 RUN cd /ros2_ws/libs/pigpio && make && make install
 
+# prepare to install all dependencies thorugh rosdep
+# RUN cd /ros2_ws
+# RUN rosdep update
+
 COPY --from=plugin_installer /opt/ros/humble /opt/ros/humble
 COPY --from=plugin_installer /usr/bin /usr/bin
 COPY --from=plugin_installer /usr/share /usr/share
+COPY --from=plugin_installer /usr/include /usr/include
 
 # https://medium.com/codex/a-practical-guide-to-containerize-your-c-application-with-docker-50abb197f6d4
 FROM urc_software_base AS urc_software 
@@ -86,6 +95,7 @@ WORKDIR /ros2_ws
 COPY --from=plugin_installer /opt/ros/humble /opt/ros/humble
 # for installing Qt for rviz2
 COPY --from=plugin_installer /usr/lib /usr/lib
+COPY --from=plugin_installer /usr/include /usr/include
 # for installing gazebo
 COPY --from=plugin_installer /usr/bin /usr/bin
 COPY --from=plugin_installer /usr/share /usr/share
