@@ -11,7 +11,7 @@ find_package(image_transport REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(cross_pkg_messages REQUIRED)
-find_package(moveit_ros_planning_interface REQUIRED)
+# find_package(moveit_ros_planning_interface REQUIRED)
 
 # Include directories
 include_directories(
@@ -77,9 +77,9 @@ ament_target_dependencies(GroundStationGUI
 add_executable(SpaceMouseMapper_node src/spaceMouseMapper/spaceMouseMapper.cpp)
 ament_target_dependencies(SpaceMouseMapper_node rclcpp cross_pkg_messages std_msgs)
 
-# Declare the SpaceMouseMapper executable
-add_executable(ArmCommandEncoder_node src/ArmCommandEncoder/main.cpp)
-ament_target_dependencies(ArmCommandEncoder_node rclcpp cross_pkg_messages std_msgs moveit_ros_planning_interface)
+# # Declare the SpaceMouseMapper executable
+# add_executable(ArmCommandEncoder_node src/ArmCommandEncoder/main.cpp)
+# ament_target_dependencies(ArmCommandEncoder_node rclcpp cross_pkg_messages std_msgs moveit_ros_planning_interface)
 
 # Install and export
 install(DIRECTORY
@@ -92,7 +92,7 @@ install(TARGETS
   # TelemetryPanel_node
   GroundStationGUI
   SpaceMouseMapper_node
-  ArmCommandEncoder_node
+  # ArmCommandEncoder_node
   DESTINATION lib/${PROJECT_NAME}
 )
 
