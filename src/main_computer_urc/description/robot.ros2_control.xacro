@@ -7,7 +7,8 @@
         <!-- <xacro:if value="${use_gazebo}"> -->
         <!-- <plugin>gz_ros2_control/GazeboSimSystem</plugin> -->
         <!-- By default, set up controllers for simulation. This won't work on real hardware -->
-        <plugin>mock_components/GenericSystem</plugin>
+        <!-- <plugin>mock_components/GenericSystem</plugin> -->
+        <plugin>main_computer_urc/MockArmHardware</plugin>
         <!-- </xacro:if> -->
         <!-- <xacro:unless value="${use_gazebo}">
           <plugin>ros2_control_demo_example_9/RRBotSystemPositionOnlyHardware</plugin>

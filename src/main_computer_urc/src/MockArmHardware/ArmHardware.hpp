@@ -5,7 +5,9 @@
 #include <rclcpp_lifecycle/state.hpp>
 #include <hardware_interface/system_interface.hpp>
 #include <hardware_interface/types/hardware_interface_return_values.hpp>
-#include "arm_urc/ArmMotorManager.h"
+#include <rclcpp/rclcpp.hpp>
+
+extern rclcpp::Logger arm_logger;
 
 namespace arm_urc
 {
@@ -24,7 +26,10 @@ public:
   hardware_interface::return_type write(const rclcpp::Time &time, const rclcpp::Duration &period) override;
 
 private:
-  std::unique_ptr<ArmMotorManager> manager_;
+    std::vector<double> hw_positions_;
+    std::vector<double> hw_velocities_;
+    std::vector<double> hw_commands_;
+    size_t motorCount = 0;
 };
 
 }  // namespace arm_urc
