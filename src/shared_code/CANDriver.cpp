@@ -1,7 +1,7 @@
 #include "CANDriver.h"
-#include <string>
 #include "Limits.h"
-#include "main.h"
+#include <string>
+#include "Logger.h"
 
 #define MAX_PWM 2000
 #define MIN_PWM 1000
@@ -28,11 +28,11 @@ bool CANDriver::setupCAN(int canBus) {
         return true;
     }
 
-    RCLCPP_INFO(node->get_logger(), "Settting up CAN %d",canBus);
+    RCLCPP_INFO(dl_logger, "Setting up CAN %d",canBus);
 
     data->soc = socket(PF_CAN, SOCK_RAW, CAN_RAW);
     if (data->soc < 0) {
-        RCLCPP_ERROR(node->get_logger(), "socket PF_CAN failed");
+        RCLCPP_ERROR(dl_logger, "socket PF_CAN failed");
         return false;
     }
 
@@ -43,7 +43,7 @@ bool CANDriver::setupCAN(int canBus) {
 
     int ret = ioctl(data->soc, SIOCGIFINDEX, &(data->ifr));
     if (ret < 0) {
-        RCLCPP_ERROR(node->get_logger(), "ioctl failed");
+        RCLCPP_ERROR(dl_logger, "ioctl failed");
         return false;
     }
 
@@ -77,7 +77,7 @@ bool CANDriver::sendMSG(int canBus, can_frame frame) {
 
     int nbytes = write(data->soc, &frame, sizeof(frame));
     if (nbytes != sizeof(frame)) {
-        RCLCPP_ERROR(node->get_logger(), "CAN Frame Send Error!\r\n");
+        RCLCPP_ERROR(dl_logger, "CAN Frame Send Error!\r\n");
         return false;
     }
     return true;
@@ -109,7 +109,7 @@ bool CANDriver::receiveMSG(int canBus, can_frame &frame)
         // Data is available; perform the read
         int nbytes = read(data->soc, &frame, sizeof(frame));
         if (nbytes != sizeof(frame)) {
-            RCLCPP_ERROR(node->get_logger(), "CAN Frame Receive Error!\r\n");
+            RCLCPP_ERROR(dl_logger, "CAN Frame Receive Error!\r\n");
             return false;
         }
         return true;
@@ -123,7 +123,7 @@ bool CANDriver::receiveMSG(int canBus, can_frame &frame)
     // int nbytes = select()
 
     // if(nbytes != sizeof(frame)) {
-    //     RCLCPP_ERROR(node->get_logger(),"CAN Frame Receive Error!\r\n");
+    //     RCLCPP_ERROR(dl_logger,"CAN Frame Receive Error!\r\n");
     //     return false;
     // }
     // return true;
@@ -134,7 +134,7 @@ const uint32_t maxCANID = 7;
 
 void CANDriver::startCanReadThread(int canBus)
 {
-    RCLCPP_INFO(node->get_logger(), "Starting CAN Read Thread");
+    RCLCPP_INFO(dl_logger, "Starting CAN Read Thread");
     while (true) {
         can_frame frame;
         if (receiveMSG(canBus, frame)) {
@@ -212,7 +212,7 @@ void CANDriver::parsePeriodicData(int canBus, can_frame frame)
     if (motorPtr) {
         // motorPtr->lastPeriodicData.velocity.store(pdata.velocity.load());
         motorPtr->lastPeriodicData = pdata;
-        // RCLCPP_INFO(node->get_logger(), "CAN ID %d, velocity %.3f, temperature %i, voltage %i, current %i",motorID,pdata.velocity,pdata.temperature,pdata.voltage,pdata.current);
+        RCLCPP_INFO(dl_logger, "CAN ID %d, velocity %.3f, temperature %i, voltage %i, current %i",motorID,pdata.velocity,pdata.temperature,pdata.voltage,pdata.current);
         // RCLCPP_INFO(rclcpp::get_logger("CANDriver"), "did  motor found yes. big happy! %f cur",motorPtr->lastPeriodicData.velocity);
         //TODO: copy rest of params
     } else {

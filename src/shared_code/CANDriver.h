@@ -14,8 +14,8 @@
 #include <array>
 #include <vector>
 #include <pigpio.h>
-#include "cs_plain_guarded.h"
-#include "PID/pid.h"
+#include "cs_libguarded/cs_plain_guarded.h"
+#include "pid.h"
 #include "Limits.h"
 
 class CANDriver {

@@ -1,20 +1,10 @@
-#include "arm_urc/MotorManager.h"
-#include "arm_urc/main.h"
+#include "MotorManager.h"
+#include "Logger.h"
+
+rclcpp::Logger dl_logger = rclcpp::get_logger("driveline logger");
 
 MotorManager::MotorManager()
 {
-//     setupMotors();
-//     motor_count_ = motors_.size();
-
-//     // Resize vectors for position, velocity, command
-//     hw_positions_.resize(motorCount, 0.0);
-//     hw_velocities_.resize(motorCount, 0.0);
-//     hw_commands_.resize(motorCount, 0.0);
-  
-//   {
-//     auto lock = lastManualCommandTime.lock();
-//     *lock = std::chrono::system_clock::now();
-//   }
 }
 
 MotorManager::~MotorManager()
@@ -25,16 +15,16 @@ MotorManager::~MotorManager()
 void MotorManager::setupMotors()
 {
     // Add motors to the motors vector
-    // Left side (BUS 0)
-    motors_.emplace_back(SparkMax(1, 1)); // LF
-    motors_.emplace_back(SparkMax(1, 2)); // LM
-    motors_.emplace_back(SparkMax(1, 3)); // LB
-    // Right side (BUS 1)
-    motors_.emplace_back(SparkMax(1, 4)); // RB
-    motors_.emplace_back(SparkMax(1, 5)); // RM
-    motors_.emplace_back(SparkMax(1, 6)); // RF
+    // // Left side (BUS 0)
+    // motors_.emplace_back(SparkMax(1, 1)); // LF
+    // motors_.emplace_back(SparkMax(1, 2)); // LM
+    // motors_.emplace_back(SparkMax(1, 3)); // LB
+    // // Right side (BUS 1)
+    // motors_.emplace_back(SparkMax(1, 4)); // RB
+    // motors_.emplace_back(SparkMax(1, 5)); // RM
+    // motors_.emplace_back(SparkMax(1, 6)); // RF
 
-    RCLCPP_INFO(node->get_logger(), "MotorManager: Testing Motors");
+    RCLCPP_INFO(dl_logger, "MotorManager: Testing Motors");
     for (auto &motor : motors_) {
         motor.ident();
     }
@@ -46,6 +36,22 @@ void MotorManager::stopAllMotors()
         motor.motorLocked = true;
         motor.sendPowerCMD(0);
     }
+}
+
+void MotorManager::init()
+{
+    setupMotors();
+    motor_count_ = motors_.size();
+
+    // Resize vectors for position, velocity, command
+    hw_positions_.resize(motor_count_, 0.0);
+    hw_velocities_.resize(motor_count_, 0.0);
+    hw_commands_.resize(motor_count_, 0.0);
+  
+  {
+    auto lock = lastManualCommandTime.lock();
+    *lock = std::chrono::system_clock::now();
+  }
 }
 
 void MotorManager::sendHeartbeats()
@@ -66,11 +72,35 @@ void MotorManager::readMotors(const rclcpp::Duration period) {
 void MotorManager::writeMotors() {
     for (size_t i = 0; i < motor_count_; i++) {
       // direct power
-      motors_[i].sendPowerCMD(hw_commands_[i]);
+
+      //motors_[i].sendPowerCMD(hw_commands_[i]);
+    //   printf("Going to send power: %d to motor %d",hw_commands_[i],i);
     }
 }
 
 size_t MotorManager::getMotorCount() { return motor_count_; }
+
+// std::vector<hardware_interface::StateInterface> MotorManager::getStateInterfaces(std::vector<hardware_interface::ComponentInfo>& joints) {
+//     std::vector<hardware_interface::StateInterface> interfaces;
+//     for (size_t i = 0; i < motor_count_; i++) {
+//         interfaces.emplace_back(hardware_interface::StateInterface(
+//             joints[i].name, /*hardware_interface::HW_IF_POSITION*/ "position", &hw_positions_[i]));
+//         interfaces.emplace_back(hardware_interface::StateInterface(
+//             joints[i].name, /*hardware_interface::HW_IF_VELOCITY*/ "velocity", &hw_velocities_[i]));
+//     }
+//     return interfaces;
+// }
+
+// std::vector<hardware_interface::CommandInterface> MotorManager::getCommandInterface(std::vector<hardware_interface::ComponentInfo>& joints) {
+//     std::vector<hardware_interface::CommandInterface> interfaces;
+//     for (size_t i = 0; i < motor_count_; i++) {
+//         interfaces.emplace_back(hardware_interface::CommandInterface(
+//         joints[i].name, /*hardware_interface::HW_IF_VELOCITY*/ "velocity", &hw_commands_[i]));
+//     }
+//     return interfaces;
+// }
+
+
 
 void MotorManager::tick()
 {
@@ -88,7 +118,7 @@ void MotorManager::tick()
         auto lock = lastManualCommandTime.lock();
         auto now = std::chrono::system_clock::now();
         if (now - *lock > manualCommandTimeout) {
-            RCLCPP_WARN(node->get_logger(), "MotorManager: LOS Safety Stop");
+            RCLCPP_WARN(dl_logger, "MotorManager: LOS Safety Stop");
             stopAllMotors();
         }
     }
@@ -103,7 +133,7 @@ void MotorManager::tick()
 
 void MotorManager::setCommands(const cross_pkg_messages::msg::RoverComputerDriveCMD::SharedPtr msg)
 {
-    RCLCPP_INFO(node->get_logger(), "MotorManager: Drive Commands Received with L: %f, R: %f", msg->cmd_l.x, msg->cmd_r.x);
+    RCLCPP_INFO(dl_logger, "MotorManager: Drive Commands Received with L: %f, R: %f", msg->cmd_l.x, msg->cmd_r.x);
 
     // for (auto m : motors_) {
     //     m.motorLocked = false;

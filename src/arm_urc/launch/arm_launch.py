@@ -6,17 +6,10 @@ from launch_ros.actions import Node
 from launch.substitutions import Command
 
 def generate_launch_description():
-    # urdf_file = os.path.join(
-    #     get_package_share_directory('arm_urc'),
-    #     'urdf',
-    #     'arm_urc.urdf'
-    # )
-
     return LaunchDescription([
         Node(
             package='arm_urc',
-            executable='arm_node',
-            name='ArmController',
+            executable='ArmMotorManager',
             output='screen',
         ),
     ])

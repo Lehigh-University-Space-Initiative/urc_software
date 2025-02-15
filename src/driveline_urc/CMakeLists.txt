@@ -4,6 +4,9 @@ project(driveline_urc)
 # Find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(controller_manager REQUIRED)
+find_package(pluginlib REQUIRED)
+find_package(hardware_interface REQUIRED) 
 find_package(std_msgs REQUIRED)
 find_package(cross_pkg_messages REQUIRED)
 find_package(sensor_msgs REQUIRED)
@@ -11,6 +14,7 @@ find_package(sensor_msgs REQUIRED)
 # Include directories (Added path for cs_libguarded)
 include_directories(
   include
+  ../shared_code
   ${CMAKE_CURRENT_SOURCE_DIR}/include/cs_libguarded  # Include path for cs_plain_guarded.h
   ${CMAKE_CURRENT_SOURCE_DIR}/../../libs/pigpio      # pigpio path
   ${rclcpp_INCLUDE_DIRS}
@@ -21,35 +25,55 @@ add_custom_target(pigpio_build ALL
   COMMAND make -C ${CMAKE_CURRENT_SOURCE_DIR}/../../libs/pigpio
 )
 
-# Motor Controller node executable
-file(GLOB MotorCtr_src
-     "src/MotorCtr/*.cpp"
-     "src/MotorCtr/PID/*.cpp"
+set(DRIVELINE_URC_SRC
+  src/pid.cpp
+  src/DrivelineMotorManager.cpp
 )
-add_executable(MotorCtr_node ${MotorCtr_src})
-ament_target_dependencies(MotorCtr_node rclcpp std_msgs cross_pkg_messages)
 
-# Ensure pigpio is built before MotorCtr_node
-add_dependencies(MotorCtr_node pigpio_build)
+set(DRIVELINE_URC_HW_SRC
+  src/DrivelineHardware.cpp
+)
 
-# Link the pigpio library to MotorCtr_node
-target_link_libraries(MotorCtr_node pigpio)
+add_library(driveline_urc SHARED ${DRIVELINE_URC_SRC})
+add_dependencies(${PROJECT_NAME} pigpio_build)
 
-# GPS Driver node executable
-add_executable(GpsDriver_node src/GpsDriver/main.cpp)
-ament_target_dependencies(GpsDriver_node rclcpp std_msgs cross_pkg_messages)
-target_link_libraries(GpsDriver_node gps)
+ament_target_dependencies(${PROJECT_NAME}
+  rclcpp
+  hardware_interface
+  pluginlib
+  std_msgs
+  cross_pkg_messages
+  sensor_msgs
+)
+target_link_libraries(${PROJECT_NAME} pigpio)
 
-# Install the executables
+add_library(driveline_urc_hw SHARED ${DRIVELINE_URC_HW_SRC})
+set_target_properties(driveline_urc_hw PROPERTIES OUTPUT_NAME "driveline_urc_hw")
+ament_target_dependencies(driveline_urc_hw
+  rclcpp
+  hardware_interface
+  pluginlib
+  cross_pkg_messages
+)
+target_link_libraries(driveline_urc_hw pigpio driveline_urc)
+
+
+pluginlib_export_plugin_description_file(hardware_interface plugin.xml)
+
 install(TARGETS
-  MotorCtr_node
-  GpsDriver_node
-  DESTINATION lib/${PROJECT_NAME})
+  driveline_urc
+  driveline_urc_hw
+  DESTINATION lib
+)
 
-# Install the launch directory
+install(FILES plugin.xml
+  DESTINATION share/${PROJECT_NAME}
+)
+
 install(DIRECTORY
+  # urdf
   launch
-  DESTINATION share/${PROJECT_NAME}/
+  DESTINATION share/${PROJECT_NAME}
 )
 
 ament_package()

@@ -27,6 +27,9 @@ case "$1" in
   driveline)
     ros2 launch driveline_urc driveline_launch.py
     ;;
+  arm)
+    ros2 launch arm_urc arm_launch.py
+    ;;
   ground_input)
     ros2 launch ground_input_urc ground_input_launch.py
     ;;

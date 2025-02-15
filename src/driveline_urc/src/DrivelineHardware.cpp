@@ -1,46 +1,46 @@
-#include "arm_urc/ArmHardware.hpp"
+#include "driveline_urc/DrivelineHardware.hpp"
 #include <pluginlib/class_list_macros.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <algorithm>
-#include "arm_urc/Logger.h"
+#include "driveline_urc/Logger.h"
 
-rclcpp::Logger arm_logger = rclcpp::get_logger("arm logger");
-#include "arm_urc/ArmMotorManager.h"
+rclcpp::Logger dl_logger = rclcpp::get_logger("driveline logger");
+#include "driveline_urc/DrivelineMotorManager.h"
 
-namespace arm_urc
+namespace driveline_urc
 {
 
 
-hardware_interface::CallbackReturn ArmHardware::on_init(const hardware_interface::HardwareInfo &info)
+hardware_interface::CallbackReturn DrivelineHardware::on_init(const hardware_interface::HardwareInfo &info)
 {
   if (hardware_interface::SystemInterface::on_init(info) != hardware_interface::CallbackReturn::SUCCESS) {
     return hardware_interface::CallbackReturn::ERROR;
   }
 
   if (info_.joints.size() != 6) {
-    RCLCPP_ERROR(dl_logger, "Arm: Expected 6 joints in URDF, found %zu", info_.joints.size());
+    RCLCPP_ERROR(dl_logger, "Driveline: Expected 6 joints in URDF, found %zu", info_.joints.size());
     return hardware_interface::CallbackReturn::ERROR;
   }
 
-  RCLCPP_INFO(dl_logger, "Arm on_init: command clamp [%.2f, %.2f]", -MAX_DRIVE_POWER, MAX_DRIVE_POWER);
+  RCLCPP_INFO(dl_logger, "Driveline on_init: command clamp [%.2f, %.2f]", -MAX_DRIVE_POWER, MAX_DRIVE_POWER);
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 
 hardware_interface::CallbackReturn
-  ArmHardware::on_configure(const rclcpp_lifecycle::State & /*previous_state*/)
+  DrivelineHardware::on_configure(const rclcpp_lifecycle::State & /*previous_state*/)
 {
-  // Create a logger for the arm hardware
-  // rclcpp::Logger dl_logger = rclcpp::get_logger("arm logger");
+  // Create a logger for the driveline hardware
+  // rclcpp::Logger dl_logger = rclcpp::get_logger("driveline logger");
 
   // Construct the manager
-  manager_ = std::make_unique<ArmMotorManager>();
+  manager_ = std::make_unique<DrivelineMotorManager>();
 
-  RCLCPP_INFO(dl_logger, "ArmHardware on_configure done");
+  RCLCPP_INFO(dl_logger, "DrivelineHardware on_configure done");
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 
 std::vector<hardware_interface::StateInterface>
-  ArmHardware::export_state_interfaces()
+  DrivelineHardware::export_state_interfaces()
 {
   // std::vector<hardware_interface::StateInterface> interfaces;
   // for (size_t i = 0; i < 6; i++) {
@@ -50,25 +50,28 @@ std::vector<hardware_interface::StateInterface>
   //     info_.joints[i].name, /*hardware_interface::HW_IF_VELOCITY*/ "velocity", &hw_velocities_[i]));
   // }
 
-  std::vector<hardware_interface::StateInterface> interfaces = manager_->getStateInterfaces(info_.joints);
-
-  return interfaces;
+  //TODO: fixme
+  // std::vector<hardware_interface::StateInterface> interfaces = manager_->getStateInterfaces(info_.joints);
+  // return interfaces;
+  return {};
 }
 
 std::vector<hardware_interface::CommandInterface>
-  ArmHardware::export_command_interfaces()
+  DrivelineHardware::export_command_interfaces()
 {
   // std::vector<hardware_interface::CommandInterface> interfaces;
   // for (size_t i = 0; i < 6; i++) {
   //   interfaces.emplace_back(hardware_interface::CommandInterface(
   //     info_.joints[i].name, /*hardware_interface::HW_IF_VELOCITY*/ "velocity", &hw_commands_[i]));
   // }
-  std::vector<hardware_interface::CommandInterface> interfaces = manager_->getCommandInterface(info_.joints);
-  return interfaces;
+  //TODO: fixme
+  // std::vector<hardware_interface::CommandInterface> interfaces = manager_->getCommandInterface(info_.joints);
+  // return interfaces;
+  return {};
 }
 
 hardware_interface::return_type
-  ArmHardware::read(const rclcpp::Time & /*time*/, const rclcpp::Duration &period)
+  DrivelineHardware::read(const rclcpp::Time & /*time*/, const rclcpp::Duration &period)
 {
   manager_->tick();
 
@@ -79,7 +82,7 @@ hardware_interface::return_type
 }
 
 hardware_interface::return_type
-  ArmHardware::write(const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/)
+  DrivelineHardware::write(const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/)
 {
   manager_->writeMotors();
   //
@@ -92,4 +95,4 @@ hardware_interface::return_type
 }
 #include "pluginlib/class_list_macros.hpp"
 
-PLUGINLIB_EXPORT_CLASS(arm_urc::ArmHardware, hardware_interface::SystemInterface)
+PLUGINLIB_EXPORT_CLASS(driveline_urc::DrivelineHardware, hardware_interface::SystemInterface)

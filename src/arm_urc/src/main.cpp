@@ -7,8 +7,19 @@
 // Global variables
 std::shared_ptr<rclcpp::Node> node;
 
+std::unique_ptr<ArmMotorManager> manager;
 
-int main(int argc, char** argv) {
+// Callback function
+void callback(const cross_pkg_messages::msg::RoverComputerArmCMD::SharedPtr msg)
+{
+    //    RCLCPP_INFO(rclcpp::get_logger("Motor_CTR"), "Received command with CMD_R.z: %f", msg->cmd_r.z);
+    // wrist_yaw.setVelocity(msg->cmd_r.z);  // Uncomment and set velocity when integrating
+    manager->setArmCommand(msg);
+}
+
+
+int main(int argc, char **argv)
+{
     rclcpp::init(argc, argv);
 
     // Create ROS2 node
@@ -17,16 +28,25 @@ int main(int argc, char** argv) {
     RCLCPP_INFO(node->get_logger(), "ArmMotorManager is running");
 
     // Construct the manager
-    std::unique_ptr<ArmMotorManager> manager = std::make_unique<ArmMotorManager>();
+    manager = std::make_unique<ArmMotorManager>();
 
-    rclcpp::Rate loop_rate(10);  // Set rate to 10 Hz
+        // Subscriber for rover drive commands
+    auto driveCommandsSub = node->create_subscription<cross_pkg_messages::msg::RoverComputerArmCMD>(
+        "/roverArmCommands", 10, callback);
 
-    while (rclcpp::ok()) {
+
+    rclcpp::Rate loop_rate(10); // Set rate to 10 Hz
+
+    while (rclcpp::ok())
+    {
         // Spin and process ROS callbacks
         rclcpp::spin_some(node);
         manager->tick();
         loop_rate.sleep();
     }
+
+    //dealloc
+    manager = nullptr;
 
     rclcpp::shutdown();
     return 0;
