@@ -69,6 +69,12 @@ double PIDImpl::calculate( double setpoint, double pv )
 
     // Integral term
     _integral += error * _dt;
+    //prevent windeup
+    if( _integral > _max )
+        _integral = 0.1 * _max;
+    else if( _integral < _min )
+        _integral = 0.1 * _min;
+
     double Iout = _Ki * _integral;
 
     // Derivative term

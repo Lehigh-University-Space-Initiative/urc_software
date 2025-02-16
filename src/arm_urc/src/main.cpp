@@ -13,7 +13,7 @@ std::unique_ptr<ArmMotorManager> manager;
 // Callback function
 void callback(const cross_pkg_messages::msg::RoverComputerArmCMD::SharedPtr msg)
 {
-    //    RCLCPP_INFO(rclcpp::get_logger("Motor_CTR"), "Received command with CMD_R.z: %f", msg->cmd_r.z);
+    RCLCPP_INFO(rclcpp::get_logger("Motor_CTR"), "Received command with CMD_S: %f", msg->cmd_s);
     // wrist_yaw.setVelocity(msg->cmd_r.z);  // Uncomment and set velocity when integrating
     manager->setArmCommand(msg);
 }
@@ -39,7 +39,7 @@ int main(int argc, char **argv)
     auto armPosPub = node->create_publisher<cross_pkg_messages::msg::RoverComputerArmCMD>(
         "/roverArmPos", 10);
 
-    rclcpp::Rate loop_rate(10); // Set rate to 10 Hz
+    rclcpp::Rate loop_rate(6000); // Set rate to 6k Hz
     
     std::chrono::system_clock::time_point last_update = std::chrono::system_clock::now();
     bool firstTime = true;
@@ -50,20 +50,22 @@ int main(int argc, char **argv)
         rclcpp::spin_some(node);
         manager->tick();
 
-        // if (!firstTime) {
-        //     manager->readMotors(std::chrono::system_clock::now() - last_update);
+        if (!firstTime) {
+            //reading of movotrs for movit should be in radians from veterical
+            manager->readMotors(std::chrono::duration<double>(std::chrono::system_clock::now() - last_update).count());
 
-        //     auto& positions = manager->getMotorPositions();
-        //     if (positions.size() >= 2) {
-        //         cross_pkg_messages::msg::RoverComputerArmCMD msg{};
+            auto& positions = manager->getMotorPositions();
+            if (positions.size() >= 2) {
+                cross_pkg_messages::msg::RoverComputerArmCMD msg{};
 
-        //         msg.cmd_s = positions[1];
-        //         msg.cmd_e = positions[2];
+
+                msg.cmd_s = positions[3];
+                // msg.cmd_e = positions[2];
                 
-        //         // armPosPub->publish(msg);
-        //     }
+                armPosPub->publish(msg);
+            }
 
-        // }
+        }
         firstTime = false;
 
         last_update = std::chrono::system_clock::now();

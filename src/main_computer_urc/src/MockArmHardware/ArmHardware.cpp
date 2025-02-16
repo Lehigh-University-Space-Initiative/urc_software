@@ -29,8 +29,8 @@ hardware_interface::CallbackReturn ArmHardware::on_init(const hardware_interface
   node_ = rclcpp::Node::make_shared("mock_arm_hardware");
 
 
-  armPublisher = node_->create_publisher<cross_pkg_messages::msg::RoverComputerArmCMD>("roverArmCommands", 10);
-  armPosSubscriber = node_->create_subscription<cross_pkg_messages::msg::RoverComputerArmCMD>("roverArmPos", 10, std::bind(&ArmHardware::onReceivePosition, this, std::placeholders::_1));
+  armPublisher = node_->create_publisher<cross_pkg_messages::msg::RoverComputerArmCMD>("/roverArmCommands", 10);
+  armPosSubscriber = node_->create_subscription<cross_pkg_messages::msg::RoverComputerArmCMD>("/roverArmPos", 10, std::bind(&ArmHardware::onReceivePosition, this, std::placeholders::_1));
 
   RCLCPP_INFO(arm_logger, "Arm on_init: command clamp [%.2f, %.2f]", std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
   return hardware_interface::CallbackReturn::SUCCESS;
@@ -81,6 +81,8 @@ hardware_interface::return_type
   // if (hw_commands_[0] != 0 || hw_commands_[1] != 0)
   // RCLCPP_INFO(arm_logger, "GOT updated arm commands: %.2f %.2f",hw_commands_[0],hw_commands_[1]);
 
+  rclcpp::spin_some(node_);
+
   cross_pkg_messages::msg::RoverComputerArmCMD msg{};
   msg.cmd_s = hw_commands_[0];
   msg.cmd_e= hw_commands_[1];
@@ -105,6 +107,7 @@ void ArmHardware::onReceivePosition(const cross_pkg_messages::msg::RoverComputer
 {
   hw_positions_[0] = msg->cmd_s; 
   hw_positions_[1] = msg->cmd_e; 
+  RCLCPP_ERROR(arm_logger, "got posses with %f", hw_positions_[0]);
 }
 
 }

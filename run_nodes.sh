@@ -22,7 +22,10 @@ case "$1" in
     # ros2 run base_station_urc GroundStationGUI
     ;;
   main_computer)
-    ros2 launch main_computer_urc main_computer_launch.py
+    ros2 launch main_computer_urc main_computer_launch.py gui_only:=false
+    ;;
+  rviz)
+    ros2 launch main_computer_urc rviz_gui_launch.py
     ;;
   driveline)
     ros2 launch driveline_urc driveline_launch.py

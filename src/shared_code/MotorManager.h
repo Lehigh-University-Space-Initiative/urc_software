@@ -35,7 +35,7 @@ public:
 
     void sendHeartbeats();
     void tick();
-    void readMotors(const rclcpp::Duration period);
+    void readMotors(double period);
     std::vector<double>& getMotorPositions();
     virtual void writeMotors();
     size_t getMotorCount();

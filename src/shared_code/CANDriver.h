@@ -72,14 +72,15 @@ public:
 
     CANDriver(int busNum, int canID);
     CANDriver(const CANDriver& other);
-    CANDriver& operator=(const CANDriver& other);
+    // CANDriver(const CANDriver&& other);
+    CANDriver& operator=(const CANDriver& other) = delete;
     virtual ~CANDriver();
 };
 
 class SparkMax : CANDriver {
 protected:
     // velocity in rad / s
-    double pidSetpoint = 0;
+    double pidSetpoint = 0;// 3.141592 * 0.5;
 
 
     double lastVel = 0;
@@ -104,7 +105,8 @@ public:
 
     // PID pidController = PID(0.01,MAX_DRIVE_POWER,-MAX_DRIVE_POWER,0.06,0.001,0.05);
     //TODO fix for driveline
-    PID pidController = PID(0.01,0.1,-0.1,0.06,0.001,0.05);
+    //TODO Note: the DT is set as constant here not dynamic
+    PID pidController = PID(0.005,0.1,-0.05,0.3,0.01,0.2);
 
     void ident();
 };

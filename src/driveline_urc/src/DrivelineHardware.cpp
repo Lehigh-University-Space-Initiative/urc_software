@@ -76,7 +76,7 @@ hardware_interface::return_type
   manager_->tick();
 
   // read the actual velocities from the motors
-  manager_->readMotors(period);
+  manager_->readMotors(period.seconds());
 
   return hardware_interface::return_type::OK;
 }

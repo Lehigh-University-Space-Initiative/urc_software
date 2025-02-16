@@ -52,6 +52,10 @@ void MotorManager::init()
     auto lock = lastManualCommandTime.lock();
     *lock = std::chrono::system_clock::now();
   }
+
+  for(auto& motor: motors_) {
+    motor.sendPowerCMD(0);
+  }
 }
 
 void MotorManager::sendHeartbeats()
@@ -61,11 +65,12 @@ void MotorManager::sendHeartbeats()
     }
 }
 
-void MotorManager::readMotors(const rclcpp::Duration period) {
+void MotorManager::readMotors(double period) {
     for (size_t i = 0; i < motor_count_; i++) {
         double velocity = motors_[i].lastVelocityAsRadPerSec();
         hw_velocities_[i] = velocity;
-        hw_positions_[i] += velocity * period.seconds();
+        hw_positions_[i] += velocity * period;
+        // RCLCPP_INFO(dl_logger, "MotorManager: motor %ld vel: %.10f",i,hw_velocities_[i]);
     }
 }
 
@@ -118,53 +123,55 @@ void MotorManager::tick()
     CANDriver::doCanReadIter(1);
 
     if (loopItr % 30 != 0) return;
+    
+    //give pid tick
+    for (auto i = 0; i < motors_.size(); i++) {
+        auto& motor = motors_[i];
+        motor.sendHeartbeat();
+        motor.pidTick(hw_positions_[i]);
+    }
 
     {  // lock block for LOS safety stop
         auto lock = lastManualCommandTime.lock();
         auto now = std::chrono::system_clock::now();
         if (now - *lock > manualCommandTimeout) {
-            RCLCPP_WARN(dl_logger, "MotorManager: LOS Safety Stop");
-            stopAllMotors();
+            RCLCPP_WARN(dl_logger, "MotorManager: LOS Safety Stop WARNING: DISABLED");
+            // stopAllMotors();
         }
     }
 
-    //give pid tick
-    for (auto i = 0; i < motors_.size(); i++) {
-        auto motor = motors_[i];
-        motor.sendHeartbeat();
-        motor.pidTick(hw_positions_[i]);
-    }
+
 }
 
 
 void MotorManager::setCommands(const cross_pkg_messages::msg::RoverComputerDriveCMD::SharedPtr msg)
 {
-    RCLCPP_INFO(dl_logger, "MotorManager: Drive Commands Received with L: %f, R: %f", msg->cmd_l.x, msg->cmd_r.x);
+    // RCLCPP_INFO(dl_logger, "MotorManager: Drive Commands Received with L: %f, R: %f", msg->cmd_l.x, msg->cmd_r.x);
 
-    // for (auto m : motors_) {
-    //     m.motorLocked = false;
-    // }
+    // // for (auto m : motors_) {
+    // //     m.motorLocked = false;
+    // // }
 
-    // Send power commands to motors based on drive command message
-    // motors[0].setPIDSetpoint(-msg->cmd_l.x);
-    // motors[1].setPIDSetpoint(-msg->cmd_l.y);
-    // motors[2].setPIDSetpoint(-msg->cmd_l.z);
+    // // Send power commands to motors based on drive command message
+    // // motors[0].setPIDSetpoint(-msg->cmd_l.x);
+    // // motors[1].setPIDSetpoint(-msg->cmd_l.y);
+    // // motors[2].setPIDSetpoint(-msg->cmd_l.z);
 
-    // motors[3].setPIDSetpoint(msg->cmd_r.x);
-    // motors[4].setPIDSetpoint(msg->cmd_r.y);
-    // motors[5].setPIDSetpoint(msg->cmd_r.z);
+    // // motors[3].setPIDSetpoint(msg->cmd_r.x);
+    // // motors[4].setPIDSetpoint(msg->cmd_r.y);
+    // // motors[5].setPIDSetpoint(msg->cmd_r.z);
 
     
-    motors_[0].sendPowerCMD(-msg->cmd_l.x / 20);
-    motors_[1].sendPowerCMD(-msg->cmd_l.y / 20);
-    motors_[2].sendPowerCMD(-msg->cmd_l.z / 20);
+    // motors_[0].sendPowerCMD(-msg->cmd_l.x / 20);
+    // motors_[1].sendPowerCMD(-msg->cmd_l.y / 20);
+    // motors_[2].sendPowerCMD(-msg->cmd_l.z / 20);
 
-    motors_[3].sendPowerCMD(msg->cmd_r.x / 20);
-    motors_[4].sendPowerCMD(msg->cmd_r.y / 20);
-    motors_[5].sendPowerCMD(msg->cmd_r.z / 20);
+    // motors_[3].sendPowerCMD(msg->cmd_r.x / 20);
+    // motors_[4].sendPowerCMD(msg->cmd_r.y / 20);
+    // motors_[5].sendPowerCMD(msg->cmd_r.z / 20);
 
 
-    resetLOSTimeout();
+    // resetLOSTimeout();
 }
 
 
@@ -173,5 +180,10 @@ void MotorManager::resetLOSTimeout()
 {
   auto lock = lastManualCommandTime.lock();
   *lock = std::chrono::system_clock::now();
+  
+    for (auto i = 0; i < motors_.size(); i++) {
+        auto& motor = motors_[i];
+        motor.motorLocked = false;
+    }
 }
 

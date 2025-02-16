@@ -1,12 +1,24 @@
 from launch import LaunchDescription
 from launch_ros.actions import Node
-from launch.substitutions import Command, PathJoinSubstitution, FindExecutable
+from launch.substitutions import Command, PathJoinSubstitution, FindExecutable, LaunchConfiguration
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, SetEnvironmentVariable
-from launch_ros.substitutions import FindPackageShare
+from launch_ros.substitutions import FindPackageShare 
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from moveit_configs_utils import MoveItConfigsBuilder
+from launch.conditions import IfCondition, UnlessCondition
+
 
 def generate_launch_description():
+
+    declared_arguments = []
+    declared_arguments.append(
+        DeclareLaunchArgument(
+            "gui_only",
+            default_value="false",
+            description="",
+        )
+    )
+    gui_only = LaunchConfiguration("gui_only")
 
     ## Setup for State publishing
 
@@ -65,6 +77,7 @@ def generate_launch_description():
         name="rviz2",
         output="log",
         arguments=["-d", rviz_file],
+        condition=IfCondition(gui_only),
     )
     joint_state_publisher_node = Node(
         package="joint_state_publisher_gui",
@@ -88,17 +101,20 @@ def generate_launch_description():
         remappings=[
             ("~/robot_description", "/robot_description"),
         ],
+        condition=UnlessCondition(gui_only),
     )
     joint_state_broadcaster_spawner = Node(
         package="controller_manager",
         executable="spawner",
         arguments=["joint_state_broadcaster"],
+        condition=UnlessCondition(gui_only),
     )
 
     arm_controller_spawner = Node(
         package="controller_manager",
         executable="spawner",
         arguments=["arm_controller"],
+        condition=UnlessCondition(gui_only),
     )
 
 
@@ -110,7 +126,7 @@ def generate_launch_description():
     move_group_node = Node(package='moveit_ros_move_group', executable='move_group',
                        output='screen',
                        parameters=[moveit_config.to_dict()],
-
+                        condition=UnlessCondition(gui_only),
                        )
 
 
@@ -177,7 +193,7 @@ def generate_launch_description():
         #         '--remap', 'out/compressed:=/video_stream/compressed',
         #     ],
         # ),
-    ])
+    ] + declared_arguments)
 
 # <ros2_control name="${name}" type="system">
 #             <hardware>

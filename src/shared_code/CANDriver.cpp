@@ -130,7 +130,7 @@ bool CANDriver::receiveMSG(int canBus, can_frame &frame)
 }
 
 const uint32_t perioticUpdateCanIDBase = 0x82051840;
-const uint32_t maxCANID = 7;
+const uint32_t maxCANID = 60;
 
 void CANDriver::startCanReadThread(int canBus)
 {
@@ -163,8 +163,9 @@ void CANDriver::startCanReadThread(int canBus)
 void CANDriver::doCanReadIter(int canBus)
 {
         can_frame frame;
+        // RCLCPP_INFO(dl_logger,"checking can");
         if (receiveMSG(canBus, frame)) {
-            // ROS_INFO("received item: %x",frame.can_id);
+            // RCLCPP_INFO(dl_logger,"received item: %x",frame.can_id);
 
             //check if the frame is a periotic update
             if (frame.can_id >= perioticUpdateCanIDBase && frame.can_id < perioticUpdateCanIDBase + maxCANID) {
@@ -172,7 +173,7 @@ void CANDriver::doCanReadIter(int canBus)
                 // ROS_INFO("Periotic Update Received");
 
                 //print the frame to formated string
-                // ROS_INFO("ID: %x", frame.can_id);
+                // RCLCPP_INFO(dl_logger, "ID: %x", frame.can_id);
                 parsePeriodicData(canBus, frame);
             }
             else {
@@ -212,11 +213,11 @@ void CANDriver::parsePeriodicData(int canBus, can_frame frame)
     if (motorPtr) {
         // motorPtr->lastPeriodicData.velocity.store(pdata.velocity.load());
         motorPtr->lastPeriodicData = pdata;
-        RCLCPP_INFO(dl_logger, "CAN ID %d, velocity %.3f, temperature %i, voltage %i, current %i",motorID,pdata.velocity,pdata.temperature,pdata.voltage,pdata.current);
+        // RCLCPP_INFO(dl_logger, "CAN ID %d, velocity %.3f, temperature %i, voltage %i, current %i",motorID,pdata.velocity,pdata.temperature,pdata.voltage,pdata.current);
         // RCLCPP_INFO(rclcpp::get_logger("CANDriver"), "did  motor found yes. big happy! %f cur",motorPtr->lastPeriodicData.velocity);
         //TODO: copy rest of params
     } else {
-        RCLCPP_WARN(rclcpp::get_logger("CANDriver"), "no motor found BIG DEAL");
+        RCLCPP_WARN(rclcpp::get_logger("CANDriver"), "no motor found THIS IS A BIG DEAL");
     }
         //todo broadcast ros messages with new data
 
@@ -249,10 +250,10 @@ CANDriver::CANDriver(const CANDriver &other)
         *data = *data + 1;
     }
 
-        {
-            auto data = canStaticData[canBus].lock();
-            data->canIDMap[canID] = this;
-        }
+    {
+        auto data = canStaticData[canBus].lock();
+        data->canIDMap[canID] = this;
+    }
 }
 
 void CANDriver::closeCAN(int canBus) {
@@ -266,13 +267,13 @@ void CANDriver::closeCAN(int canBus) {
     data->canBussesSetup = false;
 }
 
-CANDriver& CANDriver::operator=(const CANDriver &other)
-{
-    canBus = other.canBus;
-    canID = other.canID;
+// CANDriver& CANDriver::operator=(const CANDriver &other)
+// {
+//     canBus = other.canBus;
+//     canID = other.canID;
 
-    return *this;
-}
+//     return *this;
+// }
 
 CANDriver::~CANDriver()
 {
@@ -290,6 +291,7 @@ double SparkMax::lastVelocityAsRadPerSec()
     // in rad / second
 
     // each wheel has a 3:1 and a 4:1 gear box leading ot a total of 12:1
+    //TODO fix for drivetrain
     double gearRatio = 12;
     double rpmToRadPerSec = 2 * 3.14159265 / 60;
 
@@ -335,12 +337,12 @@ void SparkMax::setPIDSetpoint(double pidSetpoint)
 void SparkMax::pidTick(double currentPos)
 {
     if (pidControlled && !motorLocked) {
-        // double currentVel = lastVelocityAsRadPerSec(); 
+        double currentVel = lastVelocityAsRadPerSec(); 
 
         double val = pidController.calculate(pidSetpoint,currentPos);
-        RCLCPP_INFO(rclcpp::get_logger("SparkMax"), "running pid %d with set: %f, cur: %f output: %f", canID, pidSetpoint,currentPos,val);
+        RCLCPP_INFO(rclcpp::get_logger("SparkMax"), "running pid %d with set: %f, cur: %f output: %f", canID, pidSetpoint, currentPos,val);
 
-        //sendPowerCMD(val);
+        sendPowerCMD(val);
     }
 }
 
@@ -350,7 +352,7 @@ void SparkMax::ident()
     frame.can_id = 0x2051D80 + canID;
     frame.can_dlc = 0;
 
-    RCLCPP_INFO(rclcpp::get_logger("SparkMax"), "Sending ident message to CAN ID: %x", frame.can_id);
+    RCLCPP_INFO(rclcpp::get_logger("SparkMax"), "Sending ident message to CAN ID: %X (%X)", frame.can_id,canID);
 
     sendMSG(canBus, frame);
 }
