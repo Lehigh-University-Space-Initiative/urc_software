@@ -19,10 +19,10 @@ void ArmMotorManager::writeMotors() {
 void ArmMotorManager::setArmCommand(const cross_pkg_messages::msg::RoverComputerArmCMD::SharedPtr msg)
 {
     //TODO add the rest
-    // hw_commands_[1] = msg->cmd_s;
-    // hw_commands_[2] = msg->cmd_e;
+    hw_commands_[1] = msg->cmd_s;
+    hw_commands_[2] = msg->cmd_e;
     // TODO test
-    hw_commands_[3] = msg->cmd_s;
+    // hw_commands_[3] = msg->cmd_s;
     writeMotors();
 }
 

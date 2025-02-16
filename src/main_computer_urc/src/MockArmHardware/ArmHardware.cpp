@@ -85,7 +85,7 @@ hardware_interface::return_type
 
   cross_pkg_messages::msg::RoverComputerArmCMD msg{};
   msg.cmd_s = hw_commands_[0];
-  msg.cmd_e= hw_commands_[1];
+  msg.cmd_e = -hw_commands_[1];
 
   armPublisher->publish(msg);
 
@@ -106,7 +106,7 @@ hardware_interface::return_type
 void ArmHardware::onReceivePosition(const cross_pkg_messages::msg::RoverComputerArmCMD::SharedPtr msg)
 {
   hw_positions_[0] = msg->cmd_s; 
-  hw_positions_[1] = msg->cmd_e; 
+  hw_positions_[1] = -msg->cmd_e; 
   RCLCPP_ERROR(arm_logger, "got posses with %f", hw_positions_[0]);
 }
 

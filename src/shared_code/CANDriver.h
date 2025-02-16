@@ -106,7 +106,7 @@ public:
     // PID pidController = PID(0.01,MAX_DRIVE_POWER,-MAX_DRIVE_POWER,0.06,0.001,0.05);
     //TODO fix for driveline
     //TODO Note: the DT is set as constant here not dynamic
-    PID pidController = PID(0.005,0.1,-0.05,0.3,0.01,0.2);
+    PID pidController = PID(0.005,0.15,-0.15,0.3,0.01,0.2);
 
     void ident();
 };

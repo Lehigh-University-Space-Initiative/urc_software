@@ -292,7 +292,7 @@ double SparkMax::lastVelocityAsRadPerSec()
 
     // each wheel has a 3:1 and a 4:1 gear box leading ot a total of 12:1
     //TODO fix for drivetrain
-    double gearRatio = 12;
+    double gearRatio = 125;
     double rpmToRadPerSec = 2 * 3.14159265 / 60;
 
     return  lastPeriodicData.velocity / gearRatio * rpmToRadPerSec;
