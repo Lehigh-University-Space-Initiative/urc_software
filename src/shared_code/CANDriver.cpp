@@ -129,8 +129,9 @@ bool CANDriver::receiveMSG(int canBus, can_frame &frame)
     // return true;
 }
 
-const uint32_t perioticUpdateCanIDBase = 0x82051840;
-const uint32_t maxCANID = 60;
+const uint32_t perioticUpdate1CanIDBase = 0x82051840;
+const uint32_t perioticUpdate2CanIDBase = 0x82051880;
+const uint32_t maxCANID = 63;
 
 void CANDriver::startCanReadThread(int canBus)
 {
@@ -141,13 +142,13 @@ void CANDriver::startCanReadThread(int canBus)
             // ROS_INFO("received item: %x",frame.can_id);
 
             //check if the frame is a periotic update
-            if (frame.can_id >= perioticUpdateCanIDBase && frame.can_id < perioticUpdateCanIDBase + maxCANID) {
+            if (frame.can_id >= perioticUpdate1CanIDBase && frame.can_id < perioticUpdate1CanIDBase + maxCANID) {
                 //handle periotic update
                 // ROS_INFO("Periotic Update Received");
 
                 //print the frame to formated string
                 // ROS_INFO("ID: %x", frame.can_id);
-                parsePeriodicData(canBus, frame);
+                parsePeriodicData1(canBus, frame);
             }
             else {
                 //handle other frames
@@ -168,13 +169,11 @@ void CANDriver::doCanReadIter(int canBus)
             // RCLCPP_INFO(dl_logger,"received item: %x",frame.can_id);
 
             //check if the frame is a periotic update
-            if (frame.can_id >= perioticUpdateCanIDBase && frame.can_id < perioticUpdateCanIDBase + maxCANID) {
-                //handle periotic update
-                // ROS_INFO("Periotic Update Received");
-
-                //print the frame to formated string
-                // RCLCPP_INFO(dl_logger, "ID: %x", frame.can_id);
-                parsePeriodicData(canBus, frame);
+            if (frame.can_id >= perioticUpdate1CanIDBase && frame.can_id < perioticUpdate1CanIDBase + maxCANID) {
+                parsePeriodicData1(canBus, frame);
+            }
+            else if (frame.can_id >= perioticUpdate2CanIDBase && frame.can_id < perioticUpdate2CanIDBase + maxCANID) {
+                parsePeriodicData2(canBus, frame);
             }
             else {
                 //handle other frames
@@ -186,20 +185,20 @@ void CANDriver::doCanReadIter(int canBus)
         }
 }
 
-void CANDriver::parsePeriodicData(int canBus, can_frame frame)
+void CANDriver::parsePeriodicData1(int canBus, can_frame frame)
 {
     // length, dataout[1], dataout[2], dataout[3], dataout[4], dataout[5], dataout[6], dataout[7]
     // 8, Motor Velocity LSB, Motor Velocity MID_L, Motor Velocity MID_H, Motor Velocity MSB, Motor Temperature, Motor Voltage LSB, Motor Current LSB 4 bits Motor Voltage MSB 4 bits, Motor Current MSB
 
     //parse the data
-    PeriodicUpdateData pdata;
+    PeriodicUpdateData1 pdata;
     uint32_t velocityFloat = (frame.data[0] | (frame.data[1] << 8) | (frame.data[2] << 16) | (frame.data[3] << 24));
     pdata.velocity = *(reinterpret_cast<float*>(&velocityFloat));
     pdata.temperature = frame.data[4];
     pdata.voltage = (frame.data[5] | ((frame.data[6] & 0x0F) << 8));
     pdata.current = ((frame.data[6] & 0xF0) | (frame.data[7] << 4));
 
-    auto motorID = frame.can_id - perioticUpdateCanIDBase;
+    auto motorID = frame.can_id - perioticUpdate1CanIDBase;
 
     
     //assign the data to the correct motor
@@ -212,12 +211,48 @@ void CANDriver::parsePeriodicData(int canBus, can_frame frame)
 
     if (motorPtr) {
         // motorPtr->lastPeriodicData.velocity.store(pdata.velocity.load());
-        motorPtr->lastPeriodicData = pdata;
+        motorPtr->lastPeriodicData1 = pdata;
         // RCLCPP_INFO(dl_logger, "CAN ID %d, velocity %.3f, temperature %i, voltage %i, current %i",motorID,pdata.velocity,pdata.temperature,pdata.voltage,pdata.current);
         // RCLCPP_INFO(rclcpp::get_logger("CANDriver"), "did  motor found yes. big happy! %f cur",motorPtr->lastPeriodicData.velocity);
         //TODO: copy rest of params
     } else {
         RCLCPP_WARN(rclcpp::get_logger("CANDriver"), "no motor found THIS IS A BIG DEAL");
+    }
+        //todo broadcast ros messages with new data
+
+}
+
+void CANDriver::parsePeriodicData2(int canBus, can_frame frame)
+{
+    // length, dataout[1], dataout[2], dataout[3], dataout[4], dataout[5], dataout[6], dataout[7]
+    // 8, Motor Velocity LSB, Motor Velocity MID_L, Motor Velocity MID_H, Motor Velocity MSB, Motor Temperature, Motor Voltage LSB, Motor Current LSB 4 bits Motor Voltage MSB 4 bits, Motor Current MSB
+
+    //parse the data
+    PeriodicUpdateData2 pdata;
+    uint32_t positionFloat = (frame.data[0] | (frame.data[1] << 8) | (frame.data[2] << 16) | (frame.data[3] << 24));
+    //position from motor is in revolutions from zero
+    pdata.position = *(reinterpret_cast<float*>(&positionFloat));
+
+    auto motorID = frame.can_id - perioticUpdate2CanIDBase;
+    RCLCPP_WARN(rclcpp::get_logger("CANDriver"), "GOT motor %d pos of: %.2f",motorID,pdata.position);
+
+    
+    //assign the data to the correct motor
+    CANDriver* motorPtr = nullptr;
+    {
+        auto data = canStaticData[canBus].lock();
+        
+        motorPtr = data->canIDMap[motorID];
+    }
+
+    if (motorPtr) {
+        // motorPtr->lastPeriodicData.velocity.store(pdata.velocity.load());
+        motorPtr->lastPeriodicData2 = pdata;
+        // RCLCPP_INFO(dl_logger, "CAN ID %d, velocity %.3f, temperature %i, voltage %i, current %i",motorID,pdata.velocity,pdata.temperature,pdata.voltage,pdata.current);
+        // RCLCPP_INFO(rclcpp::get_logger("CANDriver"), "did  motor found yes. big happy! %f cur",motorPtr->lastPeriodicData.velocity);
+        //TODO: copy rest of params
+    } else {
+        RCLCPP_WARN(rclcpp::get_logger("CANDriver"), "PERIODIC 2 no motor found THIS IS A BIG DEAL");
     }
         //todo broadcast ros messages with new data
 
@@ -292,13 +327,46 @@ double SparkMax::lastVelocityAsRadPerSec()
 
     // each wheel has a 3:1 and a 4:1 gear box leading ot a total of 12:1
     //TODO fix for drivetrain
-    double gearRatio = 125;
     double rpmToRadPerSec = 2 * 3.14159265 / 60;
 
-    return  lastPeriodicData.velocity / gearRatio * rpmToRadPerSec;
+    return  lastPeriodicData1.velocity / gearRatio * rpmToRadPerSec;
 }
 
-SparkMax::SparkMax(int canBUS, int canID) : CANDriver(canBUS, canID) {}
+double SparkMax::lastPositionInRad()
+{
+    double rpmToRadPerSec = 2 * 3.14159265;
+
+    return  lastPeriodicData2.position / gearRatio * rpmToRadPerSec;
+}
+
+void SparkMax::setupPID()
+{
+    double kp = node_->get_parameter("kp").as_double();
+    double ki = node_->get_parameter("ki").as_double();
+    double kd = node_->get_parameter("kd").as_double();
+
+
+    RCLCPP_INFO(rclcpp::get_logger("SparkMax"), "Creating PID with Kp: %f, Ki: %f, Kd: %f",kp,ki,kd);
+
+
+    this->pidController = PID(0.005,0.15,-0.15,kp,kd,ki);
+}
+
+SparkMax::SparkMax(rclcpp::Node::SharedPtr node, int canBUS, int canID, double gearRatio) : CANDriver(canBUS, canID)
+{
+    assert(gearRatio > 0);
+    this->node_ = node;
+
+    setupPID();
+}
+
+SparkMax::SparkMax(const SparkMax &other): CANDriver(other)
+{
+    this->gearRatio = other.gearRatio;
+    this->node_ = other.node_;
+
+    setupPID();
+}
 
 bool SparkMax::sendHeartbeat() {
     can_frame frame{};

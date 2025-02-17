@@ -16,6 +16,7 @@ hardware_interface::CallbackReturn DrivelineHardware::on_init(const hardware_int
   if (hardware_interface::SystemInterface::on_init(info) != hardware_interface::CallbackReturn::SUCCESS) {
     return hardware_interface::CallbackReturn::ERROR;
   }
+  node_ = rclcpp::Node::make_shared("driveline_hardware");
 
   if (info_.joints.size() != 6) {
     RCLCPP_ERROR(dl_logger, "Driveline: Expected 6 joints in URDF, found %zu", info_.joints.size());
@@ -33,7 +34,7 @@ hardware_interface::CallbackReturn
   // rclcpp::Logger dl_logger = rclcpp::get_logger("driveline logger");
 
   // Construct the manager
-  manager_ = std::make_unique<DrivelineMotorManager>();
+  manager_ = std::make_unique<DrivelineMotorManager>(node_);
 
   RCLCPP_INFO(dl_logger, "DrivelineHardware on_configure done");
   return hardware_interface::CallbackReturn::SUCCESS;

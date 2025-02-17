@@ -17,6 +17,8 @@ protected:
     std::vector<double> hw_positions_;
     std::vector<double> hw_velocities_;
     std::vector<double> hw_commands_;
+
+    rclcpp::Node::SharedPtr node_ = nullptr;
 private:
 
     virtual void setupMotors() = 0;
@@ -27,7 +29,7 @@ private:
     void parseDriveCommands(const cross_pkg_messages::msg::RoverComputerDriveCMD::SharedPtr msg);
 
 public:
-    MotorManager();
+    MotorManager(rclcpp::Node::SharedPtr node);
     virtual ~MotorManager();
 
     //can't call virtual fucntion of setupMotors from constructor so setup needs to happen here

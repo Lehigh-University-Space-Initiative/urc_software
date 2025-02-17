@@ -17,6 +17,6 @@ private:
     void setupMotors() override;
 
 public:
-    DrivelineMotorManager();
+    using MotorManager::MotorManager;
     virtual ~DrivelineMotorManager();
 };

@@ -26,10 +26,14 @@ int main(int argc, char **argv)
     // Create ROS2 node
     node = rclcpp::Node::make_shared("ArmMotorManager");
 
+    node->declare_parameter("kp",0.3);
+    node->declare_parameter("kd",0.01);
+    node->declare_parameter("ki",0.2);
+
     RCLCPP_INFO(node->get_logger(), "ArmMotorManager is running");
 
     // Construct the manager
-    manager = std::make_unique<ArmMotorManager>();
+    manager = std::make_unique<ArmMotorManager>(node);
     manager->init();
 
         // Subscriber for rover drive commands

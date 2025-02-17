@@ -3,8 +3,9 @@
 
 rclcpp::Logger dl_logger = rclcpp::get_logger("driveline logger");
 
-MotorManager::MotorManager()
+MotorManager::MotorManager(rclcpp::Node::SharedPtr node)
 {
+    this->node_ = node;
 }
 
 MotorManager::~MotorManager()
@@ -68,9 +69,10 @@ void MotorManager::sendHeartbeats()
 void MotorManager::readMotors(double period) {
     for (size_t i = 0; i < motor_count_; i++) {
         double velocity = motors_[i].lastVelocityAsRadPerSec();
+        double position = motors_[i].lastPositionInRad();
         hw_velocities_[i] = velocity;
-        hw_positions_[i] += velocity * period;
-        // RCLCPP_INFO(dl_logger, "MotorManager: motor %ld vel: %.10f",i,hw_velocities_[i]);
+        hw_positions_[i] = position;
+        //RCLCPP_INFO(dl_logger, "MotorManager: motor %ld vel: %.10f, pos: %.10f",i,hw_velocities_[i],hw_positions_[i]);
     }
 }
 

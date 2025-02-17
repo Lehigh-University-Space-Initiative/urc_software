@@ -59,7 +59,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-humble-moveit-ros-planning-interface \
     tmux \
     ruby \
-    vim nano \
+    vim nano gdb \
     libboost-all-dev \
     libboost-dev \
     libboost-date-time-dev \

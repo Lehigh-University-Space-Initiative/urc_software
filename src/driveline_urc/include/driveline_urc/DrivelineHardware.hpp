@@ -25,6 +25,7 @@ public:
 
 private:
   std::unique_ptr<DrivelineMotorManager> manager_;
+  rclcpp::Node::SharedPtr node_;
 };
 
 }  // namespace driveline_urc

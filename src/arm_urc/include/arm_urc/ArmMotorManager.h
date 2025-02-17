@@ -17,7 +17,7 @@ private:
     void setupMotors() override;
 
 public:
-    ArmMotorManager();
+    using MotorManager::MotorManager;
     virtual ~ArmMotorManager();
 
     virtual void writeMotors() override;

@@ -1,10 +1,6 @@
 #include "arm_urc/ArmMotorManager.h"
 #include "Logger.h"
 
-ArmMotorManager::ArmMotorManager() : MotorManager()
-{ 
-}
-
 ArmMotorManager::~ArmMotorManager()
 {
 }
@@ -28,12 +24,13 @@ void ArmMotorManager::setArmCommand(const cross_pkg_messages::msg::RoverComputer
 
 void ArmMotorManager::setupMotors()
 {
-    // Add motors to the motors vector
+    RCLCPP_INFO(rclcpp::get_logger("VVVVVVV"), "node: %p",node_.get());
+    // Add motors to the mo_tors vector
     // Right side (BUS 1)
-    motors_.emplace_back(1, 51); // Base
-    motors_.emplace_back(1, 52); // Shoulder
-    motors_.emplace_back(1, 53); // Elbow
-    motors_.emplace_back(1, 55); // Test
+    motors_.emplace_back(node_, 1, 51, 125); // Base
+    motors_.emplace_back(node_, 1, 52, 125); // Shoulder
+    motors_.emplace_back(node_, 1, 53, 125); // Elbow
+    // motors_.emplace_back(1, 55, 12); // Test
     // motors_.emplace_back(SparkMax(1, 54)); // Wrist 1
     // motors_.emplace_back(SparkMax(1, 55)); // Wrist 2
     // motors_.emplace_back(SparkMax(1, 56)); // Wrist 3
