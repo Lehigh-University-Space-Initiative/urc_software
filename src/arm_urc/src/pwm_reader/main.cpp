@@ -7,6 +7,7 @@
 #include "cross_pkg_messages/msg/rover_computer_drive_cmd.hpp"
 
 
+
 cross_pkg_messages::msg::RoverComputerDriveCMD currentDriveCommand{};
 rclcpp::Publisher<cross_pkg_messages::msg::RoverComputerDriveCMD>::SharedPtr driveTrainPublisher;
 
@@ -21,11 +22,8 @@ void free_gpio();
 
 void setup_pins() {
     //GPIO pins for each PWM reader
-    gpiopins.push_back(14); //22
-    // gpiopins.push_back(1);
-    // gpiopins.push_back(2);
-    // gpiopins.push_back(3);
-    // gpiopins.push_back(4);
+    gpiopins.push_back(14);
+    gpiopins.push_back(18);
 
     gpioSetPullUpDown(22, PI_PUD_DOWN); //temp ground, don't forget to remove when done
 
@@ -49,14 +47,13 @@ void setup_pins() {
 */
 void read_pwm() {
 
-    // for (auto width : edge_width) {
-        auto width = edge_width[0];
-        width %= 1024;
+    for (int i=0; i<gpiopins.size(); i++) {
+        size_t width = edge_width[i] % 1024;
         //double radians = (width - 1) * (2 * 3.14159265) / 1023;
-        double degrees = (width - 1) * (360 / 1023);
-        // RCLCPP_INFO(node->get_logger(), "PWM Pulse length: %zu,\tMotor degrees: %f", width, degrees);
+        double degrees = (width - 1) * (360. / 1023);
+        RCLCPP_INFO(node->get_logger(), "GPIO pin %d: PWM Pulse length: %zu,\tMotor degrees: %f", gpiopins[i], width, degrees);
         // break;
-    // }
+    }
 }
 
 int main(int argc, char** argv) 
@@ -98,26 +95,25 @@ int main(int argc, char** argv)
     @param tick The number of microseconds since boot
  */
 void gpio_callback(int gpio, int level, uint32_t tick) {
-    static int count = 0;
+    
     for(int i=0; i<gpiopins.size(); i++) {
         if(gpiopins[i] == gpio) {
             
-            if (count < 50) {
-                // calculate edge width
-                // TODO: try instead using tick parameter
-                uint32_t curtime = tick; // get current clock time
-                uint32_t elapsed = curtime - last_edges[i];
+            // calculate edge width
+            // TODO: try instead using tick parameter
+            uint32_t curtime = tick; // get current clock time
+            uint32_t elapsed = curtime - last_edges[i];
                 
-                // log the elapsed time of this pulse
-                // RCLCPP_INFO(node->get_logger(), "PWM time GPIO %d: %zu (state=%s) (tick=%u)", gpio, elapsed, level == 0 ? "OFF" : "ON", tick);
-                RCLCPP_INFO(node->get_logger(), "PWM pulse: %zu (state=%s)", edge_width[i], level == 0 ? "OFF" : "ON");
+            // log the elapsed time of this pulse
+            // RCLCPP_INFO(node->get_logger(), "PWM time GPIO %d: %zu (state=%s) (tick=%u)", gpio, elapsed, level == 0 ? "OFF" : "ON", tick);
+            // RCLCPP_INFO(node->get_logger(), "PWM pulse: %zu (state=%s)", edge_width[i], level == 0 ? "OFF" : "ON");
 
 
-                if (level == 0) edge_width[i] = elapsed; // update the current edge width of the pulse
-                last_edges[i] = curtime; // update the last time
-            }
-            // std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            // count++;
+            if (level == 0) {
+                edge_width[i] = elapsed; // update the current edge width of the pulse
+            } 
+
+            last_edges[i] = curtime; // update the last time
             break;
         }
     }
