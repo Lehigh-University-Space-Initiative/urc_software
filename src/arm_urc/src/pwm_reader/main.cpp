@@ -14,7 +14,7 @@ std::shared_ptr<rclcpp::Node> node;
 
 std::vector<int> gpiopins;
 
-std::vector<std::chrono::steady_clock::time_point> last_edges;
+std::vector<uint32_t> last_edges;
 std::vector<size_t> edge_width;
 void gpio_callback(int gpio, int level, uint32_t tick);
 void free_gpio();
@@ -38,7 +38,7 @@ void setup_pins() {
         gpioSetAlertFunc(pin, gpio_callback);
 
         //for keeping track of pulse lengths
-        last_edges.push_back(std::chrono::steady_clock::now());
+        last_edges.push_back(0);
         
     }
     edge_width.reserve(gpiopins.size());
@@ -53,8 +53,8 @@ void read_pwm() {
         auto width = edge_width[0];
         width %= 1024;
         //double radians = (width - 1) * (2 * 3.14159265) / 1023;
-        double degrees = (width - 1) * 360 / 3.14159265;
-        RCLCPP_INFO(node->get_logger(), "Motor degrees: %f", degrees);
+        double degrees = (width - 1) * (360 / 1023);
+        // RCLCPP_INFO(node->get_logger(), "PWM Pulse length: %zu,\tMotor degrees: %f", width, degrees);
         // break;
     // }
 }
@@ -98,19 +98,26 @@ int main(int argc, char** argv)
     @param tick The number of microseconds since boot
  */
 void gpio_callback(int gpio, int level, uint32_t tick) {
+    static int count = 0;
     for(int i=0; i<gpiopins.size(); i++) {
-        if(gpiopins[i] == gpio && level == 1) {
-            // calculate edge width
-
-            // TODO: try instead using tick parameter
-            std::chrono::steady_clock::time_point curtime = std::chrono::steady_clock::now(); // get current clock time
-            size_t elapsed = std::chrono::duration_cast<std::chrono::microseconds>(curtime - last_edges[i]).count();
+        if(gpiopins[i] == gpio) {
             
-            // log the elapsed time of this pulse
-            RCLCPP_INFO(node->get_logger(), "PWM time GPIO %d: %zu (state=%s)", gpio, elapsed, level == 0 ? "OFF" : "ON");
+            if (count < 50) {
+                // calculate edge width
+                // TODO: try instead using tick parameter
+                uint32_t curtime = tick; // get current clock time
+                uint32_t elapsed = curtime - last_edges[i];
+                
+                // log the elapsed time of this pulse
+                // RCLCPP_INFO(node->get_logger(), "PWM time GPIO %d: %zu (state=%s) (tick=%u)", gpio, elapsed, level == 0 ? "OFF" : "ON", tick);
+                RCLCPP_INFO(node->get_logger(), "PWM pulse: %zu (state=%s)", edge_width[i], level == 0 ? "OFF" : "ON");
 
-            edge_width[i] = elapsed; // update the current edge width of the pulse
-            last_edges[i] = curtime; // update the last time
+
+                if (level == 0) edge_width[i] = elapsed; // update the current edge width of the pulse
+                last_edges[i] = curtime; // update the last time
+            }
+            // std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            // count++;
             break;
         }
     }
