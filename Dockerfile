@@ -59,12 +59,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-humble-moveit-ros-planning-interface \
     tmux \
     ruby \
-    vim nano gdb \
-    libboost-all-dev \
-    libboost-dev \
-    libboost-date-time-dev \
-    libboost-filesystem-dev \
-    libboost-program-options-dev libboost-system-dev libboost-thread-dev \
+    vim nano \
+    python3-rosdep \
+    python3-colcon-common-extensions \
+    python3-colcon-mixin \
+    python3-vcstool \
     && rm -rf /var/lib/apt/lists/*
 
 FROM urc_software_base AS urc_software_builder
@@ -86,6 +85,21 @@ COPY --from=plugin_installer /opt/ros/humble /opt/ros/humble
 COPY --from=plugin_installer /usr/bin /usr/bin
 COPY --from=plugin_installer /usr/share /usr/share
 COPY --from=plugin_installer /usr/include /usr/include
+
+RUN apt update
+RUN apt -y dist-upgrade
+RUN colcon mixin update default
+RUN mkdir -p /ros2_ws/src
+RUN cd /ros2_ws/src
+RUN git clone --branch humble https://github.com/ros-planning/moveit2_tutorials
+RUN vcs import < moveit2_tutorials/moveit2_tutorials.repos
+RUN apt update && rosdep install -r --from-paths . --ignore-src --rosdistro $ROS_DISTRO -y
+RUN cd /ros2_ws/
+RUN bash -c 'source /opt/ros/humble/setup.bash && colcon build --mixin release --merge-install --packages-skip imgui_example_glfw_wgpu ImGuiExample imgui_example_glfw_vulkan pigpio'
+RUN bash -c 'source /ros2_ws/install/setup.bash'
+RUN apt-get update && apt-get install -y --no-install-recommends \
+ros-humble-moveit-ros-move-group \
+&& rm -rf /var/lib/apt/lists/*
 
 # https://medium.com/codex/a-practical-guide-to-containerize-your-c-application-with-docker-50abb197f6d4
 FROM urc_software_base AS urc_software 
