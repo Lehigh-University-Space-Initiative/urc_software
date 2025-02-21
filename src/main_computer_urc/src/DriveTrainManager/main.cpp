@@ -27,12 +27,12 @@ void manualInputCallback(const geometry_msgs::msg::Twist::SharedPtr msg) {
     float rightSideAlpha = rightSideVel / wheelRadius;
 
 
-    currentDriveCommand.cmd_l.x = leftSideAlpha;
-    currentDriveCommand.cmd_l.y = leftSideAlpha;
+    // currentDriveCommand.cmd_l.x = leftSideAlpha;
+    // currentDriveCommand.cmd_l.y = leftSideAlpha;
     currentDriveCommand.cmd_l.z = leftSideAlpha;
 
-    currentDriveCommand.cmd_r.x = rightSideAlpha;
-    currentDriveCommand.cmd_r.y = rightSideAlpha;
+    // currentDriveCommand.cmd_r.x = rightSideAlpha;
+    // currentDriveCommand.cmd_r.y = rightSideAlpha;
     currentDriveCommand.cmd_r.z = rightSideAlpha;
 
     sendDrivePowers();
