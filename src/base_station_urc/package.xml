@@ -57,6 +57,8 @@
   <depend>image_transport</depend>
   <depend>cv_bridge</depend>
   <depend>joy</depend>
+  <depend>moveit_ros_planning_interface</depend>
+  <depend>moveit_ros_move_group</depend>
 
   <export>
     <build_type>ament_cmake</build_type>
