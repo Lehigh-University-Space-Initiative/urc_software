@@ -11,8 +11,8 @@ find_package(image_transport REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(cross_pkg_messages REQUIRED)
-find_package(moveit_ros_planning_interface REQUIRED)
-find_package(moveit_ros_move_group REQUIRED)
+find_package(control_msgs REQUIRED)
+find_package(moveit_servo REQUIRED)
 
 # Include directories
 include_directories(
@@ -23,6 +23,7 @@ include_directories(
   ${geometry_msgs_INCLUDE_DIRS}
   ${std_msgs_INCLUDE_DIRS}
   ${cross_pkg_messages_INCLUDE_DIRS}
+  ${control_msgs_INCLUDE_DIRS}
   ../../libs/imgui
   ../../libs/imgui/backends
 )
@@ -78,9 +79,9 @@ ament_target_dependencies(GroundStationGUI
 add_executable(SpaceMouseMapper_node src/spaceMouseMapper/spaceMouseMapper.cpp)
 ament_target_dependencies(SpaceMouseMapper_node rclcpp cross_pkg_messages std_msgs)
 
-# # Declare the SpaceMouseMapper executable
+# Declare the ArmCommandEncoder executable
 add_executable(ArmCommandEncoder_node src/ArmCommandEncoder/main.cpp)
-ament_target_dependencies(ArmCommandEncoder_node rclcpp cross_pkg_messages std_msgs moveit_ros_planning_interface moveit_ros_move_group)
+ament_target_dependencies(ArmCommandEncoder_node rclcpp cross_pkg_messages std_msgs control_msgs moveit_servo)
 
 # Install and export
 install(DIRECTORY

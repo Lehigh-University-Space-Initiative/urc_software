@@ -98,8 +98,9 @@ RUN cd /ros2_ws/
 RUN bash -c 'source /opt/ros/humble/setup.bash && colcon build --mixin release --merge-install --packages-skip imgui_example_glfw_wgpu ImGuiExample imgui_example_glfw_vulkan pigpio'
 RUN bash -c 'source /ros2_ws/install/setup.bash'
 RUN apt-get update && apt-get install -y --no-install-recommends \
-ros-humble-moveit-ros-move-group \
-&& rm -rf /var/lib/apt/lists/*
+    ros-humble-moveit-ros-move-group \
+    ros-humble-moveit-servo \
+    && rm -rf /var/lib/apt/lists/*
 
 # https://medium.com/codex/a-practical-guide-to-containerize-your-c-application-with-docker-50abb197f6d4
 FROM urc_software_base AS urc_software 
@@ -107,6 +108,7 @@ FROM urc_software_base AS urc_software
 # copy built binaries
 WORKDIR /ros2_ws
 COPY --from=plugin_installer /opt/ros/humble /opt/ros/humble
+COPY --from=urc_software_builder /opt/ros/humble /opt/ros/humble
 # for installing Qt for rviz2
 COPY --from=plugin_installer /usr/lib /usr/lib
 COPY --from=plugin_installer /usr/include /usr/include
