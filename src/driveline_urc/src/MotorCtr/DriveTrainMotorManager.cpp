@@ -112,13 +112,13 @@ void DriveTrainMotorManager::parseDriveCommands(const cross_pkg_messages::msg::R
     // motors[5].setPIDSetpoint(msg->cmd_r.z);
 
     
-    motors[0].sendPowerCMD(-msg->cmd_l.x / 20);
-    motors[1].sendPowerCMD(-msg->cmd_l.y / 20);
-    motors[2].sendPowerCMD(-msg->cmd_l.z / 20);
+    motors[0].sendPowerCMD(msg->cmd_l.x / 20);
+    motors[1].sendPowerCMD(msg->cmd_l.y / 20);
+    motors[2].sendPowerCMD(msg->cmd_l.z / 20);
 
-    motors[3].sendPowerCMD(msg->cmd_r.x / 20);
-    motors[4].sendPowerCMD(msg->cmd_r.y / 20);
-    motors[5].sendPowerCMD(msg->cmd_r.z / 20);
+    motors[3].sendPowerCMD(-msg->cmd_r.x / 20);
+    motors[4].sendPowerCMD(-msg->cmd_r.y / 20);
+    motors[5].sendPowerCMD(-msg->cmd_r.z / 20);
 
 
 }
