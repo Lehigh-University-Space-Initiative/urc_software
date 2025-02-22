@@ -26,9 +26,9 @@ int main(int argc, char **argv)
     // Create ROS2 node
     node = rclcpp::Node::make_shared("ArmMotorManager");
 
-    node->declare_parameter("kp",3.0);
-    node->declare_parameter("kd",0.05);
-    node->declare_parameter("ki",8.0);
+    node->declare_parameter("kp",1.0);
+    node->declare_parameter("kd",0.01);
+    node->declare_parameter("ki",1.0);
     node->declare_parameter("max_i",0.01);
     node->declare_parameter("readOnly",false);
 
