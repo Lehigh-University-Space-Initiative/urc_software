@@ -30,15 +30,19 @@
 using namespace std;
 
 
-PID::PID( double dt, double max, double min, double Kp, double Kd, double Ki )
-    : pimpl(dt,max,min,Kp,Kd,Ki)
+PID::PID( double dt, double max, double min, double Kp, double Kd, double Ki, double max_i )
+    : pimpl(dt,max,min,Kp,Kd,Ki,max_i)
 {
 }
 double PID::calculate( double setpoint, double pv )
 {
     return pimpl.calculate(setpoint,pv);
 }
-PID::~PID() 
+double PID::i_sum()
+{
+    return pimpl.i_sum();
+}
+PID::~PID()
 {
 }
 
@@ -46,13 +50,14 @@ PID::~PID()
 /**
  * Implementation
  */
-PIDImpl::PIDImpl( double dt, double max, double min, double Kp, double Kd, double Ki ) :
+PIDImpl::PIDImpl( double dt, double max, double min, double Kp, double Kd, double Ki, double max_i ) :
     _dt(dt),
     _max(max),
     _min(min),
     _Kp(Kp),
     _Kd(Kd),
     _Ki(Ki),
+    _max_i(max_i),
     _pre_error(0),
     _integral(0)
 {
@@ -68,14 +73,14 @@ double PIDImpl::calculate( double setpoint, double pv )
     double Pout = _Kp * error;
 
     // Integral term
-    _integral += error * _dt;
+    _integral += error * _dt * _Ki;
     //prevent windeup
-    if( _integral > _max )
-        _integral = 0.1 * _max;
-    else if( _integral < _min )
-        _integral = 0.1 * _min;
+    if( _integral > _max_i )
+        _integral = _max_i;
+    else if( _integral < -_max_i )
+        _integral = -_max_i;
 
-    double Iout = _Ki * _integral;
+    double Iout =  _integral;
 
     // Derivative term
     double derivative = (error - _pre_error) / _dt;
@@ -94,6 +99,11 @@ double PIDImpl::calculate( double setpoint, double pv )
     _pre_error = error;
 
     return output;
+}
+
+double PIDImpl::i_sum()
+{
+    return _integral;
 }
 
 PIDImpl::~PIDImpl()

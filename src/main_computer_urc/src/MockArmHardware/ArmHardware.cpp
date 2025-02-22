@@ -107,7 +107,7 @@ void ArmHardware::onReceivePosition(const cross_pkg_messages::msg::RoverComputer
 {
   hw_positions_[0] = msg->cmd_s; 
   hw_positions_[1] = -msg->cmd_e; 
-  RCLCPP_ERROR(arm_logger, "got posses with %f", hw_positions_[0]);
+  RCLCPP_ERROR(arm_logger, "got posses with %f", hw_positions_[1]);
 }
 
 }
