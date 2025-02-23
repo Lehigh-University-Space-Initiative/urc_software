@@ -30,6 +30,9 @@ case "$1" in
   ground_input)
     ros2 launch ground_input_urc ground_input_launch.py
     ;;
+  manaul)
+    exec /bin/bash
+    ;;
   *)
     echo "Unknown mode: $1. Please specify one of 'hootl', 'base_station', 'main_computer', or 'driveline'."
     exit 1

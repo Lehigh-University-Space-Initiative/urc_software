@@ -25,13 +25,13 @@ void DriveTrainMotorManager::setupMotors()
 {
     // Add motors to the motors vector
     // Left side (BUS 0)
-    motors.emplace_back(SparkMax(1, 1)); // LF
-    motors.emplace_back(SparkMax(1, 2)); // LM
-    motors.emplace_back(SparkMax(1, 3)); // LB
+    motors.emplace_back(SparkMax(0, 1)); // LF
+    motors.emplace_back(SparkMax(0, 2)); // LM
+    motors.emplace_back(SparkMax(0, 3)); // LB
     // Right side (BUS 1)
-    motors.emplace_back(SparkMax(1, 4)); // RB
-    motors.emplace_back(SparkMax(1, 5)); // RM
-    motors.emplace_back(SparkMax(1, 6)); // RF
+    motors.emplace_back(SparkMax(0, 4)); // RB
+    motors.emplace_back(SparkMax(0, 5)); // RM
+    motors.emplace_back(SparkMax(0, 6)); // RF
 
     RCLCPP_INFO(node->get_logger(), "Testing Motors");
     for (auto &motor : motors) {

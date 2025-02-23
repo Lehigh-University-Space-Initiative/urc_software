@@ -62,9 +62,9 @@ private:
 
   
   // 100% forward thottle should be this speed m/s
-  const double linearSensativity = 0.5;
+  const double linearSensativity = -1;
   // 100% twist throttle should be this speed in deg/s
-  const double angularSensativity = 120;
+  const double angularSensativity = 120 * 2;
 };
 
 int main(int argc, char** argv)

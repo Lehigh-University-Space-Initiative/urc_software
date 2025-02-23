@@ -313,6 +313,8 @@ void SparkMax::sendPowerCMD(float power) {
     power = std::min(std::max(power, -MAX_DRIVE_POWER), MAX_DRIVE_POWER);
     if (abs(power) < DRIVE_DEADBAND) power = 0;
 
+    RCLCPP_INFO(rclcpp::get_logger("SparkMax"),"sending %.2f to motor %d",power,canID);
+
     can_frame frame{};
     frame.can_id = 0x2050080 + canID;
     frame.can_dlc = 6;
