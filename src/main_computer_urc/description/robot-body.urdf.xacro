@@ -15,10 +15,6 @@
   <xacro:property name="axel_offset" value="0.025" /> <!-- Space btw top of beam and the each joint -->
 
 
-  <xacro:property name="wrist2SizeX" value="0.107" /> 
-  <xacro:property name="wrist2SizeY" value="0.053" /> 
-  <xacro:property name="wrist2SizeZ" value="0.05" /> 
-  <xacro:property name="wrist1AxelGap" value="0.007" /> 
 
   <joint name="${prefix}base_base" type="fixed">
     <xacro:insert_block name="origin" />
@@ -110,6 +106,11 @@
     <limit effort="100" velocity="1.0"/>
   </joint>
 
+
+  <xacro:property name="olnaExtraSizeX" value="0.044" /> 
+  <xacro:property name="olnaExtra2SizeY" value="0.10" /> 
+  <xacro:property name="olnaExtra2SizeZ" value="0.045" /> 
+
   <!-- Top Link -->
   <link name="${prefix}link2">
     <collision>
@@ -123,6 +124,10 @@
       <origin xyz="0 0 ${height3/2 - axel_offset}" rpy="0 0 0"/>
       <geometry>
         <box size="${width} ${width} ${height3}"/>
+        <!-- <box size="${olnaextrasizex*5} ${olnaextra2sizey} ${olnaextra2sizez}" xyz="0 0 ${height3 - axel_offset}"/> -->
+      </geometry>
+      <geometry>
+        <box size="0.1 0.1 0.1"/>
       </geometry>
       <material name="orange"/>
     </visual>
@@ -137,30 +142,27 @@
     </inertial>
   </link>
 
-  <joint name="${prefix}wrist1" type="continuous">
+  <joint name="${prefix}elbow_box_fix" type="fixed">
     <parent link="${prefix}link2"/>
-    <child link="${prefix}wrist2"/>
-    <origin xyz="0 ${wrist2SizeY + wrist1AxelGap} ${height3 - axel_offset*2}" rpy="0 0 0"/>
+    <child link="${prefix}link2_box"/>
+    <!-- <origin xyz="0 ${width} ${height2 - axel_offset*2}" rpy="0 0 0"/> -->
     <axis xyz="0 1 0"/>
-    <dynamics damping="0.7"/>
-    <limit effort="100" velocity="1.0"/>
   </joint>
 
-  <!-- Top Link -->
-  <link name="${prefix}wrist2">
+  <link name="${prefix}link2_box">
     <!-- <collision>
-      <origin xyz="0 0 ${wrist2SizeY/2}" rpy="0 0 0"/>
+      <origin xyz="0 0 ${height3/2 - axel_offset}" rpy="0 0 0"/>
       <geometry>
         <box size="${width} ${width} ${height3}"/>
       </geometry>
     </collision> -->
 
     <visual>
-      <origin xyz="0 0 ${height3/2 - axel_offset}" rpy="0 0 0"/>
+      <origin xyz="0 ${-olnaExtra2SizeY/2 - width/2} ${height3 - olnaExtra2SizeZ}" rpy="0 0 0"/>
       <geometry>
-        <box size="${wrist2SizeX} ${wrist2SizeY} ${wrist2SizeZ}"/>
+        <box size="${olnaExtraSizeX} ${olnaExtra2SizeY} ${olnaExtra2SizeZ}"/>
       </geometry>
-      <material name="green"/>
+      <material name="brown"/>
     </visual>
 
     <inertial>
@@ -171,6 +173,51 @@
         iyy="${mass / 12.0 * (height3*height3 + width*width)}" iyz="0.0"
         izz="${mass / 12.0 * (width*width + width*width)}"/>
     </inertial>
+  </link>
+
+
+
+
+  <!-- Wrist 1 -->
+  <xacro:property name="wrist2SizeX" value="0.107" /> 
+  <xacro:property name="wrist2SizeY" value="0.053" /> 
+  <xacro:property name="wrist2SizeZ" value="0.05" /> 
+  <xacro:property name="wrist1AxelGap" value="0.007" /> 
+  <xacro:property name="wrist2AxelToRectTop" value="0.03" /> 
+
+  <joint name="${prefix}wrist1" type="continuous">
+    <parent link="${prefix}link2"/>
+    <child link="${prefix}wrist2"/>
+    <origin xyz="0 ${wrist1AxelGap + width/2} ${height3 - axel_offset*2}" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <dynamics damping="0.7"/>
+    <limit effort="100" velocity="1.0"/>
+  </joint>
+
+  <link name="${prefix}wrist2">
+    <!-- <collision>
+      <origin xyz="0 0 ${wrist2SizeY/2}" rpy="0 0 0"/>
+      <geometry>
+        <box size="${width} ${width} ${height3}"/>
+      </geometry>
+    </collision> -->
+
+    <visual>
+      <origin xyz="${-wrist2AxelToRectTop + wrist2SizeX/2} ${wrist2SizeY/2} 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="${wrist2SizeX} ${wrist2SizeY} ${wrist2SizeZ}"/>
+      </geometry>
+      <material name="green"/>
+    </visual>
+
+    <!-- <inertial>
+      <origin xyz="0 0 ${- height3/2 + axel_offset}" rpy="0 0 0"/>
+      <mass value="${mass}"/>
+      <inertia
+        ixx="${mass / 12.0 * (width*width + height3*height3)}" ixy="0.0" ixz="0.0"
+        iyy="${mass / 12.0 * (height3*height3 + width*width)}" iyz="0.0"
+        izz="${mass / 12.0 * (width*width + width*width)}"/>
+    </inertial> -->
   </link>
 
   <joint name="${prefix}tool_joint" type="fixed">
