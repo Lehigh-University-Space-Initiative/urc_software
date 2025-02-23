@@ -5,16 +5,20 @@
 
   <!-- Constants for robot dimensions -->
   <xacro:property name="mass" value="1" /> <!-- arbitrary value for mass -->
-  <xacro:property name="width" value="0.1" /> <!-- Square dimensions (widthxwidth) of beams -->
-  <xacro:property name="height1" value="0.1" /> <!-- Link 1 -->
-  <xacro:property name="height2" value="1" /> <!-- Link 2 -->
-  <xacro:property name="height3" value="1" /> <!-- Link 3 -->
-  <xacro:property name="axel_offset" value="0.05" /> <!-- Space btw top of beam and the each joint -->
+  <xacro:property name="width" value="0.0254" /> <!-- Square dimensions (widthxwidth) of beams -->
+  <xacro:property name="height1" value="0.0725" /> <!-- Link 1 -->
+  <xacro:property name="height2" value="0.514" /> <!-- Link 2 -->
+  <xacro:property name="height3" value="0.514" /> <!-- Link 3 -->
+  <xacro:property name="axel_offset" value="0.025" /> <!-- Space btw top of beam and the each joint -->
 
+<!--  shoulder motor -->
   <joint name="${prefix}base_joint" type="fixed">
     <xacro:insert_block name="origin" />
     <parent link="${parent}"/>
     <child link="${prefix}base_link" />
+    <axis xyz="0 0 1"/>
+    <dynamics damping="0.7"/>
+    <limit effort="100" velocity="1.0"/>
   </joint>
 
   <!-- Base Link -->

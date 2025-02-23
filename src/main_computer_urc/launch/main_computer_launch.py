@@ -152,17 +152,17 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
-        # robot_state_publisher_node,
-        rviz_node,
+        robot_state_publisher_node,
+        # rviz_node,
         # # joint_state_publisher_node,
         # this env is for gazebo to work on M1 Mac
         # SetEnvironmentVariable(name="LIBGL_DRI3_DISABLE", value="1"),
         # gazebo,
         # gz_spawn_entity,
-        move_group_node,
-        control_node,
-        joint_state_broadcaster_spawner,
-        arm_controller_spawner,
+        #  move_group_node,
+        # control_node,
+        # joint_state_broadcaster_spawner,
+        # arm_controller_spawner,
         # Node(
         #     package='main_computer_urc',
         #     executable='DriveTrainManager_node',
