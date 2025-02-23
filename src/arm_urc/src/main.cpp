@@ -1,8 +1,8 @@
 #include "rclcpp/rclcpp.hpp"
 #include "geometry_msgs/msg/twist.hpp"
 #include "cross_pkg_messages/msg/rover_computer_arm_cmd.hpp" // TODO: figure these out
-#include "arm_urc/ArmMotorManager.h"
-#include "arm_urc/main.h"
+#include "ArmMotorManager.h"
+#include "main.h"
 #include <chrono>
 
 // Global variables
