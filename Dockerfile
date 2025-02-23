@@ -50,9 +50,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-humble-xacro \
     ros-humble-moveit \
     ros-humble-joint-state-publisher-gui \
-    ros-humble-ros-gz \
-    ros-humble-ros-ign-bridge \
-    ros-humble-ign-ros2-control \
     libqt5widgets5 \
     ros-humble-ros2-control \
     ros-humble-ros2-controllers \
@@ -60,11 +57,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     tmux \
     ruby \
     vim nano gdb \
-    libboost-all-dev \
-    libboost-dev \
-    libboost-date-time-dev \
-    libboost-filesystem-dev \
-    libboost-program-options-dev libboost-system-dev libboost-thread-dev \
     && rm -rf /var/lib/apt/lists/*
 
 FROM urc_software_base AS urc_software_builder
