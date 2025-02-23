@@ -10,6 +10,8 @@ find_package(sensor_msgs REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(image_transport REQUIRED)
 find_package(OpenCV REQUIRED)
+find_package(hardware_interface REQUIRED)
+find_package(pluginlib REQUIRED)
 
 # Include directories
 include_directories(
@@ -29,6 +31,34 @@ ament_target_dependencies(StatusLED_node rclcpp)
 add_executable(VideoStreamer_node src/VideoStreamer/VideoStreamer.cpp)
 ament_target_dependencies(VideoStreamer_node rclcpp sensor_msgs cv_bridge image_transport OpenCV)
 
+
+file(GLOB MockArmHardware_SRC
+  src/MockArmHardware/ArmHardware.cpp
+)
+
+# Mock Arm Hardware
+add_library(MockArmHardware SHARED ${MockArmHardware_SRC})
+set_target_properties(MockArmHardware PROPERTIES OUTPUT_NAME "mock_arm_hw")
+ament_target_dependencies(MockArmHardware
+  rclcpp
+  hardware_interface
+  pluginlib
+  cross_pkg_messages
+)
+# target_link_libraries(MockArmHardware PUBLIC hardware_interface::hardware_interface)
+
+
+pluginlib_export_plugin_description_file(hardware_interface plugin.xml)
+
+install(TARGETS
+  MockArmHardware
+  DESTINATION lib
+)
+
+install(FILES plugin.xml
+  DESTINATION share/${PROJECT_NAME}
+)
+
 # Install the executables
 install(TARGETS
   DriveTrainManager_node
@@ -40,6 +70,7 @@ install(TARGETS
 # Install the launch directory
 install(DIRECTORY
   launch
+  description
   DESTINATION share/${PROJECT_NAME}/
 )
 

@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>driveline_urc</name>
+  <name>arm_urc</name>
   <version>0.0.0</version>
-  <description>The driveline pi_nodes package for ROS2</description>
+  <description>The arm pi_nodes package for ROS2</description>
 
   <maintainer email="michael@todo.todo">michael</maintainer>
   <license>TODO</license>

@@ -1,0 +1,10 @@
+<library path="arm_urc_hw">
+  <class name="arm_urc/ArmHardware"
+         type="arm_urc::ArmHardware"
+         base_class_type="hardware_interface::SystemInterface">
+
+    <description>
+     Arm hardware interface
+    </description>
+  </class>
+</library>

@@ -22,13 +22,23 @@ case "$1" in
     # ros2 run base_station_urc GroundStationGUI
     ;;
   main_computer)
-    ros2 launch main_computer_urc main_computer_launch.py
+    ros2 launch main_computer_urc main_computer_launch.py gui_only:=false
+    ;;
+  rviz)
+    ros2 launch main_computer_urc rviz_gui_launch.py
     ;;
   driveline)
     ros2 launch driveline_urc driveline_launch.py
     ;;
+  arm)
+    ros2 launch arm_urc arm_launch.py
+    ;;
   ground_input)
     ros2 launch ground_input_urc ground_input_launch.py
+    ;;
+  manual)
+    # run the docker container with -it flags for this to work
+    exec /bin/bash
     ;;
   *)
     echo "Unknown mode: $1. Please specify one of 'hootl', 'base_station', 'main_computer', or 'driveline'."

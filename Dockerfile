@@ -47,6 +47,24 @@ FROM ros:humble-ros-base-jammy AS plugin_installer
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-humble-image-transport-plugins \
+    ros-humble-xacro \
+    ros-humble-moveit \
+    ros-humble-joint-state-publisher-gui \
+    ros-humble-ros-gz \
+    ros-humble-ros-ign-bridge \
+    ros-humble-ign-ros2-control \
+    libqt5widgets5 \
+    ros-humble-ros2-control \
+    ros-humble-ros2-controllers \
+    ros-humble-moveit-ros-planning-interface \
+    tmux \
+    ruby \
+    vim nano gdb \
+    libboost-all-dev \
+    libboost-dev \
+    libboost-date-time-dev \
+    libboost-filesystem-dev \
+    libboost-program-options-dev libboost-system-dev libboost-thread-dev \
     && rm -rf /var/lib/apt/lists/*
 
 FROM urc_software_base AS urc_software_builder
@@ -60,6 +78,14 @@ COPY ./libs /ros2_ws/libs
 # Build pigpio from the submodule
 RUN cd /ros2_ws/libs/pigpio && make && make install
 
+# prepare to install all dependencies thorugh rosdep
+# RUN cd /ros2_ws
+# RUN rosdep update
+
+COPY --from=plugin_installer /opt/ros/humble /opt/ros/humble
+COPY --from=plugin_installer /usr/bin /usr/bin
+COPY --from=plugin_installer /usr/share /usr/share
+COPY --from=plugin_installer /usr/include /usr/include
 
 # https://medium.com/codex/a-practical-guide-to-containerize-your-c-application-with-docker-50abb197f6d4
 FROM urc_software_base AS urc_software 
@@ -67,6 +93,12 @@ FROM urc_software_base AS urc_software
 # copy built binaries
 WORKDIR /ros2_ws
 COPY --from=plugin_installer /opt/ros/humble /opt/ros/humble
+# for installing Qt for rviz2
+COPY --from=plugin_installer /usr/lib /usr/lib
+COPY --from=plugin_installer /usr/include /usr/include
+# for installing gazebo
+COPY --from=plugin_installer /usr/bin /usr/bin
+COPY --from=plugin_installer /usr/share /usr/share
 COPY ./install /ros2_ws/install
 COPY ./libs /ros2_ws/libs
 COPY ./run_nodes.sh /ros2_ws/run_nodes.sh

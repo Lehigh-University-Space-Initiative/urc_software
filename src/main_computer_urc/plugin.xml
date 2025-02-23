@@ -1,0 +1,10 @@
+<library path="mock_arm_hw">
+  <class name="main_computer_urc/MockArmHardware"
+         type="arm_urc::ArmHardware"
+         base_class_type="hardware_interface::SystemInterface">
+
+    <description>
+    Mock arm hardware interface
+    </description>
+  </class>
+</library>
