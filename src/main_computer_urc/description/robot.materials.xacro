@@ -37,6 +37,10 @@ https://github.com/ros-simulation/gazebo_ros_demos/blob/kinetic-devel/rrbot_desc
     <color rgba="1.0 1.0 0.0 1.0"/>
   </material>
 
+  <material name="purple">
+    <color rgba="0.8632 0.625 0.8633 1.0"/>
+  </material>
+
   <material name="white">
     <color rgba="1.0 1.0 1.0 1.0"/>
   </material>
