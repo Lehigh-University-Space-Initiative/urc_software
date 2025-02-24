@@ -1,11 +1,26 @@
 #include "DriveTrainMotorManager.h"
 #include "main.h"
 
+void DriveTrainMotorManager::init() {
+    setupMotors();
+
+    // Subscribe to drive commands
+    driveCommandsSub = node_->create_subscription<cross_pkg_messages::msg::RoverComputerDriveCMD>(
+        "/roverDriveCommands", 10, [this](const cross_pkg_messages::msg::RoverComputerDriveCMD::SharedPtr msg) {
+            auto lock = lastManualCommandTime.lock();
+            *lock = std::chrono::system_clock::now();
+            parseDriveCommands(msg);
+        });
+
+    wheelVelPub = node_->create_publisher<cross_pkg_messages::msg::RoverComputerDriveCMD>("motorVels", 10);
+}
+
 DriveTrainMotorManager::~DriveTrainMotorManager()
 {
 }
 
 void DriveTrainMotorManager::setupMotors() {
+    // Add motors to the motors vector
     // Left side (BUS 0)
     motors_.emplace_back(SparkMax(node_, 0, 1, 1.0)); // LF
     motors_.emplace_back(SparkMax(node_, 0, 2, 1.0)); // LM
@@ -21,34 +36,13 @@ void DriveTrainMotorManager::setupMotors() {
     }
 }
 
-void DriveTrainMotorManager::setCommands(const cross_pkg_messages::msg::RoverComputerDriveCMD::SharedPtr msg) {
-    if (motors_.size() < 6) {
-        RCLCPP_ERROR(node_->get_logger(), "Insufficient motors configured");
-        return;
-    }
+void DriveTrainMotorManager::parseDriveCommands(const cross_pkg_messages::msg::RoverComputerDriveCMD::SharedPtr msg) {
+    motors[0].sendPowerCMD(-msg->cmd_l.x / 20);
+    motors[1].sendPowerCMD(-msg->cmd_l.y / 20);
+    motors[2].sendPowerCMD(-msg->cmd_l.z / 20);
 
-
-    motors_[0].sendPowerCMD(-msg->cmd_l.x / 20);
-    motors_[1].sendPowerCMD(-msg->cmd_l.y / 20);
-    motors_[2].sendPowerCMD(-msg->cmd_l.z / 20);
-
-
-    motors_[3].sendPowerCMD(msg->cmd_r.x / 20);
-    motors_[4].sendPowerCMD(msg->cmd_r.y / 20);
-    motors_[5].sendPowerCMD(msg->cmd_r.z / 20);
+    motors[3].sendPowerCMD(msg->cmd_r.x / 20);
+    motors[4].sendPowerCMD(msg->cmd_r.y / 20);
+    motors[5].sendPowerCMD(msg->cmd_r.z / 20);
 }
 
-void DriveTrainMotorManager::writeMotors() {
-    cross_pkg_messages::msg::RoverComputerDriveCMD speedMsg;
-    speedMsg.cmd_l.x = motors_[0].lastVelocityAsRadPerSec();
-    speedMsg.cmd_l.y = motors_[1].lastVelocityAsRadPerSec();
-    speedMsg.cmd_l.z = motors_[2].lastVelocityAsRadPerSec();
-
-
-    speedMsg.cmd_r.x = motors_[3].lastVelocityAsRadPerSec();
-    speedMsg.cmd_r.y = motors_[4].lastVelocityAsRadPerSec();
-    speedMsg.cmd_r.z = motors_[5].lastVelocityAsRadPerSec();
-
-
-    wheelVelPub_->publish(speedMsg);
-}
