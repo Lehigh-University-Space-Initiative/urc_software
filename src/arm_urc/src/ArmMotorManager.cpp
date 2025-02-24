@@ -35,9 +35,9 @@ void ArmMotorManager::setupMotors()
     motors_.emplace_back(node_, 1, 52, 125); // Shoulder
     motors_.emplace_back(node_, 1, 53, 125); // Elbow
     // motors_.emplace_back(1, 55, 12); // Test
-    motors_.emplace_back(SparkMax(1, 54, 256)); // Wrist 1
-    motors_.emplace_back(SparkMax(1, 55, 256)); // Wrist 2
-    motors_.emplace_back(SparkMax(1, 56, 256)); // Wrist 3
+    motors_.emplace_back(node_, 1, 54, 169.836); // Wrist 1
+    motors_.emplace_back(node_, 1, 55, 169.836); // Wrist 2
+    motors_.emplace_back(node_, 1, 56, 169.836); // Wrist 3
 
     RCLCPP_INFO(dl_logger, "ArmMotorManager: Testing Motors");
     for (auto &motor : motors_) {
