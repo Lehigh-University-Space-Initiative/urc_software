@@ -50,16 +50,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-humble-xacro \
     ros-humble-moveit \
     ros-humble-joint-state-publisher-gui \
-    ros-humble-ros-gz \
-    ros-humble-ros-ign-bridge \
-    ros-humble-ign-ros2-control \
     libqt5widgets5 \
     ros-humble-ros2-control \
     ros-humble-ros2-controllers \
     ros-humble-moveit-ros-planning-interface \
     tmux \
     ruby \
-    vim nano \
+    vim nano gdb \
     python3-rosdep \
     python3-colcon-common-extensions \
     python3-colcon-mixin \

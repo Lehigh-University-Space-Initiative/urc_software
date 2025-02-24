@@ -15,8 +15,12 @@ void ArmMotorManager::writeMotors() {
 void ArmMotorManager::setArmCommand(const cross_pkg_messages::msg::RoverComputerArmCMD::SharedPtr msg)
 {
     //TODO add the rest
+    hw_commands_[0] = msg->cmd_b;
     hw_commands_[1] = msg->cmd_s;
     hw_commands_[2] = msg->cmd_e;
+    hw_commands_[3] = msg->cmd_w.x;
+    hw_commands_[4] = msg->cmd_w.y;
+    hw_commands_[5] = msg->cmd_w.z;
     // TODO test
     // hw_commands_[3] = msg->cmd_s;
     writeMotors();
@@ -31,9 +35,9 @@ void ArmMotorManager::setupMotors()
     motors_.emplace_back(node_, 1, 52, 125); // Shoulder
     motors_.emplace_back(node_, 1, 53, 125); // Elbow
     // motors_.emplace_back(1, 55, 12); // Test
-    // motors_.emplace_back(SparkMax(1, 54)); // Wrist 1
-    // motors_.emplace_back(SparkMax(1, 55)); // Wrist 2
-    // motors_.emplace_back(SparkMax(1, 56)); // Wrist 3
+    motors_.emplace_back(node_, 1, 54, 169.836); // Wrist 1
+    motors_.emplace_back(node_, 1, 55, 169.836); // Wrist 2
+    motors_.emplace_back(node_, 1, 56, 169.836); // Wrist 3
 
     RCLCPP_INFO(dl_logger, "ArmMotorManager: Testing Motors");
     for (auto &motor : motors_) {

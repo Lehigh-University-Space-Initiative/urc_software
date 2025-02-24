@@ -336,7 +336,7 @@ double SparkMax::lastPositionInRad()
 {
     double rpmToRadPerSec = 2 * 3.14159265;
 
-    return  lastPeriodicData2.position / gearRatio * rpmToRadPerSec;
+    return lastPeriodicData2.position / gearRatio * rpmToRadPerSec;
 }
 
 void SparkMax::setupPID()
@@ -344,18 +344,24 @@ void SparkMax::setupPID()
     double kp = node_->get_parameter("kp").as_double();
     double ki = node_->get_parameter("ki").as_double();
     double kd = node_->get_parameter("kd").as_double();
+    double max_i = node_->get_parameter("max_i").as_double();
+    bool viewOnly = node_->get_parameter("readOnly").as_bool();
 
 
-    RCLCPP_INFO(rclcpp::get_logger("SparkMax"), "Creating PID with Kp: %f, Ki: %f, Kd: %f",kp,ki,kd);
+    RCLCPP_INFO(rclcpp::get_logger("SparkMax"), "Creating PID with Kp: %f, Ki: %f, Kd: %f; readOnly: %d",kp,ki,kd,viewOnly);
 
 
-    this->pidController = PID(0.005,0.15,-0.15,kp,kd,ki);
+    this->pidController = PID(0.005,0.15,-0.15,kp,kd,ki, max_i);
+    this->viewOnly = viewOnly;
 }
 
 SparkMax::SparkMax(rclcpp::Node::SharedPtr node, int canBUS, int canID, double gearRatio) : CANDriver(canBUS, canID)
 {
     assert(gearRatio > 0);
     this->node_ = node;
+    this->gearRatio = gearRatio;
+    RCLCPP_INFO(rclcpp::get_logger("SparkMax"), "Creating motor %d with gear ratio %.5f",canID,gearRatio);
+
 
     setupPID();
 }
@@ -364,6 +370,7 @@ SparkMax::SparkMax(const SparkMax &other): CANDriver(other)
 {
     this->gearRatio = other.gearRatio;
     this->node_ = other.node_;
+    this->viewOnly = other.viewOnly;
 
     setupPID();
 }
@@ -408,9 +415,13 @@ void SparkMax::pidTick(double currentPos)
         double currentVel = lastVelocityAsRadPerSec(); 
 
         double val = pidController.calculate(pidSetpoint,currentPos);
-        RCLCPP_INFO(rclcpp::get_logger("SparkMax"), "running pid %d with set: %f, cur: %f output: %f", canID, pidSetpoint, currentPos,val);
+        RCLCPP_INFO(rclcpp::get_logger("SparkMax"), "running pid %d with set: %f, cur: %f output: %f (integral: %f)", canID, pidSetpoint, currentPos,val, pidController.i_sum());
 
-        sendPowerCMD(val);
+        if (!viewOnly) {
+            sendPowerCMD(val);
+        } else {
+            RCLCPP_INFO(rclcpp::get_logger("SparkMax"), "view only not powering motor");
+        }
     }
 }
 

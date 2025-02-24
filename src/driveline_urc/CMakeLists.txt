@@ -26,7 +26,7 @@ add_custom_target(pigpio_build ALL
 )
 
 set(DRIVELINE_URC_SRC
-  src/pid.cpp
+  # src/pid.cpp
   src/DrivelineMotorManager.cpp
 )
 

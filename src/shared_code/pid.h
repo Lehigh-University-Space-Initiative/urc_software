@@ -32,9 +32,11 @@
 class PIDImpl
 {
     public:
-        PIDImpl( double dt, double max, double min, double Kp, double Kd, double Ki );
+        PIDImpl( double dt, double max, double min, double Kp, double Kd, double Ki, double max_i );
         ~PIDImpl();
         double calculate( double setpoint, double pv );
+
+        double i_sum();
 
     private:
         double _dt;
@@ -45,6 +47,7 @@ class PIDImpl
         double _Ki;
         double _pre_error;
         double _integral;
+        double _max_i;
 };
 
 class PID
@@ -56,10 +59,11 @@ class PID
         // dt -  loop interval time
         // max - maximum value of manipulated variable
         // min - minimum value of manipulated variable
-        PID( double dt, double max, double min, double Kp, double Kd, double Ki );
+        PID( double dt, double max, double min, double Kp, double Kd, double Ki, double max_i );
 
         // Returns the manipulated variable given a setpoint and current process value
         double calculate( double setpoint, double pv );
+        double i_sum();
         ~PID();
 
     private:

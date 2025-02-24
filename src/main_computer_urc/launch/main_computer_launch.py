@@ -159,7 +159,7 @@ def generate_launch_description():
         # SetEnvironmentVariable(name="LIBGL_DRI3_DISABLE", value="1"),
         # gazebo,
         # gz_spawn_entity,
-        move_group_node,
+         move_group_node,
         control_node,
         joint_state_broadcaster_spawner,
         arm_controller_spawner,

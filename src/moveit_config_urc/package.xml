@@ -6,7 +6,7 @@
   <description>
      An automatically generated package with all the configuration and launch files for using the 2dof_robot with the MoveIt Motion Planning Framework
   </description>
-  <maintainer email="inspace@lehigh.edu">LUSI Software</maintainer>
+  <maintainer email="inspace@lehigh.edu">LUSI</maintainer>
 
   <license>BSD</license>
 
@@ -14,7 +14,7 @@
   <url type="bugtracker">https://github.com/ros-planning/moveit2/issues</url>
   <url type="repository">https://github.com/ros-planning/moveit2</url>
 
-  <author email="inspace@lehigh.edu">LUSI Software</author>
+  <author email="inspace@lehigh.edu">LUSI</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
@@ -43,7 +43,6 @@
   <exec_depend>rviz_default_plugins</exec_depend>
   <exec_depend>tf2_ros</exec_depend>
   <exec_depend>warehouse_ros_mongo</exec_depend>
-  <exec_depend>xacro</exec_depend>
 
 
   <export>

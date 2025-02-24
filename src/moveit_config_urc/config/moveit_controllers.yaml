@@ -10,5 +10,9 @@ moveit_simple_controller_manager:
     type: FollowJointTrajectory
     action_ns: follow_joint_trajectory
     joints:
+      - base_joint
       - shoulder
       - elbow
+      - wrist1
+      - wrist2_joint
+      - wrist3_joint
