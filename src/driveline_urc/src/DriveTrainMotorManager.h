@@ -11,8 +11,6 @@
 
 class DriveTrainMotorManager : public MotorManager {
 private:
-    std::vector<SparkMax> motors;
-
     void setupMotors() override;
 
     libguarded::plain_guarded<std::chrono::time_point<std::chrono::system_clock>> lastManualCommandTime{std::chrono::system_clock::now()};
@@ -27,8 +25,5 @@ private:
 public:
     using MotorManager::MotorManager;
     virtual ~DriveTrainMotorManager();
-
-    void init();
-
     void parseDriveCommands(const cross_pkg_messages::msg::RoverComputerDriveCMD::SharedPtr msg);
 };

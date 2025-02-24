@@ -50,9 +50,6 @@ int main(int argc, char** argv) {
     manager = std::make_unique<DriveTrainMotorManager>(node);
     manager->init();
 
-    DriveTrainMotorManager driveTrainManager(node); 
-    driveTrainManager.init();
-
     // Set loop rate to 100 Hz
     rclcpp::Rate loop_rate(30000);
 
@@ -63,8 +60,7 @@ int main(int argc, char** argv) {
     // Main loop
     while (rclcpp::ok()) {
         rclcpp::spin_some(node);
-
-        driveTrainManager.tick();
+        manager->tick();
         loop_rate.sleep();  // Maintain the loop rate
     }
 
