@@ -85,11 +85,12 @@ hardware_interface::return_type
 
   cross_pkg_messages::msg::RoverComputerArmCMD msg{};
   msg.cmd_b = hw_commands_[0];
-  msg.cmd_s = -hw_commands_[1];
-  msg.cmd_e = hw_commands_[2];
-  msg.cmd_w.x = hw_commands_[2];
-  msg.cmd_w.y = hw_commands_[3];
-  msg.cmd_w.z = hw_commands_[4];
+  msg.cmd_s = hw_commands_[1];
+  msg.cmd_e = -hw_commands_[2];
+  msg.cmd_w.x = hw_commands_[3];
+  msg.cmd_w.y = -hw_commands_[4];
+  msg.cmd_w.z = hw_commands_[5];
+  RCLCPP_ERROR(arm_logger, "movit commanding posses with %f", hw_positions_[3]);
 
   armPublisher->publish(msg);
 
@@ -110,12 +111,12 @@ hardware_interface::return_type
 void ArmHardware::onReceivePosition(const cross_pkg_messages::msg::RoverComputerArmCMD::SharedPtr msg)
 {
   hw_positions_[0] = msg->cmd_b; 
-  hw_positions_[1] = -msg->cmd_s; 
-  hw_positions_[2] = msg->cmd_e; 
+  hw_positions_[1] = msg->cmd_s; 
+  hw_positions_[2] = -msg->cmd_e; 
   hw_positions_[3] = msg->cmd_w.x; 
-  hw_positions_[4] = msg->cmd_w.y; 
+  hw_positions_[4] = -msg->cmd_w.y; 
   hw_positions_[5] = msg->cmd_w.z; 
-  RCLCPP_ERROR(arm_logger, "got posses with %f", hw_positions_[1]);
+  // RCLCPP_ERROR(arm_logger, "got posses (invert) with %f", hw_positions_[2]);
 }
 
 }

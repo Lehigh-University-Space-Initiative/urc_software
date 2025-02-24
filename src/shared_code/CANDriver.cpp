@@ -360,6 +360,8 @@ SparkMax::SparkMax(rclcpp::Node::SharedPtr node, int canBUS, int canID, double g
     assert(gearRatio > 0);
     this->node_ = node;
     this->gearRatio = gearRatio;
+    RCLCPP_INFO(rclcpp::get_logger("SparkMax"), "Creating motor %d with gear ratio %.5f",canID,gearRatio);
+
 
     setupPID();
 }
