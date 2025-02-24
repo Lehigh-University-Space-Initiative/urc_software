@@ -65,11 +65,13 @@ int main(int argc, char **argv)
                 cross_pkg_messages::msg::RoverComputerArmCMD msg{};
 
 
+                msg.cmd_b = positions[0];
                 msg.cmd_s = positions[1];
                 msg.cmd_e = positions[2];
+                msg.cmd_w.x = positions[3];
+                msg.cmd_w.y = positions[4];
+                msg.cmd_w.z = positions[5];
 
-                // msg.cmd_s = positions[3];
-                
                 armPosPub->publish(msg);
             }
 
