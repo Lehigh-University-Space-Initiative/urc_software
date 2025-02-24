@@ -150,12 +150,12 @@
   </joint>
 
   <link name="${prefix}link2_box">
-    <!-- <collision>
-      <origin xyz="0 0 ${height3/2 - axel_offset}" rpy="0 0 0"/>
+    <collision>
+      <origin xyz="0 ${-olnaExtra2SizeY/2 - width/2} ${height3 - olnaExtra2SizeZ}" rpy="0 0 0"/>
       <geometry>
-        <box size="${width} ${width} ${height3}"/>
+        <box size="${olnaExtraSizeX} ${olnaExtra2SizeY} ${olnaExtra2SizeZ}"/>
       </geometry>
-    </collision> -->
+    </collision>
 
     <visual>
       <origin xyz="0 ${-olnaExtra2SizeY/2 - width/2} ${height3 - olnaExtra2SizeZ}" rpy="0 0 0"/>
@@ -195,12 +195,12 @@
   </joint>
 
   <link name="${prefix}wrist2">
-    <!-- <collision>
-      <origin xyz="0 0 ${wrist2SizeY/2}" rpy="0 0 0"/>
+    <collision>
+      <origin xyz="${-wrist2AxelToRectTop + wrist2SizeX/2} ${wrist2SizeY/2} 0" rpy="0 0 0"/>
       <geometry>
-        <box size="${width} ${width} ${height3}"/>
+        <box size="${wrist2SizeX} ${wrist2SizeY} ${wrist2SizeZ}"/>
       </geometry>
-    </collision> -->
+    </collision>
 
     <visual>
       <origin xyz="${-wrist2AxelToRectTop + wrist2SizeX/2} ${wrist2SizeY/2} 0" rpy="0 0 0"/>
@@ -241,12 +241,12 @@
   </joint>
 
   <link name="${prefix}wrist3">
-    <!-- <collision>
-      <origin xyz="0 0 ${wrist2SizeY/2}" rpy="0 0 0"/>
+    <collision>
+      <origin xyz="${-wrist2AxelGap - wrist3SizeX/2} ${0} ${-wrist3SizeZ/2 + wrist3AxelToRectTop}" rpy="0 0 0"/>
       <geometry>
-        <box size="${width} ${width} ${height3}"/>
+        <box size="${wrist3SizeX} ${wrist3SizeY} ${wrist3SizeZ}"/>
       </geometry>
-    </collision> -->
+    </collision>
 
     <visual>
       <origin xyz="${-wrist2AxelGap - wrist3SizeX/2} ${0} ${-wrist3SizeZ/2 + wrist3AxelToRectTop}" rpy="0 0 0"/>
@@ -266,11 +266,54 @@
     </inertial> -->
   </link>
 
-<!-- end effect -->
+<!-- end effector -->
+  <xacro:property name="endeSizeX" value="0.03" /> 
+  <xacro:property name="endeSizeY" value="0.11" /> 
+  <xacro:property name="endeSizeZ" value="0.24" /> 
+<!--  distance between boxes  -->
+  <xacro:property name="wrist3AxelGap" value="0.01" /> 
+  <!-- <xacro:property name="endeAxelToRectTop" value="0.01" />  -->
+
+  <joint name="${prefix}wrist3_joint" type="continuous">
+    <parent link="${prefix}wrist3"/>
+    <child link="${prefix}endEffector"/>
+<!-- in parent coords -->
+    <origin xyz="${-wrist3SizeX/2} 0 ${0}" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <dynamics damping="0.7"/>
+    <limit effort="100" velocity="1.0"/>
+  </joint>
+
+  <link name="${prefix}endEffector">
+    <collision>
+      <origin xyz="0 0 ${endeSizeZ/2 + wrist3AxelToRectTop + wrist3AxelGap}" rpy="0 0 0"/>
+      <geometry>
+        <box size="${endeSizeX} ${endeSizeY} ${endeSizeZ}"/>
+      </geometry>
+    </collision>
+
+    <visual>
+      <origin xyz="0 0 ${endeSizeZ/2 + wrist3AxelToRectTop + wrist3AxelGap}" rpy="0 0 0"/>
+      <geometry>
+        <box size="${endeSizeX} ${endeSizeY} ${endeSizeZ}"/>
+      </geometry>
+      <material name="white"/>
+    </visual>
+
+    <!-- <inertial>
+      <origin xyz="0 0 ${- height3/2 + axel_offset}" rpy="0 0 0"/>
+      <mass value="${mass}"/>
+      <inertia
+        ixx="${mass / 12.0 * (width*width + height3*height3)}" ixy="0.0" ixz="0.0"
+        iyy="${mass / 12.0 * (height3*height3 + width*width)}" iyz="0.0"
+        izz="${mass / 12.0 * (width*width + width*width)}"/>
+    </inertial> -->
+  </link>
+
 
   <joint name="${prefix}tool_joint" type="fixed">
-    <origin xyz="0 0 1" rpy="0 0 0" />
-    <parent link="${prefix}link2"/>
+    <origin xyz="0 0 ${endeSizeZ + wrist3AxelToRectTop + wrist3AxelGap}" rpy="0 0 0" />
+    <parent link="${prefix}endEffector"/>
     <child link="${prefix}tool_link" />
   </joint>
 
