@@ -220,6 +220,54 @@
     </inertial> -->
   </link>
 
+
+
+  <!-- Wrist 3 -->
+  <xacro:property name="wrist3SizeX" value="0.053" /> 
+  <xacro:property name="wrist3SizeY" value="0.05" /> 
+  <xacro:property name="wrist3SizeZ" value="0.107" /> 
+<!--  distance between boxes  -->
+  <xacro:property name="wrist2AxelGap" value="0.002" /> 
+  <xacro:property name="wrist3AxelToRectTop" value="0.025" /> 
+
+  <joint name="${prefix}wrist2_joint" type="continuous">
+    <parent link="${prefix}wrist2"/>
+    <child link="${prefix}wrist3"/>
+<!-- in parent coords -->
+    <origin xyz="${-wrist2AxelToRectTop} ${wrist2SizeY/2} ${0}" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <dynamics damping="0.7"/>
+    <limit effort="100" velocity="1.0"/>
+  </joint>
+
+  <link name="${prefix}wrist3">
+    <!-- <collision>
+      <origin xyz="0 0 ${wrist2SizeY/2}" rpy="0 0 0"/>
+      <geometry>
+        <box size="${width} ${width} ${height3}"/>
+      </geometry>
+    </collision> -->
+
+    <visual>
+      <origin xyz="${-wrist2AxelGap - wrist3SizeX/2} ${0} ${-wrist3SizeZ/2 + wrist3AxelToRectTop}" rpy="0 0 0"/>
+      <geometry>
+        <box size="${wrist3SizeX} ${wrist3SizeY} ${wrist3SizeZ}"/>
+      </geometry>
+      <material name="blue"/>
+    </visual>
+
+    <!-- <inertial>
+      <origin xyz="0 0 ${- height3/2 + axel_offset}" rpy="0 0 0"/>
+      <mass value="${mass}"/>
+      <inertia
+        ixx="${mass / 12.0 * (width*width + height3*height3)}" ixy="0.0" ixz="0.0"
+        iyy="${mass / 12.0 * (height3*height3 + width*width)}" iyz="0.0"
+        izz="${mass / 12.0 * (width*width + width*width)}"/>
+    </inertial> -->
+  </link>
+
+<!-- end effect -->
+
   <joint name="${prefix}tool_joint" type="fixed">
     <origin xyz="0 0 1" rpy="0 0 0" />
     <parent link="${prefix}link2"/>
