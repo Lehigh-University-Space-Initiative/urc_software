@@ -20,6 +20,6 @@ arm_controller:
       - wrist2_joint
       - wrist3_joint
     command_interfaces:
-      []
+        - position
     state_interfaces:
-      []
+        - position

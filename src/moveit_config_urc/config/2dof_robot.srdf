@@ -13,7 +13,6 @@
         <joint name="base_joint"/>
         <joint name="shoulder"/>
         <joint name="elbow"/>
-        <joint name="elbow_box_fix"/>
         <joint name="wrist1"/>
         <joint name="wrist2_joint"/>
         <joint name="wrist3_joint"/>
