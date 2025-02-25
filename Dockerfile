@@ -20,6 +20,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-humble-ros2-control \
     ros-humble-ros2-controllers \
     ros-humble-moveit-ros-planning-interface \
+    ros-humble-moveit-servo \
     tmux \
     ruby \
     vim nano gdb \
@@ -56,21 +57,21 @@ RUN cd /ros2_ws/libs/pigpio && make && make install
 # RUN cd /ros2_ws
 # RUN rosdep update
 
-RUN apt update
-RUN apt -y dist-upgrade
-RUN colcon mixin update default
-RUN mkdir -p /ros2_ws/src
-RUN cd /ros2_ws/src
-RUN git clone --branch humble https://github.com/ros-planning/moveit2_tutorials
-RUN vcs import < moveit2_tutorials/moveit2_tutorials.repos
-RUN apt update && rosdep install -r --from-paths . --ignore-src --rosdistro $ROS_DISTRO -y
-RUN cd /ros2_ws/
-RUN bash -c 'source /opt/ros/humble/setup.bash && colcon build --mixin release --merge-install --packages-skip imgui_example_glfw_wgpu ImGuiExample imgui_example_glfw_vulkan pigpio'
-RUN bash -c 'source /ros2_ws/install/setup.bash'
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    ros-humble-moveit-ros-move-group \
-    ros-humble-moveit-servo \
-    && rm -rf /var/lib/apt/lists/*
+# RUN apt update
+# RUN apt -y dist-upgrade
+# RUN colcon mixin update default
+# RUN mkdir -p /ros2_ws/src
+# RUN cd /ros2_ws/src
+# RUN git clone --branch humble https://github.com/ros-planning/moveit2_tutorials
+# RUN vcs import < moveit2_tutorials/moveit2_tutorials.repos
+# RUN apt update && rosdep install -r --from-paths . --ignore-src --rosdistro $ROS_DISTRO -y
+# RUN cd /ros2_ws/
+# RUN bash -c 'source /opt/ros/humble/setup.bash && colcon build --mixin release --merge-install --packages-skip imgui_example_glfw_wgpu ImGuiExample imgui_example_glfw_vulkan pigpio'
+# RUN bash -c 'source /ros2_ws/install/setup.bash'
+# RUN apt-get update && apt-get install -y --no-install-recommends \
+#     ros-humble-moveit-ros-move-group \
+#     ros-humble-moveit-servo \
+#     && rm -rf /var/lib/apt/lists/*
 
 # https://medium.com/codex/a-practical-guide-to-containerize-your-c-application-with-docker-50abb197f6d4
 FROM urc_software_base AS urc_software 

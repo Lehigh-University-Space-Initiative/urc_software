@@ -88,7 +88,7 @@ private:
   {
     auto twist_msg = std::make_unique<geometry_msgs::msg::TwistStamped>();
     twist_msg->header.stamp = this->now();
-    twist_msg->header.frame_id = "arm";
+    twist_msg->header.frame_id = "tool_joint";
 
 
     auto now_time = std::chrono::steady_clock::now();
