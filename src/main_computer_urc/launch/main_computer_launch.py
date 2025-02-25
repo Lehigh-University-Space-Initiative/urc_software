@@ -1,7 +1,7 @@
 from launch import LaunchDescription
 from launch_ros.actions import Node
 from launch.substitutions import Command, PathJoinSubstitution, FindExecutable, LaunchConfiguration
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, SetEnvironmentVariable
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, SetEnvironmentVariable, ExecuteProcess
 from launch_ros.substitutions import FindPackageShare 
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from moveit_configs_utils import MoveItConfigsBuilder
@@ -195,7 +195,9 @@ def generate_launch_description():
         output="screen",
     )
 
-    return LaunchDescription([
+
+
+    ld = LaunchDescription([
         # robot_state_publisher_node,
         rviz_node,
         # # joint_state_publisher_node,
@@ -239,6 +241,21 @@ def generate_launch_description():
         #     ],
         # ),
     ] + declared_arguments)
+
+    ld.add_action(
+    ExecuteProcess(
+        cmd=[[
+            FindExecutable(name='ros2'),
+            " service call ",
+            "/servo_node/start_servo ",
+            "std_srvs/srv/Trigger ",
+            '"{}"',
+        ]],
+        shell=True
+    )
+)
+
+    return ld;
 
 # <ros2_control name="${name}" type="system">
 #             <hardware>
