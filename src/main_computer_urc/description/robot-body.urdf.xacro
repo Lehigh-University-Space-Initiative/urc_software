@@ -51,14 +51,14 @@
       <material name="purple"/>
     </visual>
 
-    <inertial>
+    <!-- <inertial>
       <origin xyz="0 0 ${height1/2}" rpy="0 0 0"/>
       <mass value="${mass}"/>
       <inertia
         ixx="${mass / 12.0 * (width*width + height1*height1)}" ixy="0.0" ixz="0.0"
         iyy="${mass / 12.0 * (height1*height1 + width*width)}" iyz="0.0"
         izz="${mass / 12.0 * (width*width + width*width)}"/>
-    </inertial>
+    </inertial> -->
   </link>
 
   <joint name="${prefix}shoulder" type="continuous">
