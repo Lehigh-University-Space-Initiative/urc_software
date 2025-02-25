@@ -242,18 +242,18 @@ def generate_launch_description():
         # ),
     ] + declared_arguments)
 
-    ld.add_action(
-    ExecuteProcess(
-        cmd=[[
-            FindExecutable(name='ros2'),
-            " service call ",
-            "/servo_node/start_servo ",
-            "std_srvs/srv/Trigger ",
-            '"{}"',
-        ]],
-        shell=True
-    )
-)
+#     ld.add_action(
+#     ExecuteProcess(
+#         cmd=[[
+#             FindExecutable(name='ros2'),
+#             " service call ",
+#             "/servo_node/start_servo ",
+#             "std_srvs/srv/Trigger ",
+#             '"{}"',
+#         ]],
+#         shell=True
+#     )
+# )
 
     return ld;
 
