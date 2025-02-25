@@ -14,6 +14,8 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v4
+      with:
+        submodules: 'true'
 
     # In this step, this action saves a list of existing images,
     # the cache is created without them in the post run.
