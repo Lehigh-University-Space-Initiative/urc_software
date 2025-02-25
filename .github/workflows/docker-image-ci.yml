@@ -5,14 +5,23 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
 
   build:
 
     runs-on: ubuntu-22.04
-
     steps:
     - uses: actions/checkout@v4
+
+    # In this step, this action saves a list of existing images,
+    # the cache is created without them in the post run.
+    # It also restores the cache if it exists.
+    - uses: satackey/action-docker-layer-caching@v0.0.11
+      # Ignore the failure of a step and avoid terminating the job.
+      continue-on-error: true
+
+    
     - name: Build the Docker image
       run: ./softwareUpdate/dockerBuild.sh 
