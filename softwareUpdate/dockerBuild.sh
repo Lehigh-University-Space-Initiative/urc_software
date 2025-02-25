@@ -23,4 +23,4 @@ fi
 # copy the built binaries into the final
 docker image build -t urc_software -t 10.0.0.10:65000/urc_software --target urc_software ../
 
-echo -e "\033[32mCode compiled successfully!\033[0m"
+echo "\033[32mCode compiled successfully!\033[0m"

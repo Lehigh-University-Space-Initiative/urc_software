@@ -163,6 +163,5 @@ int main(int argc, char** argv)
 
   }
   rclcpp::shutdown();
-  aaaaaa
   return 0;
 }
