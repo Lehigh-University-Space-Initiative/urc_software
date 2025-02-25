@@ -210,12 +210,12 @@ def generate_launch_description():
         joint_state_broadcaster_spawner,
         arm_controller_spawner,
         servo_node,
-        # Node(
-        #     package='main_computer_urc',
-        #     executable='DriveTrainManager_node',
-        #     name='DriveTrainManager',
-        #     output='screen'
-        # ),
+        Node(
+            package='main_computer_urc',
+            executable='DriveTrainManager_node',
+            name='DriveTrainManager',
+            output='screen'
+        ),
         # Node(
         #     package='main_computer_urc',
         #     executable='StatusLED_node',
