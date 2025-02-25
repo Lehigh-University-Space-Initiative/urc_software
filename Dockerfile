@@ -27,6 +27,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-colcon-common-extensions \
     python3-colcon-mixin \
     python3-vcstool \
+    libglfw3-dev \
+    libglew-dev \
+    libgps-dev \
+    iproute2 net-tools \
+    x11-apps \
+    iputils-ping \
+    # for opencv
+     wget g++ unzip \ 
     && rm -rf /var/lib/apt/lists/*
 
 # Copy the urcAssets directory to the home directory in the container
@@ -47,11 +55,6 @@ RUN cd /ros2_ws/libs/pigpio && make && make install
 # prepare to install all dependencies thorugh rosdep
 # RUN cd /ros2_ws
 # RUN rosdep update
-
-COPY --from=plugin_installer /opt/ros/humble /opt/ros/humble
-COPY --from=plugin_installer /usr/bin /usr/bin
-COPY --from=plugin_installer /usr/share /usr/share
-COPY --from=plugin_installer /usr/include /usr/include
 
 RUN apt update
 RUN apt -y dist-upgrade
@@ -74,14 +77,8 @@ FROM urc_software_base AS urc_software
 
 # copy built binaries
 WORKDIR /ros2_ws
-COPY --from=plugin_installer /opt/ros/humble /opt/ros/humble
 COPY --from=urc_software_builder /opt/ros/humble /opt/ros/humble
 # for installing Qt for rviz2
-COPY --from=plugin_installer /usr/lib /usr/lib
-COPY --from=plugin_installer /usr/include /usr/include
-# for installing gazebo
-COPY --from=plugin_installer /usr/bin /usr/bin
-COPY --from=plugin_installer /usr/share /usr/share
 COPY ./install /ros2_ws/install
 COPY ./libs /ros2_ws/libs
 COPY ./run_nodes.sh /ros2_ws/run_nodes.sh
