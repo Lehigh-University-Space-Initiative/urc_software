@@ -35,7 +35,7 @@ int main(int argc, char **argv)
     RCLCPP_INFO(node->get_logger(), "ArmMotorManager is running");
 
     // Construct the manager
-    manager = std::make_unique<ArmMotorManager>(node);
+    manager = std::make_unique<ArmMotorManager>(node,true);
     manager->init();
 
         // Subscriber for rover drive commands

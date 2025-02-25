@@ -47,7 +47,7 @@ int main(int argc, char** argv) {
     RCLCPP_INFO(node->get_logger(), "Motor CTR startup");
 
     // Construct the manager
-    manager = std::make_unique<DriveTrainMotorManager>(node);
+    manager = std::make_unique<DriveTrainMotorManager>(node,false);
     manager->init();
 
     // Set loop rate to 100 Hz
