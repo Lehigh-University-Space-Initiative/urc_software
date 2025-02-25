@@ -1,8 +1,8 @@
 #include "rclcpp/rclcpp.hpp"
 #include "geometry_msgs/msg/twist.hpp"
 #include "cross_pkg_messages/msg/rover_computer_arm_cmd.hpp" // TODO: figure these out
-#include "arm_urc/ArmMotorManager.h"
-#include "arm_urc/main.h"
+#include "ArmMotorManager.h"
+#include "main.h"
 #include <chrono>
 
 // Global variables
@@ -35,7 +35,7 @@ int main(int argc, char **argv)
     RCLCPP_INFO(node->get_logger(), "ArmMotorManager is running");
 
     // Construct the manager
-    manager = std::make_unique<ArmMotorManager>(node);
+    manager = std::make_unique<ArmMotorManager>(node,true);
     manager->init();
 
         // Subscriber for rover drive commands

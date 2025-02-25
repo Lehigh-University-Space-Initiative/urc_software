@@ -3,9 +3,10 @@
 
 rclcpp::Logger dl_logger = rclcpp::get_logger("driveline logger");
 
-MotorManager::MotorManager(rclcpp::Node::SharedPtr node)
+MotorManager::MotorManager(rclcpp::Node::SharedPtr node, bool usePid)
 {
     this->node_ = node;
+    this->usePid_ = usePid;
 }
 
 MotorManager::~MotorManager()
@@ -43,6 +44,10 @@ void MotorManager::init()
 {
     setupMotors();
     motor_count_ = motors_.size();
+
+    for(auto& m : motors_) {
+        m.pidControlled = usePid_;
+    }
 
     // Resize vectors for position, velocity, command
     hw_positions_.resize(motor_count_, 0.0);
