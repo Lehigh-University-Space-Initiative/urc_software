@@ -14,6 +14,13 @@ docker container run \
              source ./install/setup.bash &&
              colcon build --merge-install --packages-select base_station_urc main_computer_urc driveline_urc'
 
+# Check if the build step failed (return code 2)
+if [ $? -eq 2 ]; then
+    echo "\033[31mCode did not compile!\033[0m"
+    exit 2
+fi
+
 # copy the built binaries into the final
 docker image build -t urc_software -t 10.0.0.10:65000/urc_software --target urc_software ../
 
+echo -e "\033[32mCode compiled successfully!\033[0m"
