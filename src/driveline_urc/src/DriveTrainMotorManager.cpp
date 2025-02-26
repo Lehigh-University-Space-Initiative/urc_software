@@ -11,10 +11,9 @@ void DriveTrainMotorManager::setupMotors() {
     motors_.emplace_back(node_, 0, 1, 1.0); // LF
     motors_.emplace_back(node_, 0, 2, 1.0); // LM
     motors_.emplace_back(node_, 0, 3, 1.0); // LB
-    // Right side (BUS 1)
-    motors_.emplace_back(node_, 1, 4, 1.0); // RB
-    motors_.emplace_back(node_, 1, 5, 1.0); // RM
-    motors_.emplace_back(node_, 1, 6, 1.0); // RF
+    motors_.emplace_back(node_, 0, 4, 1.0); // RB
+    motors_.emplace_back(node_, 0, 5, 1.0); // RM
+    motors_.emplace_back(node_, 0, 6, 1.0); // RF
 
     RCLCPP_INFO(node_->get_logger(), "Testing Motors");
     for (auto &motor : motors_) {

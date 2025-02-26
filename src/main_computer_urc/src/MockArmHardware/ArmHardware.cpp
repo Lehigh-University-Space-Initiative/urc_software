@@ -90,7 +90,7 @@ hardware_interface::return_type
   msg.cmd_w.x = hw_commands_[3];
   msg.cmd_w.y = -hw_commands_[4];
   msg.cmd_w.z = hw_commands_[5];
-  RCLCPP_ERROR(arm_logger, "movit commanding posses with %f", hw_positions_[3]);
+  // RCLCPP_ERROR(arm_logger, "movit commanding posses with %f", hw_commands_[2]);
 
   armPublisher->publish(msg);
 

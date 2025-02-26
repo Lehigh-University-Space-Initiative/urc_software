@@ -54,8 +54,8 @@ int main(int argc, char** argv) {
     rclcpp::Rate loop_rate(30000);
 
     // Subscriber for rover drive commands
-    // auto driveCommandsSub = node->create_subscription<cross_pkg_messages::msg::RoverComputerDriveCMD>(
-        // "/roverDriveCommands", 10, callback);
+    auto driveCommandsSub = node->create_subscription<cross_pkg_messages::msg::RoverComputerDriveCMD>(
+        "/roverDriveCommands", 10, callback);
 
     // Main loop
     while (rclcpp::ok()) {
