@@ -25,20 +25,30 @@ right trigger: open end effector
 
 
 std::shared_ptr<rclcpp::Node> node;
+std::unique_ptr<DriveTrainMotorManager> manager;
 
 // Callback function
 void callback(const cross_pkg_messages::msg::RoverComputerDriveCMD::SharedPtr msg) {
    RCLCPP_INFO(rclcpp::get_logger("Motor_CTR"), "Received command with CMD_R.z: %f", msg->cmd_r.z);
    // wrist_yaw.setVelocity(msg->cmd_r.z);  // Uncomment and set velocity when integrating
+   manager->parseDriveCommands(msg);
 }
 
 int main(int argc, char** argv) {
     rclcpp::init(argc, argv);
-    node = rclcpp::Node::make_shared("motor_ctr");
+    node = rclcpp::Node::make_shared("DriveTrainMotorManager");
+
+    node->declare_parameter("kp",1.0);
+    node->declare_parameter("kd",0.01);
+    node->declare_parameter("ki",1.0);
+    node->declare_parameter("max_i",0.01);
+    node->declare_parameter("readOnly",false);
 
     RCLCPP_INFO(node->get_logger(), "Motor CTR startup");
 
-    DriveTrainMotorManager driveTrainManager{}; 
+    // Construct the manager
+    manager = std::make_unique<DriveTrainMotorManager>(node,false);
+    manager->init();
 
     // Set loop rate to 100 Hz
     rclcpp::Rate loop_rate(30000);
@@ -50,8 +60,7 @@ int main(int argc, char** argv) {
     // Main loop
     while (rclcpp::ok()) {
         rclcpp::spin_some(node);
-
-        driveTrainManager.tick();
+        manager->tick();
         loop_rate.sleep();  // Maintain the loop rate
     }
 

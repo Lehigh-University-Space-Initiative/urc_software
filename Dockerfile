@@ -13,6 +13,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-humble-image-transport-plugins \
     ros-humble-cv-bridge \
     ros-humble-joy \
+    ros-humble-xacro \
+    ros-humble-moveit \
+    ros-humble-joint-state-publisher-gui \
+    libqt5widgets5 \
+    ros-humble-ros2-control \
+    ros-humble-ros2-controllers \
+    ros-humble-moveit-ros-planning-interface \
+    tmux \
+    ruby \
+    vim nano gdb \
     libglfw3-dev \
     libglew-dev \
     libgps-dev \
@@ -38,6 +48,9 @@ COPY ./libs /ros2_ws/libs
 # Build pigpio from the submodule
 RUN cd /ros2_ws/libs/pigpio && make && make install
 
+# prepare to install all dependencies thorugh rosdep
+# RUN cd /ros2_ws
+# RUN rosdep update
 
 # https://medium.com/codex/a-practical-guide-to-containerize-your-c-application-with-docker-50abb197f6d4
 FROM urc_software_base AS urc_software 
@@ -51,7 +64,7 @@ COPY ./run_nodes.sh /ros2_ws/run_nodes.sh
 RUN cd /ros2_ws/libs/pigpio && make && make install
 
 # Default command
-ENTRYPOINT ["/ros2_ws/run_nodes.sh"]
+ENTRYPOINT ["/ros2_ws/run_nodes.sh"] 
 #  ENTRYPOINT ["bash"]
 
 # added

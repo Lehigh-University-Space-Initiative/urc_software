@@ -1,9 +1,12 @@
 cmake_minimum_required(VERSION 3.5)
-project(driveline_urc)
+project(arm_urc)
 
 # Find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(controller_manager REQUIRED)
+find_package(pluginlib REQUIRED)
+find_package(hardware_interface REQUIRED) 
 find_package(std_msgs REQUIRED)
 find_package(cross_pkg_messages REQUIRED)
 find_package(sensor_msgs REQUIRED)
@@ -22,29 +25,36 @@ add_custom_target(pigpio_build ALL
   COMMAND make -C ${CMAKE_CURRENT_SOURCE_DIR}/../../libs/pigpio
 )
 
-# Motor Controller node executable
-file(GLOB MotorCtr_src
+file(GLOB ARM_URC_SRC
   ../shared_code/*.cpp
-  src/*.cpp
+  src/ArmMotorManager.cpp
+  src/main.cpp
 )
-add_executable(MotorCtr_node ${MotorCtr_src})
-ament_target_dependencies(MotorCtr_node rclcpp std_msgs cross_pkg_messages)
 
-# Ensure pigpio is built before MotorCtr_node
-add_dependencies(MotorCtr_node pigpio_build)
+set(ARM_URC_HW_SRC
+  src/ArmHardware.cpp
+)
 
-# Link the pigpio library to MotorCtr_node
-target_link_libraries(MotorCtr_node pigpio)
+# Declare the SpaceMouseMapper executable
+add_executable(ArmMotorManager ${ARM_URC_SRC})
+ament_target_dependencies(ArmMotorManager rclcpp cross_pkg_messages std_msgs)
+target_link_libraries(ArmMotorManager pigpio)
 
-# Install the executables
 install(TARGETS
-  MotorCtr_node
-  DESTINATION lib/${PROJECT_NAME})
+  # arm_urc
+  # arm_urc_hw
+  ArmMotorManager
+  DESTINATION lib/${PROJECT_NAME}
+)
 
-# Install the launch directory
+# install(FILES plugin.xml
+#   DESTINATION share/${PROJECT_NAME}
+# )
+
 install(DIRECTORY
+  # urdf
   launch
-  DESTINATION share/${PROJECT_NAME}/
+  DESTINATION share/${PROJECT_NAME}
 )
 
 ament_package()

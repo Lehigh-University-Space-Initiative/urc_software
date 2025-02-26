@@ -1,0 +1,10 @@
+<library path="driveline_urc_hw">
+  <class name="driveline_urc/DrivelineHardware"
+         type="driveline_urc::DrivelineHardware"
+         base_class_type="hardware_interface::SystemInterface">
+
+    <description>
+     Driveline hardware interface
+    </description>
+  </class>
+</library>

@@ -7,14 +7,11 @@
 #include <vector>
 #include <cs_plain_guarded.h>
 #include "cross_pkg_messages/msg/rover_computer_drive_cmd.hpp"
+#include "MotorManager.h"
 
-
-class DriveTrainMotorManager {
+class DriveTrainMotorManager : public MotorManager {
 private:
-    std::vector<SparkMax> motors;
-
-    void setupMotors();
-    void stopAllMotors();
+    void setupMotors() override;
 
     libguarded::plain_guarded<std::chrono::time_point<std::chrono::system_clock>> lastManualCommandTime{std::chrono::system_clock::now()};
     std::chrono::milliseconds manualCommandTimeout{1500};
@@ -24,11 +21,9 @@ private:
 
     rclcpp::Publisher<cross_pkg_messages::msg::RoverComputerDriveCMD>::SharedPtr wheelVelPub;
 
-    void parseDriveCommands(const cross_pkg_messages::msg::RoverComputerDriveCMD::SharedPtr msg);
 
 public:
-    DriveTrainMotorManager();
+    using MotorManager::MotorManager;
     virtual ~DriveTrainMotorManager();
-    void sendHeartbeats();
-    void tick();
+    void parseDriveCommands(const cross_pkg_messages::msg::RoverComputerDriveCMD::SharedPtr msg);
 };
