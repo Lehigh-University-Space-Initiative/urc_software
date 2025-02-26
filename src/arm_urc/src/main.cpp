@@ -22,6 +22,7 @@ void callback(const cross_pkg_messages::msg::RoverComputerArmCMD::SharedPtr msg)
 int main(int argc, char **argv)
 {
     rclcpp::init(argc, argv);
+    aahhhhhhhh
 
     // Create ROS2 node
     node = rclcpp::Node::make_shared("ArmMotorManager");
