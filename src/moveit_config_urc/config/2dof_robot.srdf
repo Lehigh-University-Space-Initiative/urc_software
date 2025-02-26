@@ -46,7 +46,7 @@
         <joint name="wrist3_joint" value="0.1562"/>
     </group_state>
     <group_state name="ahh" group="arm">
-        <joint name="base_joint" value="-0.781"/>
+        <joint name="base_joint" value="-0.3905"/>
         <joint name="elbow" value="1.2323"/>
         <joint name="shoulder" value="-1.4059"/>
         <joint name="wrist1" value="2.8291"/>
@@ -76,6 +76,14 @@
         <joint name="wrist1" value="0"/>
         <joint name="wrist2_joint" value="0"/>
         <joint name="wrist3_joint" value="0"/>
+    </group_state>
+    <group_state name="bend_alt" group="arm">
+        <joint name="base_joint" value="-0.6"/>
+        <joint name="elbow" value="1.3707"/>
+        <joint name="shoulder" value="0"/>
+        <joint name="wrist1" value="0"/>
+        <joint name="wrist2_joint" value="0.4"/>
+        <joint name="wrist3_joint" value="0.2"/>
     </group_state>
     <group_state name="bend_wrist_rotate" group="arm">
         <joint name="base_joint" value="0"/>

@@ -23,6 +23,7 @@ hardware_interface::CallbackReturn ArmHardware::on_init(const hardware_interface
   motorCount = info_.joints.size();
     // Resize vectors for position, velocity, command
   hw_positions_.resize(motorCount, 0.0);
+  // hw_positions_[2] = 0.4;
   hw_velocities_.resize(motorCount, 0.0);
   hw_commands_.resize(motorCount, 0.0);
 
@@ -90,7 +91,7 @@ hardware_interface::return_type
   msg.cmd_w.x = hw_commands_[3];
   msg.cmd_w.y = -hw_commands_[4];
   msg.cmd_w.z = hw_commands_[5];
-  // RCLCPP_ERROR(arm_logger, "movit commanding posses with %f", hw_commands_[2]);
+  RCLCPP_ERROR(arm_logger, "movit commanding posses with %f", hw_commands_[2]);
 
   armPublisher->publish(msg);
 

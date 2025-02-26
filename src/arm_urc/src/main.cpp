@@ -50,18 +50,20 @@ int main(int argc, char **argv)
     std::chrono::system_clock::time_point last_update = std::chrono::system_clock::now();
     bool firstTime = true;
 
+    size_t itr = 0;
+
     while (rclcpp::ok())
     {
         // Spin and process ROS callbacks
         rclcpp::spin_some(node);
         manager->tick();
 
-        if (!firstTime) {
+        if (!firstTime && itr++ % 10 == 0) {
             //reading of movotrs for movit should be in radians from veterical
             manager->readMotors(std::chrono::duration<double>(std::chrono::system_clock::now() - last_update).count());
 
             auto& positions = manager->getMotorPositions();
-            if (positions.size() >= 2) {
+            if (positions.size() >= 6) {
                 cross_pkg_messages::msg::RoverComputerArmCMD msg{};
 
 
