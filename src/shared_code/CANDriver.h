@@ -73,7 +73,7 @@ protected:
 
 public:
 
-    static void doCanReadIter(int canBus);
+    static bool doCanReadIter(int canBus);
 
     CANDriver(int busNum, int canID);
     CANDriver(const CANDriver& other);

@@ -50,6 +50,10 @@ def generate_launch_description():
     urdf_file = PathJoinSubstitution(
         [FindPackageShare("main_computer_urc"), "description", "robot.urdf.xacro"]
     )
+    initial_file = PathJoinSubstitution(
+        [FindPackageShare("moveit_config_urc"), "config", "initial_positions.yaml"]
+        # [FindPackageShare("moveit_config_urc"), "config", "moveit.rviz"]
+    )
     # rviz_file = PathJoinSubstitution(
     #     [FindPackageShare("main_computer_urc"), "description", "robot.rviz"]
     # )
@@ -80,7 +84,7 @@ def generate_launch_description():
         MoveItConfigsBuilder(
             "gen3", package_name="moveit_config_urc"
         )
-        # .robot_description(mappings=launch_arguments)
+        # .robot_description(file_path=urdf_file, mappings={"initial_positions_file": "config/initial_positions.yaml"})
         .trajectory_execution(file_path="config/moveit_controllers.yaml")
         .planning_scene_monitor(
             publish_robot_description=True, publish_robot_description_semantic=True
@@ -222,12 +226,12 @@ def generate_launch_description():
         #     name='StatusLED',
         #     output='screen'
         # ),
-        Node(
-            package='main_computer_urc',
-            executable='VideoStreamer_node',
-            name='VideoStreamer',
-            output='screen'
-        ),
+        # Node(
+        #     package='main_computer_urc',
+        #     executable='VideoStreamer_node',
+        #     name='VideoStreamer',
+        #     output='screen'
+        # ),
         Node(
             package='image_transport',
             executable='republish',

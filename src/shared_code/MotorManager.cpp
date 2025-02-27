@@ -127,9 +127,21 @@ void MotorManager::tick()
 
     //read any can message at a much higher rate than all other update tasks
     //TODO: URC-102: should move this back 
-    CANDriver::doCanReadIter(1);
+    size_t canItr = 0;
+    while(CANDriver::doCanReadIter(1)) {
+        canItr++;
+    };
+    RCLCPP_INFO(rclcpp::get_logger("Arm"), "can ITR count: %ld", canItr);
+    
 
-    if (loopItr % 30 != 0) return;
+    //if (loopItr % 0 != 0) return;
+
+            {
+            static std::chrono::system_clock::time_point last_update;
+            double delta = std::chrono::duration<double>(std::chrono::system_clock::now() - last_update).count();
+            last_update = std::chrono::system_clock::now();
+            RCLCPP_INFO(rclcpp::get_logger("Arm"), "pid tick cycle delta: %f", delta);
+            }
     
     //give pid tick
     for (auto i = 0; i < motors_.size(); i++) {

@@ -161,7 +161,7 @@ void CANDriver::startCanReadThread(int canBus)
     }
 }
 
-void CANDriver::doCanReadIter(int canBus)
+bool CANDriver::doCanReadIter(int canBus)
 {
         can_frame frame;
         // RCLCPP_INFO(dl_logger,"checking can");
@@ -182,6 +182,9 @@ void CANDriver::doCanReadIter(int canBus)
             
             //optional wait a little bit
             // std::this_thread::sleep_for(std::chrono::milliseconds(1));//
+            return true;
+        } else {
+            return false;
         }
 }
 

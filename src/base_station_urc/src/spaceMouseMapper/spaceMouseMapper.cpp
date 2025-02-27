@@ -110,7 +110,7 @@ private:
     twist_msg.header.frame_id = "tool_link";
 
     // Scaling factors
-    const double kLinearScale = 0.3;
+    const double kLinearScale = 0.5;
     const double kAngularScale = 1;
 
     twist_msg.twist.linear.x  = std::clamp(msg.linear_input.z*-1, -1.0, 1.0) * kLinearScale;
