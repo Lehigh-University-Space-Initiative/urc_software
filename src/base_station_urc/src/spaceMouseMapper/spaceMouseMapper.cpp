@@ -35,6 +35,10 @@ private:
 
   int joyFd = 0;
 
+
+  bool left_btn = 0;
+  bool right_btn = 0;
+
   void loadJoystick() {
     int i = 0;
     char *fname = NULL;
@@ -102,6 +106,8 @@ private:
     msg.angular_input.x = fixAxis(-axes[4]);
     msg.angular_input.y = fixAxis(-axes[3]);
     msg.angular_input.z = fixAxis(-axes[5]);
+    msg.left_btn = left_btn * 0.1;
+    msg.right_btn = right_btn * 0.1;
 
     drive_pub_->publish(msg);
 
@@ -142,6 +148,15 @@ private:
     {
       switch (ev.type)
       {
+      case EV_KEY:
+        // printf("Key %d pressed %d.\n", ev.code, ev.value);
+        if (ev.code == 256) {
+          left_btn = ev.value;
+        } else if (ev.code == 257) {
+          right_btn = ev.value;
+        }
+        break;
+
       /*
           older kernels than and including 2.6.31 send EV_REL events for SpaceNavigator movement
           newer - 2.6.35 and upwards send the more logical EV_ABS instead.

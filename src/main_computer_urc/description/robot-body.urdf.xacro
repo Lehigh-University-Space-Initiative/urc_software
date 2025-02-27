@@ -4,11 +4,11 @@
   <xacro:macro name="robot" params="parent prefix *origin">
 
   <!-- Constants for robot dimensions -->
-  <xacro:property name="mass" value="3" /> <!-- arbitrary value for mass -->
+  <!-- <xacro:property name="mass" value="3" /> < arbitrary value for mass > -->
   <xacro:property name="base_width" value="0.13" /> <!-- Square dimensions (widthxwidth) of beams -->
   <xacro:property name="base_depth" value="0.102" /> <!-- Square dimensions (widthxwidth) of beams -->
   <xacro:property name="height1" value="0.05" /> <!-- Link 1 -->
-  <xacro:property name="height2" value="0.6285" /> <!-- Link 2 -->
+  <xacro:property name="height2" value="0.5631" /> <!-- Link 2 -->
   <xacro:property name="width" value="0.0254" /> <!-- Square dimensions (widthxwidth) of beams -->
   <xacro:property name="height3" value="0.6285" /> <!-- Link 3 -->
   <!-- todo check axual offset for correctness -->
@@ -91,9 +91,9 @@
       <origin xyz="0 0 ${height2/2 - axel_offset}" rpy="0 0 0"/>
       <mass value="${mass}"/>
       <inertia
-        ixx="${mass / 12.0 * (width*width + height2*height2)}" ixy="0.0" ixz="0.0"
-        iyy="${mass / 12.0 * (height2*height2 + width*width)}" iyz="0.0"
-        izz="${mass / 12.0 * (width*width + width*width)}"/>
+        ixx="" ixy="0.0" ixz="0.0"
+        iyy="" iyz="0.0"
+        izz=""/>
     </inertial>
   </link>
 
