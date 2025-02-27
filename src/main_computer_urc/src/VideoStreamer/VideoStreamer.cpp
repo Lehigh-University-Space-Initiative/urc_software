@@ -67,7 +67,7 @@ public:
         image_pub_3d_ = image_transport::create_publisher(this, "/video_stream_3d");
 
         timer_ = create_wall_timer(
-            std::chrono::milliseconds(33),  // ~30 Hz
+            std::chrono::milliseconds(60),  // ~30 Hz
             std::bind(&VideoStreamer::timer_callback, this)
         );
 
@@ -94,7 +94,7 @@ private:
 
             int actual_cam = 2; //cam_map_[current_streaming_cam_];
             RCLCPP_WARN(this->get_logger(), "Print testing");
-            cap_.open("/dev/video4", cv::CAP_V4L2);
+            cap_.open("/dev/video0", cv::CAP_V4L2);
 
             if (!cap_.isOpened()) {
                 RCLCPP_WARN(this->get_logger(), "Failed to open camera %d", actual_cam);
