@@ -10,7 +10,7 @@
   <xacro:property name="height1" value="0.05" /> <!-- Link 1 -->
   <xacro:property name="height2" value="0.5631" /> <!-- Link 2 -->
   <xacro:property name="width" value="0.0254" /> <!-- Square dimensions (widthxwidth) of beams -->
-  <xacro:property name="height3" value="0.6285" /> <!-- Link 3 -->
+  <xacro:property name="height3" value="0.5631" /> <!-- Link 3 -->
   <!-- todo check axual offset for correctness -->
   <xacro:property name="axel_offset" value="0.025" /> <!-- Space btw top of beam and the each joint -->
 
@@ -88,12 +88,12 @@
     </visual>
 
     <inertial>
-      <origin xyz="0 0 ${height2/2 - axel_offset}" rpy="0 0 0"/>
-      <mass value="${mass}"/>
+      <origin xyz="-0.00009299 0.031668 0.45103767" rpy="0 0 0"/>
+      <mass value="1.57816"/>
       <inertia
-        ixx="" ixy="0.0" ixz="0.0"
-        iyy="" iyz="0.0"
-        izz=""/>
+        ixx="0.029411" ixy="0.00000451" ixz="-0.00001344"
+        iyy="0.027431" iyz="-0.0031087"
+        izz="0.0026470"/>
     </inertial>
   </link>
 
@@ -126,19 +126,19 @@
         <box size="${width} ${width} ${height3}"/>
         <!-- <box size="${olnaextrasizex*5} ${olnaextra2sizey} ${olnaextra2sizez}" xyz="0 0 ${height3 - axel_offset}"/> -->
       </geometry>
-      <geometry>
+      <!-- <geometry>
         <box size="0.1 0.1 0.1"/>
-      </geometry>
+      </geometry> -->
       <material name="orange"/>
     </visual>
 
     <inertial>
-      <origin xyz="0 0 ${height3/2 - axel_offset}" rpy="0 0 0"/>
-      <mass value="${mass}"/>
+      <origin xyz="-0.00009299 0.031668 0.45103767" rpy="0 0 0"/>
+      <mass value="1.57816"/>
       <inertia
-        ixx="${mass / 12.0 * (width*width + height3*height3)}" ixy="0.0" ixz="0.0"
-        iyy="${mass / 12.0 * (height3*height3 + width*width)}" iyz="0.0"
-        izz="${mass / 12.0 * (width*width + width*width)}"/>
+        ixx="0.029411" ixy="0.00000451" ixz="-0.00001344"
+        iyy="0.027431" iyz="-0.0031087"
+        izz="0.0026470"/>
     </inertial>
   </link>
 
@@ -165,14 +165,6 @@
       <material name="brown"/>
     </visual>
 
-    <inertial>
-      <origin xyz="0 0 ${height3/2 - axel_offset}" rpy="0 0 0"/>
-      <mass value="${mass}"/>
-      <inertia
-        ixx="${mass / 12.0 * (width*width + height3*height3)}" ixy="0.0" ixz="0.0"
-        iyy="${mass / 12.0 * (height3*height3 + width*width)}" iyz="0.0"
-        izz="${mass / 12.0 * (width*width + width*width)}"/>
-    </inertial>
   </link>
 
 
