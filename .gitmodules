@@ -8,3 +8,6 @@
 [submodule "src/slidar_ros2"]
 	path = src/slidar_ros2
 	url = https://github.com/Slamtec/sllidar_ros2.git
+[submodule "libs/sockpp"]
+	path = libs/sockpp
+	url = https://github.com/fpagliughi/sockpp.git

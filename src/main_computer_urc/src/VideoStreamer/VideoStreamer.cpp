@@ -61,7 +61,7 @@ class VideoStreamer : public rclcpp::Node {
 public:
     VideoStreamer() : Node("video_streamer") {
         declare_parameter<bool>("lusi_vision_mode", false);
-        declare_parameter<int>("stream_cam", 1);
+        declare_parameter<int>("stream_cam", 0);
 
         image_pub_ = image_transport::create_publisher(this, "/video_stream");
         image_pub_3d_ = image_transport::create_publisher(this, "/video_stream_3d");
@@ -92,9 +92,9 @@ private:
                 return;
             }
 
-            int actual_cam = 2; //cam_map_[current_streaming_cam_];
-            RCLCPP_WARN(this->get_logger(), "Print testing");
-            cap_.open("/dev/video0", cv::CAP_V4L2);
+            int actual_cam = cam_map_[current_streaming_cam_];
+            RCLCPP_INFO(this->get_logger(), "Switching to camera %d", actual_cam);
+            cap_.open(actual_cam, cv::CAP_V4L2);
 
             if (!cap_.isOpened()) {
                 RCLCPP_WARN(this->get_logger(), "Failed to open camera %d", actual_cam);

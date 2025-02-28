@@ -13,6 +13,8 @@ find_package(glfw3 REQUIRED)
 find_package(cross_pkg_messages REQUIRED)
 find_package(control_msgs REQUIRED)
 find_package(moveit_servo REQUIRED)
+find_package(sockpp REQUIRED)
+# find_package(moveit_ros_planning_interface REQUIRED)
 
 # Include directories
 include_directories(
@@ -24,6 +26,7 @@ include_directories(
   ${std_msgs_INCLUDE_DIRS}
   ${cross_pkg_messages_INCLUDE_DIRS}
   ${control_msgs_INCLUDE_DIRS}
+  ${CMAKE_CURRENT_SOURCE_DIR}/../../libs/sockpp 
   ../../libs/imgui
   ../../libs/imgui/backends
 )
@@ -75,6 +78,29 @@ ament_target_dependencies(GroundStationGUI
   cross_pkg_messages
 )
 
+file(GLOB VisionFiles
+      "src/LUSIVisionStreamer/*.cpp"
+      "src/LUSIVisionStreamer/LUSIVisionTelem.cpp"
+      "src/LUSIVisionStreamer/*.h"
+
+      "src/LUSIVisionStreamer/sockpp/src/*.cpp"
+
+      "src/LUSIVisionStreamer/sockpp/src/linux/*.cpp"
+      "src/LUSIVisionStreamer/sockpp/src/unix*.h"
+)
+add_executable(LUSIVisionStreamer_node ${VisionFiles})
+target_include_directories(LUSIVisionStreamer_node PRIVATE src/LUSIVisionStreamer/sockpp/include include/cs_libguarded)
+target_link_libraries(LUSIVisionStreamer_node Sockpp::sockpp)
+ament_target_dependencies(LUSIVisionStreamer_node
+  rclcpp
+  std_msgs
+  sensor_msgs
+  image_transport
+  cv_bridge
+  geometry_msgs
+  cross_pkg_messages
+)
+
 # Declare the SpaceMouseMapper executable
 add_executable(SpaceMouseMapper_node src/spaceMouseMapper/spaceMouseMapper.cpp)
 ament_target_dependencies(SpaceMouseMapper_node rclcpp cross_pkg_messages std_msgs)
@@ -95,6 +121,8 @@ install(TARGETS
   GroundStationGUI
   SpaceMouseMapper_node
   ArmCommandEncoder_node
+  # ArmCommandEncoder_node
+  LUSIVisionStreamer_node
   DESTINATION lib/${PROJECT_NAME}
 )
 
