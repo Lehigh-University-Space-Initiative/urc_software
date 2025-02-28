@@ -13,6 +13,7 @@ public:
     VideoViewPanel(const std::string &name, const rclcpp::Node::SharedPtr &node)
         : Panel(name, node) {}
 
+    std::shared_ptr<rclcpp::AsyncParametersClient> camParamClient_;
     virtual void setup() override;
     virtual void update() override;
     virtual ~VideoViewPanel();
