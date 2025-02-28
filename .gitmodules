@@ -5,3 +5,6 @@
 [submodule "libs/pigpio"]
 	path = libs/pigpio
 	url = https://github.com/joan2937/pigpio.git
+[submodule "libs/sockpp"]
+	path = libs/sockpp
+	url = https://github.com/fpagliughi/sockpp.git

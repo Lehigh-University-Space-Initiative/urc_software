@@ -50,6 +50,13 @@ def generate_launch_description():
             # parameters=[{'/hootl': False}] 
         ),
         Node(
+            package='base_station_urc',
+            executable='LUSIVisionStreamer_node',
+            name='lusi_vision_streamer',
+            output='screen',
+            # parameters=[{'/hootl': False}] 
+        ),
+        Node(
             package='image_transport',
             executable='republish',
             name='republish',

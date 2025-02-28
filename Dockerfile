@@ -37,6 +37,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN mkdir -p /home/urcAssets
 COPY urcAssets /home/urcAssets
 
+COPY ./libs /ros2_ws/libs
+RUN cd /ros2_ws/libs/sockpp && cmake -Bbuild . && cmake --build build/ && cmake --build build/ --target install
+
 FROM urc_software_base AS urc_software_builder
 
 # Set the working directory
