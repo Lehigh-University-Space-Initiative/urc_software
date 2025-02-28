@@ -13,6 +13,9 @@
 class MotorManager {
 protected:
     std::vector<SparkMax> motors_;
+    //end effector for arm
+    std::unique_ptr<SparkMax> eef;
+    
     size_t motor_count_;
     std::vector<double> hw_positions_;
     std::vector<double> hw_velocities_;

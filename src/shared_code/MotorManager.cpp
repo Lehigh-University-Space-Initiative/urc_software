@@ -149,6 +149,9 @@ void MotorManager::tick()
         motor.sendHeartbeat();
         motor.pidTick(hw_positions_[i]);
     }
+    if (eef) {
+        eef->sendHeartbeat();
+    }
 
     {  // lock block for LOS safety stop
         auto lock = lastManualCommandTime.lock();
@@ -156,6 +159,9 @@ void MotorManager::tick()
         if (now - *lock > manualCommandTimeout) {
             RCLCPP_WARN(dl_logger, "MotorManager: LOS Safety Stop WARNING: DISABLED");
             // stopAllMotors();
+            if (eef) {
+                eef->sendPowerCMD(0);
+            }
         }
     }
 

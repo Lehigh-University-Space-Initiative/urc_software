@@ -1,6 +1,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "geometry_msgs/msg/twist.hpp"
 #include "cross_pkg_messages/msg/rover_computer_arm_cmd.hpp" // TODO: figure these out
+#include "cross_pkg_messages/msg/arm_input_raw.hpp" // TODO: figure these out
 #include "ArmMotorManager.h"
 #include "main.h"
 #include <chrono>
@@ -18,6 +19,12 @@ void callback(const cross_pkg_messages::msg::RoverComputerArmCMD::SharedPtr msg)
     manager->setArmCommand(msg);
 }
 
+void callback2(const cross_pkg_messages::msg::ArmInputRaw::SharedPtr msg)
+{
+    // RCLCPP_INFO(rclcpp::get_logger("Motor_CTR"), "Received command with CMD_S: %f", msg->cmd_s);
+    // wrist_yaw.setVelocity(msg->cmd_r.z);  // Uncomment and set velocity when integrating
+    manager->setArmCommand(msg);
+}
 
 int main(int argc, char **argv)
 {
@@ -41,6 +48,8 @@ int main(int argc, char **argv)
         // Subscriber for rover drive commands
     auto driveCommandsSub = node->create_subscription<cross_pkg_messages::msg::RoverComputerArmCMD>(
         "/roverArmCommands", 10, callback);
+    auto eefCommandSub = node->create_subscription<cross_pkg_messages::msg::ArmInputRaw>(
+        "/armInputRaw", 10, callback2);
 
     auto armPosPub = node->create_publisher<cross_pkg_messages::msg::RoverComputerArmCMD>(
         "/roverArmPos", 10);
