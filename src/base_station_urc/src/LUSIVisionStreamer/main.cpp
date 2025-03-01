@@ -23,12 +23,14 @@ std::vector<uchar> no_img;
 
 libguarded::plain_guarded<LUSIVIsionGenerator*> gen;
 
-bool stereo = true;
+bool stereo = false;
 
 void _proccess_frame(bool right_eye, const sensor_msgs::msg::Image::ConstSharedPtr msg) {
     cv::Mat img;
     auto im = cv_bridge::toCvShare(msg, "bgr8")->image;
     cv::resize(im, img, cv::Size(960, 540));
+     RCLCPP_INFO(rclcpp::get_logger("LUSIVisionStreamer"), "print inside process frame");
+
 
     std::vector<int> img_opts;
     img_opts.push_back(cv::IMWRITE_JPEG_QUALITY);
@@ -69,7 +71,7 @@ void run_tcp_server(bool right_eye) {
       //cerr << "Error accepting incoming connection: " << res.error_message() << endl;
     } else {
       RCLCPP_INFO(rclcpp::get_logger("LUSIVisionStreamer"),
-                  "Received a stream connection request from []");
+                  "Received a stream connection request from client");
       numStreamClientsConnected++;
       sockpp::tcp_socket sock = res.release();
       std::thread thr(run_con, std::move(sock), right_eye);
@@ -135,7 +137,7 @@ void run_telem_tcp_server() {
       // Error accepting connection.
     } else {
       RCLCPP_INFO(rclcpp::get_logger("LUSIVisionStreamer"),
-                  "Received a connection request from []");
+                  "Received a connection request from client");
       numClientsConnected++;
       sockpp::tcp_socket sock = res.release();
       std::thread thr(run_telem_con, std::move(sock));
@@ -184,9 +186,9 @@ int main(int argc, char** argv) {
 
     RCLCPP_INFO(node->get_logger(), "Setting up video subscribers");
     sub = node->create_subscription<sensor_msgs::msg::Image>(
-        "/videoStream/image_raw", rclcpp::QoS(1), proccess_frame);
+        "/video_stream/image_raw", rclcpp::QoS(1), proccess_frame);
     sub2 = node->create_subscription<sensor_msgs::msg::Image>(
-        "/videoStream2/image_raw", rclcpp::QoS(1), proccess_frame2);
+        "/video_stream2/image_raw", rclcpp::QoS(1), proccess_frame2);
 
     auto no = cv::imread("/home/urcAssets/LUSNoDownlink.png");
     std::vector<int> img_opts;

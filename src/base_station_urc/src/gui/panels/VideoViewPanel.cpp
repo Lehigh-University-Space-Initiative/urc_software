@@ -36,7 +36,7 @@ void VideoViewPanel::drawBody() {
 
 void VideoViewPanel::setupSubscriber() {
     auto callback = [this](const sensor_msgs::msg::Image::SharedPtr msg) {
-        RCLCPP_INFO(node_->get_logger(), "Got frame");
+        //RCLCPP_INFO(node_->get_logger(), "Got frame");
         currentImage = cv_bridge::toCvCopy(msg, "bgr8")->image;
         lastFrameTime = std::chrono::system_clock::now();
         showingLOS = false;
