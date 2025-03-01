@@ -106,8 +106,8 @@ private:
     msg.angular_input.x = fixAxis(-axes[4]);
     msg.angular_input.y = fixAxis(-axes[3]);
     msg.angular_input.z = fixAxis(-axes[5]);
-    msg.left_btn = left_btn * 0.1;
-    msg.right_btn = right_btn * 0.1;
+    msg.left_btn = left_btn * 0.01;
+    msg.right_btn = right_btn * 0.01;
 
     drive_pub_->publish(msg);
 

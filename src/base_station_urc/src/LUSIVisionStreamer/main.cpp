@@ -29,8 +29,7 @@ void _proccess_frame(bool right_eye, const sensor_msgs::msg::Image::ConstSharedP
     cv::Mat img;
     auto im = cv_bridge::toCvShare(msg, "bgr8")->image;
     cv::resize(im, img, cv::Size(960, 540));
-     RCLCPP_INFO(rclcpp::get_logger("LUSIVisionStreamer"), "print inside process frame");
-
+    RCLCPP_INFO(rclcpp::get_logger("LUSIVisionStreamer"), "print inside process frame");
 
     std::vector<int> img_opts;
     img_opts.push_back(cv::IMWRITE_JPEG_QUALITY);
