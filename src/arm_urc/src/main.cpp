@@ -1,7 +1,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "geometry_msgs/msg/twist.hpp"
-#include "cross_pkg_messages/msg/rover_computer_arm_cmd.hpp" // TODO: figure these out
-#include "cross_pkg_messages/msg/arm_input_raw.hpp" // TODO: figure these out
+#include "cross_pkg_messages/msg/rover_computer_arm_cmd.hpp"
+#include "cross_pkg_messages/msg/arm_input_raw.hpp" 
 #include "ArmMotorManager.h"
 #include "main.h"
 #include <chrono>
@@ -15,14 +15,11 @@ std::unique_ptr<ArmMotorManager> manager;
 void callback(const cross_pkg_messages::msg::RoverComputerArmCMD::SharedPtr msg)
 {
     RCLCPP_INFO(rclcpp::get_logger("Motor_CTR"), "Received command with CMD_S: %f", msg->cmd_s);
-    // wrist_yaw.setVelocity(msg->cmd_r.z);  // Uncomment and set velocity when integrating
     manager->setArmCommand(msg);
 }
 
 void callback2(const cross_pkg_messages::msg::ArmInputRaw::SharedPtr msg)
 {
-    // RCLCPP_INFO(rclcpp::get_logger("Motor_CTR"), "Received command with CMD_S: %f", msg->cmd_s);
-    // wrist_yaw.setVelocity(msg->cmd_r.z);  // Uncomment and set velocity when integrating
     manager->setArmCommand(msg);
 }
 

@@ -28,12 +28,6 @@ def generate_launch_description():
             name='joy_mapper',
             output='screen',
         ),
-        # Node(
-        #     package='base_station_urc',
-        #     executable='TelemetryPanel_node',
-        #     name='telemetry_panel',
-        #     output='screen',
-        # ),
         # GroundStationGUI node
         Node(
             package='base_station_urc',
@@ -49,13 +43,6 @@ def generate_launch_description():
             output='screen',
             # parameters=[{'/hootl': False}] 
         ),
-        # Node(
-        #     package='base_station_urc',
-        #     executable='ArmCommandEncoder_node',
-        #     name='arm_command_encoder',
-        #     output='screen',
-        #     # parameters=[{'/hootl': False}] 
-        # ),
         Node(
             package='base_station_urc',
             executable='LUSIVisionStreamer_node',

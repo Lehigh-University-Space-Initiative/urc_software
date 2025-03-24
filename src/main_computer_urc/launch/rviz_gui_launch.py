@@ -12,13 +12,8 @@ def generate_launch_description():
 
     rviz_file = PathJoinSubstitution(
         [FindPackageShare("moveit_config_urc"), "config", "moveit.rviz"]
-        # [FindPackageShare("main_computer_urc"), "description", "robot.rviz"]
     )
    
-    joint_state_publisher_gui_node = Node(
-        package="joint_state_publisher_gui",
-        executable="joint_state_publisher_gui",
-    )
     rviz_node = Node(
         package="rviz2",
         executable="rviz2",
@@ -28,9 +23,6 @@ def generate_launch_description():
     )
   
 
-    aaaaaaaah
-
     return LaunchDescription([
         rviz_node,
-        # joint_state_publisher_gui_node,
     ])

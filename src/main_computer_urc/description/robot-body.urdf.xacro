@@ -11,7 +11,6 @@
   <xacro:property name="height2" value="0.5631" /> <!-- Link 2 -->
   <xacro:property name="width" value="0.0254" /> <!-- Square dimensions (widthxwidth) of beams -->
   <xacro:property name="height3" value="0.5631" /> <!-- Link 3 -->
-  <!-- todo check axual offset for correctness -->
   <xacro:property name="axel_offset" value="0.025" /> <!-- Space btw top of beam and the each joint -->
 
   <xacro:property name="damping" value="0.7" />
@@ -130,11 +129,7 @@
       <origin xyz="0 0 ${height3/2 - axel_offset}" rpy="0 0 0"/>
       <geometry>
         <box size="${width} ${width} ${height3}"/>
-        <!-- <box size="${olnaextrasizex*5} ${olnaextra2sizey} ${olnaextra2sizez}" xyz="0 0 ${height3 - axel_offset}"/> -->
       </geometry>
-      <!-- <geometry>
-        <box size="0.1 0.1 0.1"/>
-      </geometry> -->
       <material name="orange"/>
     </visual>
 
@@ -151,7 +146,6 @@
   <joint name="${prefix}elbow_box_fix" type="fixed">
     <parent link="${prefix}link2"/>
     <child link="${prefix}link2_box"/>
-    <!-- <origin xyz="0 ${width} ${height2 - axel_offset*2}" rpy="0 0 0"/> -->
     <axis xyz="0 1 0"/>
   </joint>
 
@@ -256,14 +250,7 @@
       <material name="blue"/>
     </visual>
 
-    <!-- <inertial>
-      <origin xyz="0 0 ${- height3/2 + axel_offset}" rpy="0 0 0"/>
-      <mass value="${mass}"/>
-      <inertia
-        ixx="${mass / 12.0 * (width*width + height3*height3)}" ixy="0.0" ixz="0.0"
-        iyy="${mass / 12.0 * (height3*height3 + width*width)}" iyz="0.0"
-        izz="${mass / 12.0 * (width*width + width*width)}"/>
-    </inertial> -->
+    <!-- TODO URC-442: add in a mass and moment of inertia for Wrist3 -->
     <inertial>
       <origin xyz="-0.026878 -0.00007064 0.011680" rpy="0 0 0"/>
       <mass value="0.49788"/>
