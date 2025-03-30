@@ -12,6 +12,8 @@ void sendDrivePowers() {
     driveTrainPublisher->publish(currentDriveCommand);
 }
 
+/// @brief Called whenever a manual drive command is sent from the base station to the rover.
+/// @param msg The message payload.
 void manualInputCallback(const geometry_msgs::msg::Twist::SharedPtr msg) {
 
     //kinimatic data (metric system)
