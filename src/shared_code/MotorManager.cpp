@@ -74,7 +74,7 @@ void MotorManager::sendHeartbeats()
 void MotorManager::readMotors(double period) {
     for (size_t i = 0; i < motor_count_; i++) {
         double velocity = motors_[i].lastVelocityAsRadPerSec();
-        double position = motors_[i].lastPositionInRad();
+        double position = motors_[i].lastCorrectPos();
         hw_velocities_[i] = velocity;
         hw_positions_[i] = position;
         //RCLCPP_INFO(dl_logger, "MotorManager: motor %ld vel: %.10f, pos: %.10f",i,hw_velocities_[i],hw_positions_[i]);
@@ -127,15 +127,30 @@ void MotorManager::tick()
 
     //read any can message at a much higher rate than all other update tasks
     //TODO: URC-102: should move this back 
-    CANDriver::doCanReadIter(1);
+    size_t canItr = 0;
+    while(CANDriver::doCanReadIter(1)) {
+        canItr++;
+    };
+    RCLCPP_INFO(rclcpp::get_logger("Arm"), "can ITR count: %ld", canItr);
+    
 
-    if (loopItr % 30 != 0) return;
+    //if (loopItr % 0 != 0) return;
+
+            {
+            static std::chrono::system_clock::time_point last_update;
+            double delta = std::chrono::duration<double>(std::chrono::system_clock::now() - last_update).count();
+            last_update = std::chrono::system_clock::now();
+            RCLCPP_INFO(rclcpp::get_logger("Arm"), "pid tick cycle delta: %f", delta);
+            }
     
     //give pid tick
     for (auto i = 0; i < motors_.size(); i++) {
         auto& motor = motors_[i];
         motor.sendHeartbeat();
         motor.pidTick(hw_positions_[i]);
+    }
+    if (eef) {
+        eef->sendHeartbeat();
     }
 
     {  // lock block for LOS safety stop
@@ -144,6 +159,9 @@ void MotorManager::tick()
         if (now - *lock > manualCommandTimeout) {
             RCLCPP_WARN(dl_logger, "MotorManager: LOS Safety Stop WARNING: DISABLED");
             // stopAllMotors();
+            if (eef) {
+                eef->sendPowerCMD(0);
+            }
         }
     }
 

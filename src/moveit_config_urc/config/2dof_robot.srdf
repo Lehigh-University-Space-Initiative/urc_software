@@ -10,24 +10,117 @@
     <!--CHAINS: When a chain is specified, all the links along the chain (including endpoints) are included in the group. Additionally, all the joints that are parents to included links are also included. This means that joints along the chain and the parent joint of the base link are included in the group-->
     <!--SUBGROUPS: Groups can also be formed by referencing to already defined group names-->
     <group name="arm">
+        <joint name="virtual_joint"/>
+        <joint name="base_joint"/>
         <joint name="shoulder"/>
         <joint name="elbow"/>
+        <joint name="wrist1"/>
+        <joint name="wrist2_joint"/>
+        <joint name="wrist3_joint"/>
+    </group>
+    <group name="hand">
+        <joint name="tool_joint"/>
     </group>
     <!--GROUP STATES: Purpose: Define a named state for a particular group, in terms of joint values. This is useful to define states like 'folded arms'-->
-    <group_state name="vertical" group="arm">
-        <joint name="elbow" value="0"/>
-        <joint name="shoulder" value="0"/>
-    </group_state>
     <group_state name="arm_out" group="arm">
+        <joint name="base_joint" value="0"/>
         <joint name="elbow" value="0"/>
         <joint name="shoulder" value="1.57075"/>
+        <joint name="wrist1" value="0"/>
+        <joint name="wrist2_joint" value="0"/>
+        <joint name="wrist3_joint" value="0"/>
     </group_state>
-    <group_state name="howdy" group="arm">
+    <group_state name="style" group="arm">
+        <joint name="base_joint" value="0"/>
         <joint name="elbow" value="1.8918"/>
-        <joint name="shoulder" value="-0.8157"/>
+        <joint name="shoulder" value="-0.9546"/>
+        <joint name="wrist1" value="0.8852"/>
+        <joint name="wrist2_joint" value="0"/>
+        <joint name="wrist3_joint" value="0"/>
     </group_state>
+    <group_state name="howdy2" group="arm">
+        <joint name="base_joint" value="0.9893"/>
+        <joint name="elbow" value="0.3645"/>
+        <joint name="shoulder" value="0.8157"/>
+        <joint name="wrist1" value="0.3298"/>
+        <joint name="wrist2_joint" value="0.5033"/>
+        <joint name="wrist3_joint" value="0.1562"/>
+    </group_state>
+    <group_state name="ahh" group="arm">
+        <joint name="base_joint" value="-0.3905"/>
+        <joint name="elbow" value="1.2323"/>
+        <joint name="shoulder" value="-1.4059"/>
+        <joint name="wrist1" value="2.8291"/>
+        <joint name="wrist2_joint" value="-0.6422"/>
+        <joint name="wrist3_joint" value="-0.1909"/>
+    </group_state>
+    <group_state name="vertical" group="arm">
+        <joint name="base_joint" value="0"/>
+        <joint name="elbow" value="0"/>
+        <joint name="shoulder" value="0"/>
+        <joint name="wrist1" value="0"/>
+        <joint name="wrist2_joint" value="0"/>
+        <joint name="wrist3_joint" value="0"/>
+    </group_state>
+    <group_state name="bedtime" group="arm">
+        <joint name="base_joint" value="0"/>
+        <joint name="elbow" value="2.8985"/>
+        <joint name="shoulder" value="-1.3017"/>
+        <joint name="wrist1" value="0"/>
+        <joint name="wrist2_joint" value="0"/>
+        <joint name="wrist3_joint" value="0"/>
+    </group_state>
+    <group_state name="bend" group="arm">
+        <joint name="base_joint" value="0"/>
+        <joint name="elbow" value="1.5707"/>
+        <joint name="shoulder" value="0"/>
+        <joint name="wrist1" value="0"/>
+        <joint name="wrist2_joint" value="0"/>
+        <joint name="wrist3_joint" value="0"/>
+    </group_state>
+    <group_state name="bend_alt" group="arm">
+        <joint name="base_joint" value="-0.6"/>
+        <joint name="elbow" value="1.3707"/>
+        <joint name="shoulder" value="0"/>
+        <joint name="wrist1" value="0"/>
+        <joint name="wrist2_joint" value="0.4"/>
+        <joint name="wrist3_joint" value="0.2"/>
+    </group_state>
+    <group_state name="bend_wrist_rotate" group="arm">
+        <joint name="base_joint" value="0"/>
+        <joint name="elbow" value="1.5707"/>
+        <joint name="shoulder" value="0"/>
+        <joint name="wrist1" value="0"/>
+        <joint name="wrist2_joint" value="0"/>
+        <joint name="wrist3_joint" value="1.5707"/>
+    </group_state>
+    <group_state name="bend_other_wrist" group="arm">
+        <joint name="base_joint" value="0"/>
+        <joint name="elbow" value="1.5707"/>
+        <joint name="shoulder" value="0"/>
+        <joint name="wrist1" value="0"/>
+        <joint name="wrist2_joint" value="-1.5707"/>
+        <joint name="wrist3_joint" value="0"/>
+    </group_state>
+    <group_state name="switch_1" group="arm">
+        <joint name="base_joint" value="1.43836"/>
+        <joint name="elbow" value="1.95148"/>
+        <joint name="shoulder" value="0.258821"/>
+        <joint name="wrist1" value="0.480212"/>
+        <joint name="wrist2_joint" value="0"/>
+        <joint name="wrist3_joint" value="0"/>
+    </group_state>
+    <!--END EFFECTOR: Purpose: Represent information about an end effector.-->
+    <end_effector name="hand" parent_link="endEffector" group="hand" parent_group="arm"/>
+    <!--VIRTUAL JOINT: Purpose: this element defines a virtual joint between a robot link and an external frame of reference (considered fixed with respect to the robot)-->
+    <virtual_joint name="virtual_joint" type="fixed" parent_frame="world" child_link="base_link"/>
     <!--DISABLE COLLISIONS: By default it is assumed that any link of the robot could potentially come into collision with any other link in the robot. This tag disables collision checking between a specified pair of links. -->
-    <disable_collisions link1="base_link" link2="link1" reason="Adjacent"/>
-    <disable_collisions link1="base_link" link2="link2" reason="Never"/>
+    <disable_collisions link1="base_arm_link" link2="link1" reason="Adjacent"/>
+    <disable_collisions link1="endEffector" link2="wrist3" reason="Adjacent"/>
     <disable_collisions link1="link1" link2="link2" reason="Adjacent"/>
+    <disable_collisions link1="link1" link2="wrist2" reason="Never"/>
+    <disable_collisions link1="link2" link2="link2_box" reason="Adjacent"/>
+    <disable_collisions link1="link2" link2="wrist2" reason="Adjacent"/>
+    <disable_collisions link1="link2_box" link2="wrist2" reason="Never"/>
+    <disable_collisions link1="wrist2" link2="wrist3" reason="Adjacent"/>
 </robot>

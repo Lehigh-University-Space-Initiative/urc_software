@@ -18,6 +18,7 @@
 #include "pid.h"
 #include "Limits.h"
 
+
 class CANDriver {
 protected:
     int canBus;
@@ -43,6 +44,7 @@ protected:
     // static std::mutex lastPeriodicMutex;
     PeriodicUpdateData1 lastPeriodicData1;
     PeriodicUpdateData2 lastPeriodicData2;
+    PeriodicUpdateData2 lastPeriodicData5;
 
 
     struct CANStaticData {
@@ -70,10 +72,11 @@ protected:
     static void startCanReadThread(int canBus);
     static void parsePeriodicData1(int canBus, can_frame frame);
     static void parsePeriodicData2(int canBus, can_frame frame);
+    static void parsePeriodicData5(int canBus, can_frame frame);
 
 public:
 
-    static void doCanReadIter(int canBus);
+    static bool doCanReadIter(int canBus);
 
     CANDriver(int busNum, int canID);
     CANDriver(const CANDriver& other);
@@ -91,21 +94,25 @@ protected:
     double lastVel = 0;
 
     double gearRatio = 1;
+    bool useAbsolute = false;
 
     void setupPID();
 
     rclcpp::Node::SharedPtr node_ = nullptr;
 
 public:
-    SparkMax(rclcpp::Node::SharedPtr node, int canBUS, int canID, double gearRatio);
+    SparkMax(rclcpp::Node::SharedPtr node, int canBUS, int canID, double gearRatio, bool useAbsolute);
     SparkMax(const SparkMax& other);
     bool sendHeartbeat();
+    bool sendAbsoluteFrameUpdateRate();
     void sendPowerCMD(float power);
     // in rad/s
     void setPIDSetpoint(double pidSetpoint);
 
     double lastVelocityAsRadPerSec();
     double lastPositionInRad();
+    double lastAbsPositionInRad();
+    double lastCorrectPos();
 
     bool pidControlled = true;
     bool viewOnly = false;

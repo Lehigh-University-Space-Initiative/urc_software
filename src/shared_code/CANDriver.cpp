@@ -3,6 +3,16 @@
 #include <string>
 #include "Logger.h"
 
+double moveSingularityInRadians(double in) {
+    const double pi = 3.14159265358979;
+    RCLCPP_ERROR(dl_logger, "og: %f", in);
+    if (in > pi) {
+        RCLCPP_ERROR(dl_logger, "fleep");
+        return in - 2 * pi;
+    }
+    return in;
+}
+
 #define MAX_PWM 2000
 #define MIN_PWM 1000
 
@@ -130,7 +140,9 @@ bool CANDriver::receiveMSG(int canBus, can_frame &frame)
 }
 
 const uint32_t perioticUpdate1CanIDBase = 0x82051840;
+//TODO: this is not really periodic update 2 but 5 to get absolute position for SARS COV-2 (SAR2025)
 const uint32_t perioticUpdate2CanIDBase = 0x82051880;
+const uint32_t perioticUpdate5CanIDBase = 0x82051940;
 const uint32_t maxCANID = 63;
 
 void CANDriver::startCanReadThread(int canBus)
@@ -161,7 +173,7 @@ void CANDriver::startCanReadThread(int canBus)
     }
 }
 
-void CANDriver::doCanReadIter(int canBus)
+bool CANDriver::doCanReadIter(int canBus)
 {
         can_frame frame;
         // RCLCPP_INFO(dl_logger,"checking can");
@@ -175,6 +187,9 @@ void CANDriver::doCanReadIter(int canBus)
             else if (frame.can_id >= perioticUpdate2CanIDBase && frame.can_id < perioticUpdate2CanIDBase + maxCANID) {
                 parsePeriodicData2(canBus, frame);
             }
+            else if (frame.can_id >= perioticUpdate5CanIDBase && frame.can_id < perioticUpdate5CanIDBase + maxCANID) {
+                parsePeriodicData5(canBus, frame);
+            }
             else {
                 //handle other frames
             }
@@ -182,6 +197,9 @@ void CANDriver::doCanReadIter(int canBus)
             
             //optional wait a little bit
             // std::this_thread::sleep_for(std::chrono::milliseconds(1));//
+            return true;
+        } else {
+            return false;
         }
 }
 
@@ -191,7 +209,7 @@ void CANDriver::parsePeriodicData1(int canBus, can_frame frame)
     // 8, Motor Velocity LSB, Motor Velocity MID_L, Motor Velocity MID_H, Motor Velocity MSB, Motor Temperature, Motor Voltage LSB, Motor Current LSB 4 bits Motor Voltage MSB 4 bits, Motor Current MSB
 
     //parse the data
-    PeriodicUpdateData1 pdata;
+    PeriodicUpdateData1 pdata{};
     uint32_t velocityFloat = (frame.data[0] | (frame.data[1] << 8) | (frame.data[2] << 16) | (frame.data[3] << 24));
     pdata.velocity = *(reinterpret_cast<float*>(&velocityFloat));
     pdata.temperature = frame.data[4];
@@ -234,7 +252,7 @@ void CANDriver::parsePeriodicData2(int canBus, can_frame frame)
     pdata.position = *(reinterpret_cast<float*>(&positionFloat));
 
     auto motorID = frame.can_id - perioticUpdate2CanIDBase;
-    RCLCPP_WARN(rclcpp::get_logger("CANDriver"), "GOT motor %d pos of: %.2f",motorID,pdata.position);
+    // RCLCPP_WARN(rclcpp::get_logger("CANDriver"), "GOT motor %d pos of: %.2f",motorID,pdata.position);
 
     
     //assign the data to the correct motor
@@ -248,6 +266,43 @@ void CANDriver::parsePeriodicData2(int canBus, can_frame frame)
     if (motorPtr) {
         // motorPtr->lastPeriodicData.velocity.store(pdata.velocity.load());
         motorPtr->lastPeriodicData2 = pdata;
+        // RCLCPP_INFO(dl_logger, "CAN ID %d, velocity %.3f, temperature %i, voltage %i, current %i",motorID,pdata.velocity,pdata.temperature,pdata.voltage,pdata.current);
+        // RCLCPP_INFO(rclcpp::get_logger("CANDriver"), "did  motor found yes. big happy! %f cur",motorPtr->lastPeriodicData.velocity);
+        //TODO: copy rest of params
+    } else {
+        RCLCPP_WARN(rclcpp::get_logger("CANDriver"), "PERIODIC 2 no motor found THIS IS A BIG DEAL");
+    }
+        //todo broadcast ros messages with new data
+
+}
+
+
+void CANDriver::parsePeriodicData5(int canBus, can_frame frame)
+{
+    // length, dataout[1], dataout[2], dataout[3], dataout[4], dataout[5], dataout[6], dataout[7]
+    // 8, Motor Velocity LSB, Motor Velocity MID_L, Motor Velocity MID_H, Motor Velocity MSB, Motor Temperature, Motor Voltage LSB, Motor Current LSB 4 bits Motor Voltage MSB 4 bits, Motor Current MSB
+
+    //parse the data
+    PeriodicUpdateData2 pdata;
+    uint32_t positionFloat = (frame.data[0] | (frame.data[1] << 8) | (frame.data[2] << 16) | (frame.data[3] << 24));
+    //position from motor is in revolutions from zero
+    pdata.position = *(reinterpret_cast<float*>(&positionFloat));
+
+    auto motorID = frame.can_id - perioticUpdate5CanIDBase;
+    RCLCPP_WARN(rclcpp::get_logger("CANDriver"), "GOT motor %d pos of: %.2f",motorID,pdata.position);
+
+    
+    //assign the data to the correct motor
+    CANDriver* motorPtr = nullptr;
+    {
+        auto data = canStaticData[canBus].lock();
+        
+        motorPtr = data->canIDMap[motorID];
+    }
+
+    if (motorPtr) {
+        // motorPtr->lastPeriodicData.velocity.store(pdata.velocity.load());
+        motorPtr->lastPeriodicData5 = pdata;
         // RCLCPP_INFO(dl_logger, "CAN ID %d, velocity %.3f, temperature %i, voltage %i, current %i",motorID,pdata.velocity,pdata.temperature,pdata.voltage,pdata.current);
         // RCLCPP_INFO(rclcpp::get_logger("CANDriver"), "did  motor found yes. big happy! %f cur",motorPtr->lastPeriodicData.velocity);
         //TODO: copy rest of params
@@ -339,6 +394,29 @@ double SparkMax::lastPositionInRad()
     return lastPeriodicData2.position / gearRatio * rpmToRadPerSec;
 }
 
+double SparkMax::lastAbsPositionInRad()
+{
+    double rpmToRadPerSec = 2 * 3.14159265;
+
+    return moveSingularityInRadians(lastPeriodicData5.position * rpmToRadPerSec);
+}
+
+double SparkMax::lastCorrectPos()
+{
+    double pos = 0;
+
+    if (useAbsolute)
+    {
+        pos = lastAbsPositionInRad();
+    }
+    else
+    {
+        pos = lastPositionInRad();
+    }
+
+    return pos;
+}
+
 void SparkMax::setupPID()
 {
     double kp = node_->get_parameter("kp").as_double();
@@ -355,11 +433,14 @@ void SparkMax::setupPID()
     this->viewOnly = viewOnly;
 }
 
-SparkMax::SparkMax(rclcpp::Node::SharedPtr node, int canBUS, int canID, double gearRatio) : CANDriver(canBUS, canID)
+SparkMax::SparkMax(rclcpp::Node::SharedPtr node, int canBUS, int canID, double gearRatio, bool useAbsolute) : CANDriver(canBUS, canID)
 {
     assert(gearRatio > 0);
     this->node_ = node;
     this->gearRatio = gearRatio;
+    this->useAbsolute = useAbsolute;
+    RCLCPP_INFO(rclcpp::get_logger("SparkMax"), "Creating motor %d with gear ratio %.5f",canID,gearRatio);
+
 
     setupPID();
 }
@@ -369,7 +450,9 @@ SparkMax::SparkMax(const SparkMax &other): CANDriver(other)
     this->gearRatio = other.gearRatio;
     this->node_ = other.node_;
     this->viewOnly = other.viewOnly;
+    this->useAbsolute = other.useAbsolute;
 
+    sendAbsoluteFrameUpdateRate();
     setupPID();
 }
 
@@ -380,6 +463,15 @@ bool SparkMax::sendHeartbeat() {
     for (int i = 0; i < 8; i++) {
         frame.data[i] = 0xFF;
     }
+
+    return sendMSG(canBus, frame);
+}
+
+bool SparkMax::sendAbsoluteFrameUpdateRate() {
+    can_frame frame{};
+    frame.can_id = 0x02051940 + canID;
+    frame.can_dlc = 2;
+    frame.data[0] = 10;
 
     return sendMSG(canBus, frame);
 }
@@ -407,18 +499,20 @@ void SparkMax::setPIDSetpoint(double pidSetpoint)
     this->pidSetpoint = pidSetpoint;
 }
 
-void SparkMax::pidTick(double currentPos)
+void SparkMax::pidTick(double _)
 {
     if (pidControlled && !motorLocked) {
-        double currentVel = lastVelocityAsRadPerSec(); 
+        // double currentVel = lastVelocityAsRadPerSec(); 
 
-        double val = pidController.calculate(pidSetpoint,currentPos);
-        RCLCPP_INFO(rclcpp::get_logger("SparkMax"), "running pid %d with set: %f, cur: %f output: %f (integral: %f)", canID, pidSetpoint, currentPos,val, pidController.i_sum());
+        double pos = lastCorrectPos();
+
+        double val = pidController.calculate(pidSetpoint,pos);
+        RCLCPP_INFO(rclcpp::get_logger("SparkMax"), "running pid %d with set: %f, cur: %f (use abs: %d) output: %f (integral: %f)", canID, pidSetpoint, pos,useAbsolute,val, pidController.i_sum());
 
         if (!viewOnly) {
             sendPowerCMD(val);
         } else {
-            RCLCPP_INFO(rclcpp::get_logger("SparkMax"), "view only not powering motor");
+            // RCLCPP_INFO(rclcpp::get_logger("SparkMax"), "view only not powering motor");
         }
     }
 }

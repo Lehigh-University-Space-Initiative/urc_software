@@ -28,12 +28,6 @@ def generate_launch_description():
             name='joy_mapper',
             output='screen',
         ),
-        # Node(
-        #     package='base_station_urc',
-        #     executable='TelemetryPanel_node',
-        #     name='telemetry_panel',
-        #     output='screen',
-        # ),
         # GroundStationGUI node
         Node(
             package='base_station_urc',
@@ -46,6 +40,13 @@ def generate_launch_description():
             package='base_station_urc',
             executable='SpaceMouseMapper_node',
             name='space_mouse_mapper',
+            output='screen',
+            # parameters=[{'/hootl': False}] 
+        ),
+        Node(
+            package='base_station_urc',
+            executable='LUSIVisionStreamer_node',
+            name='lusi_vision_streamer',
             output='screen',
             # parameters=[{'/hootl': False}] 
         ),

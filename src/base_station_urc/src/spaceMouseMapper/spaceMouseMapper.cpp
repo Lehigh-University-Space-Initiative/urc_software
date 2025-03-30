@@ -2,6 +2,7 @@
 #include <geometry_msgs/msg/twist.hpp>
 #include <sensor_msgs/msg/joy.hpp>
 #include "cross_pkg_messages/msg/arm_input_raw.hpp"
+#include <geometry_msgs/msg/twist_stamped.hpp>
 #include <linux/input.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -14,6 +15,7 @@ public:
   SpaceMouseMapper() : Node("SpaceMouseMapper")
   {
     drive_pub_ = this->create_publisher<cross_pkg_messages::msg::ArmInputRaw>("/armInputRaw", 10);
+    servo_pub = this->create_publisher<geometry_msgs::msg::TwistStamped>("/delta_twist_cmds", 10);
 
     loadJoystick();
   }
@@ -32,6 +34,10 @@ private:
 
 
   int joyFd = 0;
+
+
+  bool left_btn = 0;
+  bool right_btn = 0;
 
   void loadJoystick() {
     int i = 0;
@@ -100,8 +106,28 @@ private:
     msg.angular_input.x = fixAxis(-axes[4]);
     msg.angular_input.y = fixAxis(-axes[3]);
     msg.angular_input.z = fixAxis(-axes[5]);
+    msg.left_btn = left_btn * 0.01;
+    msg.right_btn = right_btn * 0.01;
 
     drive_pub_->publish(msg);
+
+    auto twist_msg = geometry_msgs::msg::TwistStamped();
+    twist_msg.header.stamp = this->now();
+    twist_msg.header.frame_id = "tool_link";
+
+    // Scaling factors
+    const double kLinearScale = 0.5;
+    const double kAngularScale = 1;
+
+    twist_msg.twist.linear.x  = std::clamp(msg.linear_input.z*-1, -1.0, 1.0) * kLinearScale;
+    twist_msg.twist.linear.y  = std::clamp(msg.linear_input.y*1, -1.0, 1.0) * kLinearScale;
+    twist_msg.twist.linear.z  = std::clamp(msg.linear_input.x*1, -1.0, 1.0) * kLinearScale;
+    twist_msg.twist.angular.x = std::clamp(msg.angular_input.z*-1, -1.0, 1.0) * kAngularScale;
+    twist_msg.twist.angular.y = std::clamp(msg.angular_input.y*1, -1.0, 1.0) * kAngularScale;
+    twist_msg.twist.angular.z = std::clamp(msg.angular_input.x*1, -1.0, 1.0) * kAngularScale;
+
+    servo_pub->publish(twist_msg);
+
     // RCLCPP_INFO(get_logger(), "Sending with L1: %d, %.2f",axes[0],msg.linear_input.x);
   }
 
@@ -122,6 +148,15 @@ private:
     {
       switch (ev.type)
       {
+      case EV_KEY:
+        // printf("Key %d pressed %d.\n", ev.code, ev.value);
+        if (ev.code == 256) {
+          left_btn = ev.value;
+        } else if (ev.code == 257) {
+          right_btn = ev.value;
+        }
+        break;
+
       /*
           older kernels than and including 2.6.31 send EV_REL events for SpaceNavigator movement
           newer - 2.6.35 and upwards send the more logical EV_ABS instead.
@@ -143,6 +178,7 @@ private:
   }
 
   rclcpp::Publisher<cross_pkg_messages::msg::ArmInputRaw>::SharedPtr drive_pub_;
+  rclcpp::Publisher<geometry_msgs::msg::TwistStamped>::SharedPtr servo_pub;
 
   // 100% forward thottle should be this speed m/s
   const double linearSensativity = 0.5;

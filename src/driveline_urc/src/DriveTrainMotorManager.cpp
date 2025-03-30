@@ -8,13 +8,12 @@ DriveTrainMotorManager::~DriveTrainMotorManager()
 void DriveTrainMotorManager::setupMotors() {
     // Add motors to the motors vector
     // Left side (BUS 0)
-    motors_.emplace_back(node_, 0, 1, 1.0); // LF
-    motors_.emplace_back(node_, 0, 2, 1.0); // LM
-    motors_.emplace_back(node_, 0, 3, 1.0); // LB
-    // Right side (BUS 1)
-    motors_.emplace_back(node_, 1, 4, 1.0); // RB
-    motors_.emplace_back(node_, 1, 5, 1.0); // RM
-    motors_.emplace_back(node_, 1, 6, 1.0); // RF
+    motors_.emplace_back(node_, 0, 1, 1.0, true); // LF
+    motors_.emplace_back(node_, 0, 2, 1.0, true); // LM
+    motors_.emplace_back(node_, 0, 3, 1.0, true); // LB
+    motors_.emplace_back(node_, 0, 4, 1.0, true); // RB
+    motors_.emplace_back(node_, 0, 5, 1.0, true); // RM
+    motors_.emplace_back(node_, 0, 6, 1.0, true); // RF
 
     RCLCPP_INFO(node_->get_logger(), "Testing Motors");
     for (auto &motor : motors_) {

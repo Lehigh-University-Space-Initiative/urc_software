@@ -20,9 +20,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-humble-ros2-control \
     ros-humble-ros2-controllers \
     ros-humble-moveit-ros-planning-interface \
+    ros-humble-moveit-servo \
     tmux \
     ruby \
     vim nano gdb \
+    python3-rosdep \
+    python3-colcon-common-extensions \
+    python3-colcon-mixin \
+    python3-vcstool \
     libglfw3-dev \
     libglew-dev \
     libgps-dev \
@@ -37,6 +42,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN mkdir -p /home/urcAssets
 COPY urcAssets /home/urcAssets
 
+COPY ./libs /ros2_ws/libs
+RUN cd /ros2_ws/libs/sockpp && cmake -Bbuild . && cmake --build build/ && cmake --build build/ --target install
+
 FROM urc_software_base AS urc_software_builder
 
 # Set the working directory
@@ -48,15 +56,13 @@ COPY ./libs /ros2_ws/libs
 # Build pigpio from the submodule
 RUN cd /ros2_ws/libs/pigpio && make && make install
 
-# prepare to install all dependencies thorugh rosdep
-# RUN cd /ros2_ws
-# RUN rosdep update
-
 # https://medium.com/codex/a-practical-guide-to-containerize-your-c-application-with-docker-50abb197f6d4
 FROM urc_software_base AS urc_software 
 
 # copy built binaries
 WORKDIR /ros2_ws
+COPY --from=urc_software_builder /opt/ros/humble /opt/ros/humble
+# for installing Qt for rviz2
 COPY ./install /ros2_ws/install
 COPY ./libs /ros2_ws/libs
 COPY ./run_nodes.sh /ros2_ws/run_nodes.sh

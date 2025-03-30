@@ -36,7 +36,7 @@ void VideoViewPanel::drawBody() {
 
 void VideoViewPanel::setupSubscriber() {
     auto callback = [this](const sensor_msgs::msg::Image::SharedPtr msg) {
-        RCLCPP_INFO(node_->get_logger(), "Got frame");
+        //RCLCPP_INFO(node_->get_logger(), "Got frame");
         currentImage = cv_bridge::toCvCopy(msg, "bgr8")->image;
         lastFrameTime = std::chrono::system_clock::now();
         showingLOS = false;
@@ -68,6 +68,14 @@ void VideoViewPanel::setLOSIMG() {
 void VideoViewPanel::setup() {
     setLOSIMG();
     setupSubscriber();
+    //setup parameter setting
+    camParamClient_ = std::make_shared<rclcpp::AsyncParametersClient>(node_,"VideoStreamer");
+
+    // Wait for the service to become available
+    if (!camParamClient_->wait_for_service(std::chrono::seconds(10))) {
+      RCLCPP_ERROR(node_->get_logger(), "SetParameters service not available");
+      return;
+    }
 }
 
 void VideoViewPanel::update() {
@@ -75,8 +83,29 @@ void VideoViewPanel::update() {
         currentCamIndex = newCamIndex;
 
         // Replace ros::param::set with appropriate ROS 2 parameter setting
-        rclcpp::Parameter cam_param("streamCam", static_cast<int>(currentCamIndex));
-        node_->set_parameter(cam_param);
+        rclcpp::Parameter cam_param("stream_cam", static_cast<int>(currentCamIndex));
+        camParamClient_->set_parameters({cam_param},
+                                [this](std::shared_future<std::vector<rcl_interfaces::msg::SetParametersResult>> future)
+                                {
+                                    future.wait();
+                                    auto results = future.get();
+                                    if (results.size() != 1)
+                                    {
+                                        RCLCPP_ERROR_STREAM(node_->get_logger(), "expected 1 result, got " << results.size());
+                                    }
+                                    else
+                                    {
+                                        if (results[0].successful)
+                                        {
+                                            RCLCPP_INFO(node_->get_logger(), "success");
+                                        }
+                                        else
+                                        {
+                                            RCLCPP_ERROR(node_->get_logger(), "failure");
+                                        }
+                                    }
+                                }
+        );
     }
 
     if (!showingLOS) {

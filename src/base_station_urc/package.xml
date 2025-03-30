@@ -57,6 +57,7 @@
   <depend>image_transport</depend>
   <depend>cv_bridge</depend>
   <depend>joy</depend>
+  <depend>moveit_servo</depend>
 
   <export>
     <build_type>ament_cmake</build_type>

@@ -1,5 +1,9 @@
 # Default initial positions for 2dof_robot's ros2_control fake system
 
 initial_positions:
+  base_joint: 0
   elbow: 0
   shoulder: 0
+  wrist1: 0
+  wrist2_joint: 0
+  wrist3_joint: 0

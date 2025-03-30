@@ -31,7 +31,7 @@ int main(int argc, char **argv) {
     rclcpp::init(argc, argv);
     auto node = std::make_shared<rclcpp::Node>("GroundStationGUI");
 
-    node->declare_parameter<std::string>("streamCam", "");
+    node->declare_parameter<std::string>("stream_cam", "");
 
     loadPanels(node);
 
