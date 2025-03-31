@@ -19,9 +19,19 @@
 #include "Limits.h"
 
 
+/**
+ * A device which can be communicated with over a CAN bus.
+ * 
+ * There are assumed to be only 2 can busses since the code is designed for hte waveshare 2 channel raspberry pi CAN hat
+ * 
+ * \todo this class should not deal with SparkMax spacific concepts like periodic updates
+*/
 class CANDriver {
 protected:
+    /// @brief can buss this device is connected to
+    /// Valid values are 0 and 1
     int canBus;
+    /// @brief can id of this spacific device
     int canID;
 
     // struct PeriodicUpdateData {
@@ -60,13 +70,24 @@ protected:
 
     typedef libguarded::plain_guarded<CANStaticData> CANStaticDataGuarded;
 
+    /// @brief stored data about each can bus that is setup
+    /// The array index here is the can id
     static std::array<CANStaticDataGuarded, 2> canStaticData;
     static std::array<libguarded::plain_guarded<size_t>, 2> canStaticDataUsers;
 
+    /// @brief Perform one time setup for one of the can buses
+    /// @param canBus the can bus to setup
+    /// @return if the setup was successful 
     static bool setupCAN(int canBus);
+    /// @brief Deallocate resources associated with the given can bus
+    /// @param canBus the can bus to cleanup
     static void closeCAN(int canBus);
 
     static std::thread canReadThread;
+    /// @brief Send a message on a can bus
+    /// @param canBus the can bus to send the message on
+    /// @param frame the CAN message to send
+    /// @return if the message was sent
     static bool sendMSG(int canBus, can_frame frame);
     static bool receiveMSG(int canBus, can_frame& frame);
     static void startCanReadThread(int canBus);
@@ -76,15 +97,30 @@ protected:
 
 public:
 
+    /// @brief perform one iteration of reading received messages off of a can bus
+    /// @param canBus the can bus to read messages from
+    /// @return if there was a message to read
     static bool doCanReadIter(int canBus);
 
+    /// @brief Create a new can driver device
+    /// @param busNum the can bus it is connected to
+    /// @param canID the can id of the physical device on the can bus that this object will represent.
     CANDriver(int busNum, int canID);
+
     CANDriver(const CANDriver& other);
-    // CANDriver(const CANDriver&& other);
+
     CANDriver& operator=(const CANDriver& other) = delete;
     virtual ~CANDriver();
 };
 
+/**
+ * An object representing a Rev Robotics Spark Max Brushes DC Motor Controller.
+ * 
+ * The documentation for the SparkMax CAN protocol can be found [here](https://docs.google.com/spreadsheets/d/1SD-d_iXorli3zYffGwU5WK28JmIU9irfgiajrSXJ930/edit?usp=sharing).
+ * However, the protocol version we currently have access to only works for SparkMax firmware versions prior to 2025.X.X.
+ * 
+ * @todo The pid controller might now be position. There should be a way to configure the PID to be velocity or position
+*/
 class SparkMax : CANDriver {
 protected:
     // velocity in rad / s
@@ -101,12 +137,33 @@ protected:
     rclcpp::Node::SharedPtr node_ = nullptr;
 
 public:
+    /// @brief 
+    /// @param node The ros node object owning this spark max (used for reading parameters)
+    /// @param canBUS The can bus this spark max is connect to
+    /// @param canID The can id of this spark max on the can bus
+    /// @param gearRatio The gear ratio between the motor connected to the spark max and whatever it is connected to. 
+    /// This is greater than 1 if rotation speed decreases over the gearbox.
+    /// @param useAbsolute Weather to use an absolute position encoder connected to the spark max or the default internal brushes motor position encoder
     SparkMax(rclcpp::Node::SharedPtr node, int canBUS, int canID, double gearRatio, bool useAbsolute);
+
     SparkMax(const SparkMax& other);
+
+    /// @brief send the periotic heartbeat message to the SparkMax
+    /// The spark max motor controllers will prevent any motors from moving unless this heartbeat message is sent within a given period.
+    /// If a heartbeat message is not received within that timeout period, the spark max will stop its motor. 
+    /// This is from FRC where they want a way to stop the robots if there is a software problem or the round is not running.
+    /// @return if the message was sent
     bool sendHeartbeat();
+
+    /// @brief send a message to the spark max to set the update rate of the periodic update frame which contains the absolute encoder readout.
+    /// @return if the message was sent
     bool sendAbsoluteFrameUpdateRate();
+    /// @brief Command a power level to the motor
+    /// @param power a normalized value in the range [-1,1] where 1 represents full power forwards
     void sendPowerCMD(float power);
-    // in rad/s
+    
+    /// @brief update the PID set point for the PID controller
+    /// @param pidSetpoint set point in rad/s
     void setPIDSetpoint(double pidSetpoint);
 
     double lastVelocityAsRadPerSec();
@@ -129,6 +186,7 @@ public:
     //TODO Note: the DT is set as constant here not dynamic
     // PID pidController;// = PID(0.005,0.15,-0.15,0.3,0.01,0.2);
 
+    /// @brief send an ident message to the spark max causing the status light to rapidly blink
     void ident();
 };
 

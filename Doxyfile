@@ -246,7 +246,7 @@ INHERIT_DOCS           = YES
 # of the file/class/namespace that contains it.
 # The default value is: NO.
 
-SEPARATE_MEMBER_PAGES  = NO
+SEPARATE_MEMBER_PAGES  = YES
 
 # The TAB_SIZE tag can be used to set the number of spaces in a tab. Doxygen
 # uses this value to replace tabs by spaces in code fragments.
@@ -712,7 +712,7 @@ GENERATE_BUGLIST       = YES
 # the documentation.
 # The default value is: YES.
 
-GENERATE_DEPRECATEDLIST= YES
+GENERATE_DEPRECATEDLIST = YES
 
 # The ENABLED_SECTIONS tag can be used to enable conditional documentation
 # sections, marked by \if <section_label> ... \endif and \cond <section_label>
