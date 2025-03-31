@@ -1,0 +1,25 @@
+var classSparkMax =
+[
+    [ "SparkMax", "classSparkMax_a95359882d830cfaa97e7058e1fbf7007.html#a95359882d830cfaa97e7058e1fbf7007", null ],
+    [ "SparkMax", "classSparkMax_a7603bb8d08aa721b2d5fd8230c9c2ebd.html#a7603bb8d08aa721b2d5fd8230c9c2ebd", null ],
+    [ "ident", "classSparkMax_a5e5171bd5cdfbbadd51505b8562f095a.html#a5e5171bd5cdfbbadd51505b8562f095a", null ],
+    [ "lastAbsPositionInRad", "classSparkMax_aa368bb010a9728c5f6ce15a84d4aa7de.html#aa368bb010a9728c5f6ce15a84d4aa7de", null ],
+    [ "lastCorrectPos", "classSparkMax_af0f0849d7f1a0a31083d7fe0683781ae.html#af0f0849d7f1a0a31083d7fe0683781ae", null ],
+    [ "lastPositionInRad", "classSparkMax_afb2d98531ccd6dba735038f000277645.html#afb2d98531ccd6dba735038f000277645", null ],
+    [ "lastVelocityAsRadPerSec", "classSparkMax_ad4f23002338feecbc887781d90231b25.html#ad4f23002338feecbc887781d90231b25", null ],
+    [ "pidTick", "classSparkMax_a4fb0200f0655cac93e8eab27f763f5bd.html#a4fb0200f0655cac93e8eab27f763f5bd", null ],
+    [ "sendAbsoluteFrameUpdateRate", "classSparkMax_a1501b74310ee461a87be9bef95afec8a.html#a1501b74310ee461a87be9bef95afec8a", null ],
+    [ "sendHeartbeat", "classSparkMax_a4c643098806b80801cad03d354f17e5f.html#a4c643098806b80801cad03d354f17e5f", null ],
+    [ "sendPowerCMD", "classSparkMax_afc19e9662051551bbd00d830dce8e2ec.html#afc19e9662051551bbd00d830dce8e2ec", null ],
+    [ "setPIDSetpoint", "classSparkMax_ac3320f33936961fa7eedf60ec0440ea1.html#ac3320f33936961fa7eedf60ec0440ea1", null ],
+    [ "setupPID", "classSparkMax_a3fc070a69bb1b97f8152961a1b794a40.html#a3fc070a69bb1b97f8152961a1b794a40", null ],
+    [ "gearRatio", "classSparkMax_a0b1b6cbe66c3f4ecbf7d297a6a9f8823.html#a0b1b6cbe66c3f4ecbf7d297a6a9f8823", null ],
+    [ "lastVel", "classSparkMax_a9027e9d2dfb1bdbb3466fa268404bbe0.html#a9027e9d2dfb1bdbb3466fa268404bbe0", null ],
+    [ "motorLocked", "classSparkMax_a9588512af04ff45f7c6388de5daa75ee.html#a9588512af04ff45f7c6388de5daa75ee", null ],
+    [ "node_", "classSparkMax_aa9c491926ee426554f21ec80e0f94ad9.html#aa9c491926ee426554f21ec80e0f94ad9", null ],
+    [ "pidControlled", "classSparkMax_a327c225479a3924e6bceb4a8116e63fb.html#a327c225479a3924e6bceb4a8116e63fb", null ],
+    [ "pidController", "classSparkMax_af9b9dac58be680a41bedf007eed21b1d.html#af9b9dac58be680a41bedf007eed21b1d", null ],
+    [ "pidSetpoint", "classSparkMax_addbabc557ff1c49b0b76c4a07c2374ed.html#addbabc557ff1c49b0b76c4a07c2374ed", null ],
+    [ "useAbsolute", "classSparkMax_ada239dcb6c0b0bfa53ccaa8bfe321415.html#ada239dcb6c0b0bfa53ccaa8bfe321415", null ],
+    [ "viewOnly", "classSparkMax_ad670e4a6abf9f77611177c2b807a50e7.html#ad670e4a6abf9f77611177c2b807a50e7", null ]
+];

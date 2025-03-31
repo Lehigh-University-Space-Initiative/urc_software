@@ -1,0 +1,5 @@
+<map id="VideoViewPanel" name="VideoViewPanel">
+<area shape="rect" id="node1" title=" " alt="" coords="23,93,141,119"/>
+<area shape="rect" id="node2" href="$classPanel.html" title=" " alt="" coords="5,5,60,31"/>
+<area shape="rect" id="node3" href="$classImageHelper.html" title=" " alt="" coords="85,5,181,31"/>
+</map>

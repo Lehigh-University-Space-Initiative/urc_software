@@ -1,0 +1,5 @@
+<map id="CANDriver" name="CANDriver">
+<area shape="rect" id="node1" title="A device which can be communicated with over a CAN bus." alt="" coords="154,123,238,148"/>
+<area shape="rect" id="node2" href="$structCANDriver_1_1PeriodicUpdateData1.html" title=" " alt="" coords="5,5,184,45"/>
+<area shape="rect" id="node3" href="$structCANDriver_1_1PeriodicUpdateData2.html" title=" " alt="" coords="208,5,387,45"/>
+</map>

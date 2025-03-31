@@ -1,0 +1,4 @@
+<map id="CANDriver" name="CANDriver">
+<area shape="rect" id="node1" title="A device which can be communicated with over a CAN bus." alt="" coords="5,5,89,31"/>
+<area shape="rect" id="node2" href="$classSparkMax.html" title="An object representing a Rev Robotics Spark Max Brushes DC Motor Controller." alt="" coords="7,79,87,104"/>
+</map>

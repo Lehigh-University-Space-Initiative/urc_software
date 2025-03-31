@@ -1,0 +1,7 @@
+<map id="SparkMax" name="SparkMax">
+<area shape="rect" id="node1" title="An object representing a Rev Robotics Spark Max Brushes DC Motor Controller." alt="" coords="221,211,301,236"/>
+<area shape="rect" id="node2" href="$classCANDriver.html" title="A device which can be communicated with over a CAN bus." alt="" coords="154,123,238,148"/>
+<area shape="rect" id="node3" href="$structCANDriver_1_1PeriodicUpdateData1.html" title=" " alt="" coords="5,5,184,45"/>
+<area shape="rect" id="node4" href="$structCANDriver_1_1PeriodicUpdateData2.html" title=" " alt="" coords="208,5,387,45"/>
+<area shape="rect" id="node5" href="$classPID.html" title=" " alt="" coords="262,123,306,148"/>
+</map>
