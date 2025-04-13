@@ -60,7 +60,7 @@ void MotorManager::init()
   }
 
   for(auto& motor: motors_) {
-    motor.sendPowerCMD();
+    motor.sendPowerCMD(0);
   }
 }
 
