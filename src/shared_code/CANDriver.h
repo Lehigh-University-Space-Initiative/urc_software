@@ -24,7 +24,7 @@
  * 
  * There are assumed to be only 2 can busses since the code is designed for the waveshare 2 channel raspberry pi CAN hat
  * 
- * \todo this class should not deal with SparkMax specific concepts like periodic updates
+ * @todo this class should not deal with SparkMax spacific concepts like periodic updates
 */
 class CANDriver {
 protected:
