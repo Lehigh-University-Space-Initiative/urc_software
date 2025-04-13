@@ -22,13 +22,13 @@
 /**
  * A device which can be communicated with over a CAN bus.
  * 
- * There are assumed to be only 2 can busses since the code is designed for hte waveshare 2 channel raspberry pi CAN hat
+ * There are assumed to be only 2 can busses since the code is designed for the waveshare 2 channel raspberry pi CAN hat
  * 
  * \todo this class should not deal with SparkMax spacific concepts like periodic updates
 */
 class CANDriver {
 protected:
-    /// @brief can buss this device is connected to
+    /// @brief can bus this device is connected to
     /// Valid values are 0 and 1
     int canBus;
     /// @brief can id of this spacific device
@@ -143,12 +143,12 @@ public:
     /// @param canID The can id of this spark max on the can bus
     /// @param gearRatio The gear ratio between the motor connected to the spark max and whatever it is connected to. 
     /// This is greater than 1 if rotation speed decreases over the gearbox.
-    /// @param useAbsolute Weather to use an absolute position encoder connected to the spark max or the default internal brushes motor position encoder
+    /// @param useAbsolute Whether to use an absolute position encoder connected to the spark max or the default internal brushes motor position encoder
     SparkMax(rclcpp::Node::SharedPtr node, int canBUS, int canID, double gearRatio, bool useAbsolute);
 
     SparkMax(const SparkMax& other);
 
-    /// @brief send the periotic heartbeat message to the SparkMax
+    /// @brief send the periodic heartbeat message to the SparkMax
     /// The spark max motor controllers will prevent any motors from moving unless this heartbeat message is sent within a given period.
     /// If a heartbeat message is not received within that timeout period, the spark max will stop its motor. 
     /// This is from FRC where they want a way to stop the robots if there is a software problem or the round is not running.
