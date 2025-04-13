@@ -14,3 +14,5 @@ build/
 
 # setup to save data in ground station ui
 ground_station_volume/
+
+docs/
