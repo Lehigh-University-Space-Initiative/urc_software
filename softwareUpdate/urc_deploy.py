@@ -125,7 +125,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Deployment script for different deployment levels.")
     parser.add_argument('--rsync', action='store_true', help="Sync files only.")
     parser.add_argument('--docker', action='store_true', help="Sync files and build Docker image.")
-    parser.add_argument('--deploy', action='store_true', help="Sync files, build Docker image and relaunch software.")
+    parser.add_argument('--deploy', action='store_true', help="Relaunch software on all computers.")
     parser.add_argument('--full', action='store_true', help="Run full deployment: sync, Docker build.")
     args = parser.parse_args()
 
