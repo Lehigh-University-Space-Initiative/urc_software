@@ -1,13 +1,13 @@
 #!/bin/bash
 
 INPLACE=false
-TARGET_DIR="."
+ROOT_DIR=$(git rev-parse --show-toplevel)
 
 if [[ "$1" == "-i" ]]; then
     INPLACE=true
 fi
 
-FILES=$(find "$TARGET_DIR" -type f \( -name "*.cpp" -o -name "*.h" \))
+FILES=$(find "$ROOT_DIR" -type f \( -name "*.cpp" -o -name "*.h" \))
 
 if $INPLACE; then
     echo "Formatting files in-place..."
