@@ -12,7 +12,7 @@ docker container run \
     urc_software_builder \
     bash -c 'source /opt/ros/humble/setup.sh && colcon build --merge-install --packages-select cross_pkg_messages &&
              source ./install/setup.bash &&
-             colcon build --merge-install --packages-select base_station_urc main_computer_urc driveline_urc sllidar_ros2 moveit_config_urc arm_urc'
+             colcon build --merge-install --packages-select base_station_urc main_computer_urc driveline_urc sllidar_ros2 moveit_config_urc arm_urc lusi_training'
 
 # Check if the build step failed (return code 2)
 if [ $? -eq 2 ]; then

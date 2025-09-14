@@ -40,6 +40,9 @@ case "$1" in
     # run the docker container with -it flags for this to work
     exec /bin/bash
     ;;
+  lusi_training)
+    ros2 launch lusi_training training_launch.py
+    ;;
   *)
     echo "Unknown mode: $1. Please specify one of 'hootl', 'base_station', 'main_computer', or 'driveline'."
     exit 1
