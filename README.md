@@ -50,5 +50,4 @@ to run a full software deploy: `python3 ./softwareUpdate/urc_deploy.py `
 
 for more options to run parts of the deploy process run: `python3 ./softwareUpdate/urc_deploy.py --help`
 
-
-Alex was here, blah blah blah
+alex and emily did the thing
