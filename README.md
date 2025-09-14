@@ -74,3 +74,5 @@ export DISPLAY=:0.0
 xhost +local:docker
 sudo docker run -it -e DISPLAY=$DISPLAY --net=host lusi_software
 ```
+
+this is for training
