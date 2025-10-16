@@ -1,5 +1,39 @@
 # URC Software
 
+## Software Setup
+### Linux
+*Note that this has only been tested on Ubuntu 22.04, but should work on any distro*
+1. Clone the repo onto your computer
+2. In the top level of the repository, run:
+```bash
+git submodule init
+git submodule update
+```
+
+This will install the repositories for external libraries including the GUI (ImGUI), Pi pin access (PiGPIO), sockets (sockpp), LiDAR (slider_ros2), and code documentation generation (Doxygen)
+
+3. Run 
+```bash
+./softwareUpdate/dockerBuild.sh
+```
+
+This will build the docker image. Wait for this to complete.
+
+4. To run the base station software, run
+```bash
+xhost +
+```
+To let the GUI show up on your display, then:
+```bash
+./src/base_station_urc/launch/launchScript.sh
+```
+
+### Windows
+(WIP)
+
+### MacOS
+(WIP)
+
 ## Current Packages
 
 ### base_station_urc
