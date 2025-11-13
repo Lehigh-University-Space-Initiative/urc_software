@@ -21,6 +21,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-humble-ros2-controllers \
     ros-humble-moveit-ros-planning-interface \
     ros-humble-moveit-servo \
+    gazebo \
+    ros-humble-gazebo-ros-pkgs \
     tmux \
     ruby \
     vim nano gdb \
@@ -66,7 +68,6 @@ COPY --from=urc_software_builder /opt/ros/humble /opt/ros/humble
 COPY ./install /ros2_ws/install
 COPY ./libs /ros2_ws/libs
 COPY ./run_nodes.sh /ros2_ws/run_nodes.sh
-
 RUN cd /ros2_ws/libs/pigpio && make && make install
 
 # Default command
