@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot
+  name="LUCY26">
+  <link
+    name="base_link">
+    <inertial>
+      <origin
+        xyz="0.00256212440400067 -1.0758573137582E-17 -0.106840952012263"
+        rpy="0 0 0" />
+      <mass
+        value="34.8294718636289" />
+      <inertia
+        ixx="0.699573036535457"
+        ixy="5.27725253405296E-16"
+        ixz="0.0111588723088867"
+        iyy="0.681505842283892"
+        iyz="-1.74372249839835E-16"
+        izz="1.08723591591087" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://LUCY26/meshes/base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://LUCY26/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="link_BR">
+    <inertial>
+      <origin
+        xyz="0 0.057013 -2.7756E-17"
+        rpy="0 0 0" />
+      <mass
+        value="4.1716" />
+      <inertia
+        ixx="0.01672"
+        ixy="-3.9506E-21"
+        ixz="-3.3648E-37"
+        iyy="0.02438"
+        iyz="-5.0246E-35"
+        izz="0.01672" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://LUCY26/meshes/link_BR.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://LUCY26/meshes/link_BR.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint_BR"
+    type="continuous">
+    <origin
+      xyz="-0.30823 -0.4064 -0.34863"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="link_BR" />
+    <axis
+      xyz="0 1 0" />
+  </joint>
+  <link
+    name="link_FR">
+    <inertial>
+      <origin
+        xyz="0 0.057013 0"
+        rpy="0 0 0" />
+      <mass
+        value="4.1716" />
+      <inertia
+        ixx="0.01672"
+        ixy="-3.9506E-21"
+        ixz="4.6379E-34"
+        iyy="0.02438"
+        iyz="1.4988E-34"
+        izz="0.01672" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://LUCY26/meshes/link_FR.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://LUCY26/meshes/link_FR.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint_FR"
+    type="continuous">
+    <origin
+      xyz="0.4401 -0.4064 -0.34863"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="link_FR" />
+    <axis
+      xyz="0 1 0" />
+  </joint>
+  <link
+    name="link_FL">
+    <inertial>
+      <origin
+        xyz="0 -0.057013 -2.7756E-17"
+        rpy="0 0 0" />
+      <mass
+        value="4.1716" />
+      <inertia
+        ixx="0.01672"
+        ixy="5.5672E-21"
+        ixz="2.2842E-18"
+        iyy="0.02438"
+        iyz="9.5433E-21"
+        izz="0.01672" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://LUCY26/meshes/link_FL.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://LUCY26/meshes/link_FL.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint_FL"
+    type="continuous">
+    <origin
+      xyz="0.4401 0.4064 -0.34863"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="link_FL" />
+    <axis
+      xyz="0 1 0" />
+  </joint>
+  <link
+    name="link_BL">
+    <inertial>
+      <origin
+        xyz="0 -0.057013 -2.7756E-17"
+        rpy="0 0 0" />
+      <mass
+        value="4.1716" />
+      <inertia
+        ixx="0.01672"
+        ixy="-3.9506E-21"
+        ixz="3.3648E-37"
+        iyy="0.02438"
+        iyz="5.0246E-35"
+        izz="0.01672" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://LUCY26/meshes/link_BL.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://LUCY26/meshes/link_BL.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint_BL"
+    type="continuous">
+    <origin
+      xyz="-0.30823 0.4064 -0.34863"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="link_BL" />
+    <axis
+      xyz="0 1 0" />
+  </joint>
+</robot>
