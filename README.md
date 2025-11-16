@@ -83,3 +83,8 @@ Any Package: `./src/{pkg name}/launch/launchScript.sh `
 to run a full software deploy: `python3 ./softwareUpdate/urc_deploy.py `
 
 for more options to run parts of the deploy process run: `python3 ./softwareUpdate/urc_deploy.py --help`
+
+#Starting with Docker in case ros2 command doesnt work:
+```bash
+docker exec -it urc_base_station bash
+```
