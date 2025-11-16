@@ -21,8 +21,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-humble-ros2-controllers \
     ros-humble-moveit-ros-planning-interface \
     ros-humble-moveit-servo \
-    gazebo \
+    # for gazebo sim
     ros-humble-gazebo-ros-pkgs \
+    ros-humble-robot-state-publisher \
+    ros-humble-joint-state-publisher \
     tmux \
     ruby \
     vim nano gdb \
