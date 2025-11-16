@@ -36,6 +36,9 @@ case "$1" in
   ground_input)
     ros2 launch ground_input_urc ground_input_launch.py
     ;;
+  simulation)
+    ros2 launch simulation_urc simulation_launch.py
+    ;;
   manual)
     # run the docker container with -it flags for this to work
     exec /bin/bash
