@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(simulation_urc)
+project(rover_description_urc)
 
 find_package(ament_cmake REQUIRED)
 

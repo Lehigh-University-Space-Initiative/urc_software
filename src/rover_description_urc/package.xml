@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>main_computer_urc</name>
+  <name>rover_description_urc</name>
   <version>0.0.0</version>
-  <description>ROS2 package for DriveTrainManager node</description>
+  <description>ROS2 package for Rover Description (urdf)</description>
 
   <maintainer email="vboxuser@todo.todo">vboxuser</maintainer>
   <license>TODO</license>
