@@ -1,0 +1,21 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 50
+
+    diff_drive:
+      type: diff_drive_controller/DiffDriveController
+
+diff_drive:
+  ros__parameters:
+    left_wheels:  ["left_front_wheel_joint", "left_rear_wheel_joint"]
+    right_wheels: ["right_front_wheel_joint", "right_rear_wheel_joint"]
+
+    wheel_separation: 0.42
+    wheel_radius: 0.10
+    cmd_vel_timeout: 0.25
+    publish_rate: 50
+    position_feedback: true
+    open_loop: false
+
+    base_frame_id: base_link
+    odom_frame_id: odom

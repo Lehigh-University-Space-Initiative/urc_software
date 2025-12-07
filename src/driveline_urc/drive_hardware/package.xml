@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>drive_hardware</name>
+  <version>0.1.0</version>
+  <description>Drive-only ros2_control hardware interface for the rover.</description>
+  <maintainer email="avh226@lehigh.edu">Anders Heyniger</maintainer>
+  <license>TODO</license> <!-- MIT? -->
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>rclcpp_lifecycle</depend>
+  <depend>hardware_interface</depend>
+  <depend>pluginlib</depend>
+  <depend>ros2_control</depend>
+
+  <!-- URDF/Xacro + controllers -->
+  <exec_depend>controller_manager</exec_depend>
+  <exec_depend>diff_drive_controller</exec_depend>
+  <exec_depend>forward_command_controller</exec_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>xacro</exec_depend>
+
+  <export>
+    <hardware_interface plugin="${prefix}/plugins/drive_plugin.xml"/>
+  </export>
+</package>

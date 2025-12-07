@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <xacro:arg name="drive_plugin" default="drive_hardware/DriveHardware"/> 
+
+    <!-- CAN IDs of wheels -->
+    <xacro:arg name="lf_id" default="1"/> 
+    <xacro:arg name="lr_id" default="2"/> 
+    <xacro:arg name="rf_id" default="3"/> 
+    <xacro:arg name="rr_id" default="4"/> 
+
+
+    <xacro:arg name="wheel_radius" default="0.10"/> <!-- Must be measured and changed -->
+    <xacro:arg name="gear_ratio" default="10.0"/>  <!-- Must be measured and changed -->
+    <xacro:arg name="control_mode" default="power"/> <!-- Should be either power or velocity -->
+
+    <ros2_control name="drive_system" type="system">
+        <hardware>
+            <plugin>${drive_plugin}</plugin>
+
+            <param name="control_mode">${control_mode}</param>
+            <param name="gear_ratio">${gear_ratio}</param>
+            <param name="wheel_radius">${wheel_radius}</param>
+        </hardware>
+
+        <joint name="left_front_wheel_joint">
+            <state_interface name="position"/>
+            <state_interface name="velocity"/>
+
+            <command_interface name="velocity"/>
+            <command_interface name="effort"/>
+
+            <param name="can_id">${lf_id}</param>
+        </joint>
+
+        <joint name="left_rear_wheel_joint">
+            <state_interface name="position"/>
+            <state_interface name="velocity"/>
+
+            <command_interface name="velocity"/>
+            <command_interface name="effort"/>
+
+            <param name="can_id">${lr_id}</param>
+        </joint>
+
+        <joint name="right_front_wheel_joint">
+            <state_interface name="position"/>
+            <state_interface name="velocity"/>
+
+            <command_interface name="velocity"/>
+            <command_interface name="effort"/>
+
+            <param name="can_id">${rf_id}</param>
+        </joint>
+
+        <joint name="right_rear_wheel_joint">
+            <state_interface name="position"/>
+            <state_interface name="velocity"/>
+
+            <command_interface name="velocity"/>
+            <command_interface name="effort"/>
+
+            <param name="can_id">${rr_id}</param>
+        </joint>
+    </ros2_control>
+
+</robot>

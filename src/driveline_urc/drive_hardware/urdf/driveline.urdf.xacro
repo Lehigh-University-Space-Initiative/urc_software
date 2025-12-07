@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="rover_driveline">
+  <!-- your links/joints go here -->
+
+  <!-- Include drive ros2_control component -->
+  <xacro:include filename="$(find-pkg-share drive_hardware)/urdf/drive_ros2_control.xacro"/>
+  <xacro:drive_ros2_control
+    drive_plugin="drive_hw/RoverDriveHardware"
+    lf_id="1" lr_id="2" rf_id="3" rr_id="4"
+    wheel_radius="0.10" gear_ratio="10.0"
+    control_mode="power"/>
+</robot>

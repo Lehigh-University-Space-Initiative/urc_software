@@ -1,0 +1,15 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 50
+
+    drive_power:
+      type: forward_command_controller/ForwardCommandController
+
+drive_power:
+  ros__parameters:
+    joints:
+      - left_front_wheel_joint
+      - left_rear_wheel_joint
+      - right_front_wheel_joint
+      - right_rear_wheel_joint
+    interface_name: effort   # treat effort as "power" [-1..1]

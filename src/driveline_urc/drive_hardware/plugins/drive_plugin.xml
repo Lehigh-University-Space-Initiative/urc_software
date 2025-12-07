@@ -1,0 +1,12 @@
+
+
+<library path="drive_hardware">
+    <class
+        name="drive_hardware/DriveHardware" 
+        type="drive_hardware::DriveHardware"
+        base_class_type="hardware_interface::SystemInterface"
+        >
+        <description>Drive-only hardware interface for the URC rover.</description>
+    </class>
+
+</library>
