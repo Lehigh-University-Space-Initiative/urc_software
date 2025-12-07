@@ -1,8 +1,12 @@
 # This is the message sent to the pi from drive controller
 std_msgs/Header header
 # Values should be normalized signed values e.x [-1,1]
-# components are [Lfront, LCenter, LBack]
-geometry_msgs/Vector3 cmd_l
+# lf=left front, lb=left back, ls=left steering (front wheel)
+float64 lf
+float64 lb
+float64 ls
 
-# components are [Rfront, RCenter, RBack]
-geometry_msgs/Vector3 cmd_r
+# rf=right front, rb=right back, rs=right steering (front wheel)
+float64 rf
+float64 rb
+float64 rs

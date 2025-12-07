@@ -14,7 +14,7 @@ class MotorManager {
 protected:
     std::vector<SparkMax> motors_;
     //end effector for arm
-    std::unique_ptr<SparkMax> eef;
+    // std::unique_ptr<SparkMax> eef;
     
     size_t motor_count_;
     std::vector<double> hw_positions_;
@@ -31,7 +31,7 @@ private:
     libguarded::plain_guarded<std::chrono::time_point<std::chrono::system_clock>> lastManualCommandTime{std::chrono::system_clock::now()};
     std::chrono::milliseconds manualCommandTimeout{1500};
 
-    void parseDriveCommands(const cross_pkg_messages::msg::RoverComputerDriveCMD::SharedPtr msg);
+    // void parseDriveCommands(const cross_pkg_messages::msg::RoverComputerDriveCMD::SharedPtr msg);
 
 public:
     MotorManager(rclcpp::Node::SharedPtr node, bool usePid);
@@ -48,7 +48,8 @@ public:
     size_t getMotorCount();
     // std::vector<hardware_interface::StateInterface> getStateInterfaces(std::vector<hardware_interface::ComponentInfo>& joints);
     // std::vector<hardware_interface::CommandInterface> getCommandInterface(std::vector<hardware_interface::ComponentInfo>& joints);
-    void setCommands(const cross_pkg_messages::msg::RoverComputerDriveCMD::SharedPtr msg);
     void resetLOSTimeout();
     void stopAllMotors();
+
+    virtual void testMotors();
 };

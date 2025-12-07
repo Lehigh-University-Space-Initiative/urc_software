@@ -7,22 +7,6 @@
 #include "CANDriver.h"
 #include "DriveTrainMotorManager.h"
 
-/*
-Note 
-Left stick:
-pitch: pitch
-roll: base rotate
-yaw: M3 rist pitch
-
-right stick:
-pitch: elbow pitch
-roll: rist roll
-yaw: rist/ yaw
-
-left trigger: close end effector
-right trigger: open end effector
-*/
-
 
 std::shared_ptr<rclcpp::Node> node;
 std::unique_ptr<DriveTrainMotorManager> manager;
@@ -30,7 +14,6 @@ std::unique_ptr<DriveTrainMotorManager> manager;
 // Callback function
 void callback(const cross_pkg_messages::msg::RoverComputerDriveCMD::SharedPtr msg) {
    RCLCPP_INFO(rclcpp::get_logger("Motor_CTR"), "Received command with CMD_R.z: %f", msg->cmd_r.z);
-   // wrist_yaw.setVelocity(msg->cmd_r.z);  // Uncomment and set velocity when integrating
    manager->parseDriveCommands(msg);
 }
 

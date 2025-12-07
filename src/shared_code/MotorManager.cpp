@@ -1,7 +1,7 @@
 #include "MotorManager.h"
 #include "Logger.h"
 
-rclcpp::Logger dl_logger = rclcpp::get_logger("driveline logger");
+// rclcpp::Logger dl_logger = rclcpp::get_logger("driveline logger");
 
 MotorManager::MotorManager(rclcpp::Node::SharedPtr node, bool usePid)
 {
@@ -14,19 +14,7 @@ MotorManager::~MotorManager()
 }
 
 
-void MotorManager::setupMotors()
-{
-    // Add motors to the motors vector
-    // // Left side (BUS 0)
-    // motors_.emplace_back(SparkMax(1, 1)); // LF
-    // motors_.emplace_back(SparkMax(1, 2)); // LM
-    // motors_.emplace_back(SparkMax(1, 3)); // LB
-    // // Right side (BUS 1)
-    // motors_.emplace_back(SparkMax(1, 4)); // RB
-    // motors_.emplace_back(SparkMax(1, 5)); // RM
-    // motors_.emplace_back(SparkMax(1, 6)); // RF
-
-    RCLCPP_INFO(dl_logger, "MotorManager: Testing Motors");
+void MotorManager::testMotors() {
     for (auto &motor : motors_) {
         motor.ident();
     }
@@ -131,7 +119,7 @@ void MotorManager::tick()
     while(CANDriver::doCanReadIter(1)) {
         canItr++;
     };
-    RCLCPP_INFO(rclcpp::get_logger("Arm"), "can ITR count: %ld", canItr);
+    // RCLCPP_INFO(rclcpp::get_logger("Arm"), "can ITR count: %ld", canItr);
     
 
     //if (loopItr % 0 != 0) return;
@@ -140,7 +128,7 @@ void MotorManager::tick()
             static std::chrono::system_clock::time_point last_update;
             double delta = std::chrono::duration<double>(std::chrono::system_clock::now() - last_update).count();
             last_update = std::chrono::system_clock::now();
-            RCLCPP_INFO(rclcpp::get_logger("Arm"), "pid tick cycle delta: %f", delta);
+            // RCLCPP_INFO(rclcpp::get_logger("Arm"), "pid tick cycle delta: %f", delta);
             }
     
     //give pid tick
@@ -149,56 +137,24 @@ void MotorManager::tick()
         motor.sendHeartbeat();
         motor.pidTick(hw_positions_[i]);
     }
-    if (eef) {
-        eef->sendHeartbeat();
-    }
+    // if (eef) {
+    //     eef->sendHeartbeat();
+    // }
 
     {  // lock block for LOS safety stop
         auto lock = lastManualCommandTime.lock();
         auto now = std::chrono::system_clock::now();
         if (now - *lock > manualCommandTimeout) {
             RCLCPP_WARN(dl_logger, "MotorManager: LOS Safety Stop WARNING: DISABLED");
-            // stopAllMotors();
-            if (eef) {
-                eef->sendPowerCMD(0);
-            }
+            stopAllMotors();
+            // if (eef) {
+            //     eef->sendPowerCMD(0);
+            // }
         }
     }
 
 
 }
-
-
-void MotorManager::setCommands(const cross_pkg_messages::msg::RoverComputerDriveCMD::SharedPtr msg)
-{
-    // RCLCPP_INFO(dl_logger, "MotorManager: Drive Commands Received with L: %f, R: %f", msg->cmd_l.x, msg->cmd_r.x);
-
-    // // for (auto m : motors_) {
-    // //     m.motorLocked = false;
-    // // }
-
-    // // Send power commands to motors based on drive command message
-    // // motors[0].setPIDSetpoint(-msg->cmd_l.x);
-    // // motors[1].setPIDSetpoint(-msg->cmd_l.y);
-    // // motors[2].setPIDSetpoint(-msg->cmd_l.z);
-
-    // // motors[3].setPIDSetpoint(msg->cmd_r.x);
-    // // motors[4].setPIDSetpoint(msg->cmd_r.y);
-    // // motors[5].setPIDSetpoint(msg->cmd_r.z);
-
-    
-    // motors_[0].sendPowerCMD(-msg->cmd_l.x / 20);
-    // motors_[1].sendPowerCMD(-msg->cmd_l.y / 20);
-    // motors_[2].sendPowerCMD(-msg->cmd_l.z / 20);
-
-    // motors_[3].sendPowerCMD(msg->cmd_r.x / 20);
-    // motors_[4].sendPowerCMD(msg->cmd_r.y / 20);
-    // motors_[5].sendPowerCMD(msg->cmd_r.z / 20);
-
-
-    // resetLOSTimeout();
-}
-
 
 // Public API to reset the LOS timeout (e.g. call this from another context if needed).
 void MotorManager::resetLOSTimeout()
