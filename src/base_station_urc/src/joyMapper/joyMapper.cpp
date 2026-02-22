@@ -42,8 +42,8 @@ private:
     auto joy_left = last_joy0_msg_.axes[1];
     auto joy_right = last_joy1_msg_.axes[1];
 
-    auto joy_left_steer = last_joy0_msg_.axes[0];
-    auto joy_right_steer = last_joy1_msg_.axes[0];
+    auto joy_left_twist = last_joy0_msg_.axes[2];
+    auto joy_right_twist = last_joy1_msg_.axes[2];
 
     auto flip_joystics = this->get_parameter("swap_joysticks");
     if (flip_joystics.as_bool()) {
@@ -52,8 +52,7 @@ private:
     
     cmd.linear.x = (joy_left + joy_right) / 2 * linearSensativity;
     cmd.angular.y = (joy_right - joy_left) / 2 * angularSensativity;
-
-    // cmd.linear.y = (joy_left_steer + joy_right_steer) / 2 * linearSensativity;
+    cmd.angular.z = (joy_left_twist + joy_right_twist) / 2 * angularSensativity;
 
     drive_pub_->publish(cmd);
   }

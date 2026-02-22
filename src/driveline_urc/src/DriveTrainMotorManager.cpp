@@ -12,8 +12,8 @@ void DriveTrainMotorManager::setupMotors() {
     motors_.emplace_back(node_, 0, 2, 1.0, true); // LB
     motors_.emplace_back(node_, 0, 3, 1.0, true); // RF
     motors_.emplace_back(node_, 0, 4, 1.0, true); // RB
-    // motors_.emplace_back(node_, 0, 5, 1.0, true); // LSteer
-    // motors_.emplace_back(node_, 0, 6, 1.0, true); // RSteer
+    motors_.emplace_back(node_, 0, 5, 1.0, true); // LSteer
+    motors_.emplace_back(node_, 0, 6, 1.0, true); // RSteer
 
     RCLCPP_INFO(node_->get_logger(), "Testing Motors");
     for (auto &motor : motors_) {
@@ -27,7 +27,7 @@ void DriveTrainMotorManager::parseDriveCommands(const cross_pkg_messages::msg::R
     motors_[2].sendPowerCMD(msg->cmd_r.x / 20);
 
     motors_[3].sendPowerCMD(msg->cmd_r.z / 20);
-    // motors_[4].sendPowerCMD(msg->cmd_l.y / 20); // Send left steer cmd
-    // motors_[5].sendPowerCMD(msg->cmd_r.y / 20); // Send right steer cmd
+    motors_[4].sendPowerCMD(msg->cmd_l.y / 20); // Send left steer cmd
+    motors_[5].sendPowerCMD(msg->cmd_r.y / 20); // Send right steer cmd
 }
 
