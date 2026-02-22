@@ -58,6 +58,7 @@
   <depend>cv_bridge</depend>
   <depend>joy</depend>
   <depend>moveit_servo</depend>
+  <depend>cross_pkg_messages</depend>
 
   <export>
     <build_type>ament_cmake</build_type>
