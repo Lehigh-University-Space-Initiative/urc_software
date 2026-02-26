@@ -7,6 +7,7 @@
 #include <vector>
 #include <cs_plain_guarded.h>
 #include "cross_pkg_messages/msg/rover_computer_drive_cmd.hpp"
+#include "cross_pkg_messages/msg/rover_computer_arm_cmd.hpp"
 #include "MotorManager.h"
 
 class DriveTrainMotorManager : public MotorManager {
@@ -26,4 +27,5 @@ public:
     using MotorManager::MotorManager;
     virtual ~DriveTrainMotorManager();
     void parseDriveCommands(const cross_pkg_messages::msg::RoverComputerDriveCMD::SharedPtr msg);
+    void parseArmCommands(const cross_pkg_messages::msg::RoverComputerArmCMD::SharedPtr msg);
 };

@@ -5,6 +5,7 @@
 // Global variables
 cross_pkg_messages::msg::RoverComputerDriveCMD currentDriveCommand{};
 rclcpp::Publisher<cross_pkg_messages::msg::RoverComputerDriveCMD>::SharedPtr driveTrainPublisher;
+// rclcpp::Publisher<cross_pkg_messages::msg::RoverComputerArmCMD>::SharedPtr armPublisher;
 
 std::shared_ptr<rclcpp::Node> node;
 
@@ -48,9 +49,11 @@ int main(int argc, char** argv) {
     node = rclcpp::Node::make_shared("DriveTrainManager");
 
     RCLCPP_INFO(node->get_logger(), "DriveTrainManager is running");
+    // RCLCPP_INFO(node->get_logger(), "Arm (from DriveTrainManager) is running");
 
     // Create the publisher
     driveTrainPublisher = node->create_publisher<cross_pkg_messages::msg::RoverComputerDriveCMD>("roverDriveCommands", 10);
+    // armPublisher = node->create_publisher<cross_pkg_messages::msg::RoverComputerArmCMD>("roverArmCommands", 10);
 
     // Create the subscriber
     auto subscription = node->create_subscription<geometry_msgs::msg::Twist>(

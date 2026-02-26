@@ -3,6 +3,7 @@
 #include <std_msgs/msg/string.hpp>
 #include <sstream>
 #include "cross_pkg_messages/msg/rover_computer_drive_cmd.hpp"
+#include "cross_pkg_messages/msg/rover_computer_arm_cmd.hpp"
 #include "geometry_msgs/msg/vector3.hpp"
 #include "CANDriver.h"
 #include "DriveTrainMotorManager.h"
@@ -28,10 +29,14 @@ std::shared_ptr<rclcpp::Node> node;
 std::unique_ptr<DriveTrainMotorManager> manager;
 
 // Callback function
-void callback(const cross_pkg_messages::msg::RoverComputerDriveCMD::SharedPtr msg) {
+void driveCallback(const cross_pkg_messages::msg::RoverComputerDriveCMD::SharedPtr msg) {
    RCLCPP_INFO(rclcpp::get_logger("Motor_CTR"), "Received command with CMD_R.z: %f", msg->cmd_r.z);
-   // wrist_yaw.setVelocity(msg->cmd_r.z);  // Uncomment and set velocity when integrating
    manager->parseDriveCommands(msg);
+}
+
+void armCallback(const cross_pkg_messages::msg::RoverComputerArmCMD::SharedPtr msg) {
+   RCLCPP_INFO(rclcpp::get_logger("Motor_CTR"), "Received ARM command with CMD_WR: %f", msg->cmd_wr);
+   manager->parseArmCommands(msg);
 }
 
 int main(int argc, char** argv) {
@@ -55,7 +60,11 @@ int main(int argc, char** argv) {
 
     // Subscriber for rover drive commands
     auto driveCommandsSub = node->create_subscription<cross_pkg_messages::msg::RoverComputerDriveCMD>(
-        "/roverDriveCommands", 10, callback);
+        "/roverDriveCommands", 10, driveCallback);
+
+    // Subscriber for rover arm commands
+    auto armCommandsSub = node->create_subscription<cross_pkg_messages::msg::RoverComputerArmCMD>(
+        "/roverArmCommands", 10, armCallback);
 
     // Main loop
     while (rclcpp::ok()) {

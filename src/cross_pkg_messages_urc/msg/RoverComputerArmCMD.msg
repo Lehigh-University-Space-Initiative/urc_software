@@ -12,4 +12,13 @@ float64 cmd_s
 float64 cmd_e
 
 # components are [WRoll, WPitch, WYaw]
-geometry_msgs/Vector3 cmd_w
+#geometry_msgs/Vector3 cmd_w
+
+# wrist pitch
+float64 cmd_wp
+
+# wrist roll
+float64 cmd_wr
+
+# end effector (grabby grabby)
+float64 cmd_endeff

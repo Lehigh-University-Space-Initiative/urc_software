@@ -37,8 +37,10 @@ ament_target_dependencies(JoyMapper_node
   rclcpp
   std_msgs
   sensor_msgs
+  geometry_msgs
   image_transport
   cv_bridge
+  cross_pkg_messages
 )
 target_include_directories(JoyMapper_node PRIVATE src/base_station_urc/include/cs_libguarded)
 
