@@ -30,11 +30,11 @@ void manualInputCallback(const geometry_msgs::msg::Twist::SharedPtr msg) {
 
 
     currentDriveCommand.cmd_l.x = leftSideAlpha;
-    currentDriveCommand.cmd_l.y = msg->angular.z;
+    currentDriveCommand.cmd_l.y = msg->linear.y;  // Left joystick twist -> motor 5
     currentDriveCommand.cmd_l.z = leftSideAlpha;
 
     currentDriveCommand.cmd_r.x = rightSideAlpha;
-    currentDriveCommand.cmd_r.y = msg->angular.z;
+    currentDriveCommand.cmd_r.y = msg->angular.z;  // Right joystick twist -> motor 6
     currentDriveCommand.cmd_r.z = rightSideAlpha;
 
     sendDrivePowers();

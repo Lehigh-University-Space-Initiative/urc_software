@@ -22,12 +22,16 @@ void DriveTrainMotorManager::setupMotors() {
 }
 
 void DriveTrainMotorManager::parseDriveCommands(const cross_pkg_messages::msg::RoverComputerDriveCMD::SharedPtr msg) {
-    motors_[0].sendPowerCMD(-msg->cmd_l.x / 20);
-    motors_[1].sendPowerCMD(-msg->cmd_l.z / 20);
-    motors_[2].sendPowerCMD(msg->cmd_r.x / 20);
+    // motors_[0].sendPowerCMD(-msg->cmd_l.x / 20);
+    // motors_[1].sendPowerCMD(-msg->cmd_l.z / 20);
+    // motors_[2].sendPowerCMD(msg->cmd_r.x / 20);
+    // motors_[3].sendPowerCMD(msg->cmd_r.z / 20);
+    motors_[0].sendPowerCMD((-msg->cmd_r.x) / 20); // Send left drive cmd
+    motors_[1].sendPowerCMD((-msg->cmd_r.z) / 20); // Send left drive cmd
+    motors_[2].sendPowerCMD((msg->cmd_r.x + msg->cmd_l.x) / 20); // Send right drive cmd
+    motors_[3].sendPowerCMD((msg->cmd_r.z + msg->cmd_l.z) / 20); // Send right drive cmd
 
-    motors_[3].sendPowerCMD(msg->cmd_r.z / 20);
-    motors_[4].sendPowerCMD(msg->cmd_l.y / 20); // Send left steer cmd
-    motors_[5].sendPowerCMD(msg->cmd_r.y / 20); // Send right steer cmd
+    motors_[4].sendPowerCMD(-msg->cmd_l.y); // Send left steer cmd
+    motors_[5].sendPowerCMD(-(msg->cmd_l.y + msg->cmd_r.y)); // Send right steer cmd
 }
 

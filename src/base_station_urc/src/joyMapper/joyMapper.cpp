@@ -52,7 +52,15 @@ private:
     
     cmd.linear.x = (joy_left + joy_right) / 2 * linearSensativity;
     cmd.angular.y = (joy_right - joy_left) / 2 * angularSensativity;
-    cmd.angular.z = (joy_left_twist + joy_right_twist) / 2 * angularSensativity;
+    
+    // Independent steering: left joystick twist -> motor 5, right joystick twist -> motor 6
+    const double deadzone = 0.1; // Deadzone for twist input
+    double twistScaleLeft = 0.1; // Scale down twist input to prevent excessive speeds
+    double twistScaleRight = 0.1; // Scale down twist input to prevent excessive speeds
+    if (std::abs(joy_left_twist) < deadzone) twistScaleLeft = 0; // Deadband for left twist
+    if (std::abs(joy_right_twist) < deadzone) twistScaleRight = 0; // Deadband for right twist
+    cmd.linear.y = joy_left_twist * twistScaleLeft;  // Left joystick twist -> motor 5
+    cmd.angular.z = joy_right_twist * twistScaleRight;  // Right joystick twist -> motor 6
 
     drive_pub_->publish(cmd);
   }
