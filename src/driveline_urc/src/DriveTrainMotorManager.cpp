@@ -29,10 +29,6 @@ void DriveTrainMotorManager::setupMotors() {
 }
 
 void DriveTrainMotorManager::parseDriveCommands(const cross_pkg_messages::msg::RoverComputerDriveCMD::SharedPtr msg) {
-    // motors_[0].sendPowerCMD(-msg->cmd_l.x / 20);
-    // motors_[1].sendPowerCMD(-msg->cmd_l.z / 20);
-    // motors_[2].sendPowerCMD(msg->cmd_r.x / 20);
-    // motors_[3].sendPowerCMD(msg->cmd_r.z / 20);
     motors_[0].sendPowerCMD((-msg->cmd_r.x) / 20); // Send left drive cmd
     motors_[1].sendPowerCMD((-msg->cmd_r.z) / 20); // Send left drive cmd
     motors_[2].sendPowerCMD((msg->cmd_r.x + msg->cmd_l.x) / 20); // Send right drive cmd
@@ -53,8 +49,8 @@ void DriveTrainMotorManager::parseDriveCommands(const cross_pkg_messages::msg::R
     // Buttons 0-1: End Effector (CAN 54) - Close/Open
 void DriveTrainMotorManager::parseArmCommands(const cross_pkg_messages::msg::RoverComputerArmCMD::SharedPtr msg) {
     motors_[6].sendPowerCMD(msg->cmd_b); 
-    motors_[7].sendPowerCMD(msg->cmd_s); 
-    motors_[8].sendPowerCMD(msg->cmd_e); 
+    motors_[7].sendPowerCMD(msg->cmd_s + msg->cmd_s_extra); 
+    motors_[8].sendPowerCMD(msg->cmd_e + msg->cmd_e_extra); 
     motors_[9].sendPowerCMD(msg->cmd_wr); 
     motors_[10].sendPowerCMD(msg->cmd_wp); 
     motors_[11].sendPowerCMD(msg->cmd_endeff); 

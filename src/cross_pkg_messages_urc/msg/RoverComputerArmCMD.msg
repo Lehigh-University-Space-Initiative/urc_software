@@ -7,9 +7,11 @@ float64 cmd_b
 
 # shoulder motor
 float64 cmd_s
+float64 cmd_s_extra
 
 # elbow motor
 float64 cmd_e
+float64 cmd_e_extra
 
 # components are [WRoll, WPitch, WYaw]
 #geometry_msgs/Vector3 cmd_w

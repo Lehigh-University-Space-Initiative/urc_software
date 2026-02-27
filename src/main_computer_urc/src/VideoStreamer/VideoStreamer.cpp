@@ -107,7 +107,9 @@ private:
 
 
         //perform aruco detection
-        performArucoDetection(frame);
+        if (!frame.empty()) {
+            performArucoDetection(frame);
+        }
 
         if (lusi_vision_3d) {
             if (!cap_3d_.isOpened()) {

@@ -82,7 +82,7 @@ private:
       return;
 
     cross_pkg_messages::msg::RoverComputerArmCMD arm_cmd;
-    const double armPower = 0.05;  // Very slow arm power (5%)
+    // const double armPower = 0.05;  // Very slow arm power (5%)
     bool anyButtonPressed = false;
 
     // Button mapping (Logitech Extreme 3D Pro):
@@ -96,72 +96,109 @@ private:
     // Base motor (CAN 55)
     // Axis 4 is left/right with the mini thumb joystick
     if (last_joy0_msg_.axes.size() > 4) {
-      auto base = last_joy0_msg_.axes[4];
-      if (base) {
-        arm_cmd.cmd_b = base * armPower; // Axis 4 (mini joystick left/right) controls base linear actuator
-        anyButtonPressed = true;
-      }
+      auto base_cmd = last_joy0_msg_.axes[4];
+      double base_power = 0.5;
+      // if (base_cmd) {
+      //   arm_cmd.cmd_b = base_cmd * base_power; // Axis 4 (mini joystick left/right) controls base linear actuator
+      //   anyButtonPressed = true;
+      // }
+      arm_cmd.cmd_b = base_cmd * base_power; // Axis 4 (mini joystick left/right) controls base linear actuator
     }
 
     // Shoulder motor (CAN 51) 
     // Button 6 is labeled with 7 on the joystick
     // Button 7 is labeled with 8 on the joystick
     if (last_joy0_msg_.buttons.size() > 7) {
-      auto shoulder = last_joy0_msg_.buttons[6] - last_joy0_msg_.buttons[7];
-      if (shoulder) {
-        arm_cmd.cmd_s = shoulder * armPower;     // Button 6 = CW, Button 7 = CCW
-        anyButtonPressed = true;
-      }
+      auto shoulder_cmd = last_joy0_msg_.buttons[6] - last_joy0_msg_.buttons[7];
+      double shoulder_power = 0.2;
+      // if (shoulder_cmd) {
+      //   arm_cmd.cmd_s = shoulder_cmd * shoulder_power;     // Button 6 = CW, Button 7 = CCW
+      //   anyButtonPressed = true;
+      // }
+      arm_cmd.cmd_s = shoulder_cmd * shoulder_power;     // Button 6 = CW, Button 7 = CCW
     }
 
     // Elbow motor (CAN 53)
     // Button 8 is labeled with 9 on the joystick
     // Button 9 is labeled with 10 on the joystick
     if (last_joy0_msg_.buttons.size() > 9) {
-      auto elbow = last_joy0_msg_.buttons[8] - last_joy0_msg_.buttons[9];
-      if (elbow) {
-        arm_cmd.cmd_e = elbow * 0.25;     // Button 8 = CW, Button 9 = CCW
-        anyButtonPressed = true;
-      }
+      auto elbow_cmd = last_joy0_msg_.buttons[9] - last_joy0_msg_.buttons[8];
+      double elbow_power = 0.25;
+      // if (elbow_cmd) {
+      //   arm_cmd.cmd_e = elbow_cmd * elbow_power;     // Button 8 = CW, Button 9 = CCW
+      //   anyButtonPressed = true;
+      // }
+      arm_cmd.cmd_e = elbow_cmd * elbow_power;     // Button 8 = CW, Button 9 = CCW
     }
 
     // Wrist Roll (CAN 52) - using cmd_wr
     // Button 4 is labeled with 5 on the joystick
     // Button 5 is labeled with 6 on the joystick
     if (last_joy0_msg_.buttons.size() > 5) {
-      auto wrist_roll = last_joy0_msg_.buttons[4] - last_joy0_msg_.buttons[5];
-      if (wrist_roll) {
-        arm_cmd.cmd_wr = wrist_roll * armPower;     // Button 4 = CW, Button 5 = CCW
-        anyButtonPressed = true;
-      }
+      auto wrist_roll_cmd = last_joy0_msg_.buttons[4] - last_joy0_msg_.buttons[5];
+      double wrist_roll_power = 0.05;
+      // if (wrist_roll_cmd) {
+      //   arm_cmd.cmd_wr = wrist_roll_cmd * wrist_roll_power;     // Button 4 = CW, Button 5 = CCW
+      //   anyButtonPressed = true;
+      // }
+      arm_cmd.cmd_wr = wrist_roll_cmd * wrist_roll_power;     // Button 4 = CW, Button 5 = CCW
     }
 
     // Wrist Pitch (CAN 57) - using cmd_wp
     // Button 2 is labeled with 3 on the joystick
     // Button 3 is labeled with 4 on the joystick
     if (last_joy0_msg_.buttons.size() > 3) {
-      auto wrist_pitch = last_joy0_msg_.buttons[2] - last_joy0_msg_.buttons[3];
-      if (wrist_pitch) {
-        arm_cmd.cmd_wp = wrist_pitch * armPower;     // Button 2 = CW, Button 3 = CCW
-        anyButtonPressed = true;
-      }
+      auto wrist_pitch_cmd = last_joy0_msg_.buttons[2] - last_joy0_msg_.buttons[3];
+      double wrist_pitch_power = 0.05;
+      // if (wrist_pitch_cmd) {
+      //   arm_cmd.cmd_wp = wrist_pitch_cmd * wrist_pitch_power;     // Button 2 = CW, Button 3 = CCW
+      //   anyButtonPressed = true;
+      // }
+      arm_cmd.cmd_wp = wrist_pitch_cmd * wrist_pitch_power;     // Button 2 = CW, Button 3 = CCW
     }
 
       // End Effector (CAN 54) - using cmd_endeff
       // Button 0 is labeled with 1 on the joystick
       // Button 1 is labeled with 2 on the joystick
       if (last_joy0_msg_.buttons.size() > 1) {
-        auto end_eff = last_joy0_msg_.buttons[0] - last_joy0_msg_.buttons[1];
-        if (end_eff) {
-          arm_cmd.cmd_endeff = end_eff * armPower;     // Button 0 = close, Button 1 = open
-          anyButtonPressed = true;
-        }
+        auto end_eff_cmd = last_joy0_msg_.buttons[0] - last_joy0_msg_.buttons[1];
+        double end_eff_power = 0.05;
+        // if (end_eff_cmd) {
+        //   arm_cmd.cmd_endeff = end_eff_cmd * end_eff_power;     // Button 0 = close, Button 1 = open
+        //   anyButtonPressed = true;
+        // }
+        arm_cmd.cmd_endeff = end_eff_cmd * end_eff_power;     // Button 0 = close, Button 1 = open
       }
 
-    // Only publish if at least one button is pressed
-    if (anyButtonPressed) {
-      arm_pub_->publish(arm_cmd);
-    }
+      // Extra shoulder power
+      // Button 10 is labeled with 11 on the joystick
+      if (last_joy0_msg_.buttons.size() > 10) {
+        auto shoulder_cmd_extra = -last_joy0_msg_.buttons[10];
+        double shoulder_extra_power = 0.05;
+        // if (shoulder_cmd_extra) {
+        //   arm_cmd.cmd_s += shoulder_cmd_extra * shoulder_extra_power;     // Button 10 = extra shoulder power
+        //   anyButtonPressed = true;
+        // }
+        arm_cmd.cmd_s_extra = shoulder_cmd_extra * shoulder_extra_power;     // Button 10 = extra shoulder power
+      }
+
+      // Extra shoulder power
+      // Button 11 is labeled with 12 on the joystick
+      if (last_joy0_msg_.buttons.size() > 11) {
+        auto elbow_cmd_extra = last_joy0_msg_.buttons[11];
+        double elbow_extra_power = 0.05;
+        // if (elbow_cmd_extra) {
+        //   arm_cmd.cmd_s += elbow_cmd_extra * elbow_extra_power;     // Button 10 = extra elbow power
+        //   anyButtonPressed = true;
+        // }
+        arm_cmd.cmd_e_extra = elbow_cmd_extra * elbow_extra_power;     // Button 10 = extra elbow power
+      }
+
+    // // Only publish if at least one button is pressed
+    // if (anyButtonPressed) {
+    //   arm_pub_->publish(arm_cmd);
+    // }
+    arm_pub_->publish(arm_cmd);
   }
 
   rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy0_sub_;
