@@ -172,8 +172,8 @@ private:
 
       // Extra shoulder power
       // Button 10 is labeled with 11 on the joystick
-      if (last_joy0_msg_.buttons.size() > 10) {
-        auto shoulder_cmd_extra = -last_joy0_msg_.buttons[10];
+      if (last_joy1_msg_.buttons.size() > 10) {
+        auto shoulder_cmd_extra = last_joy1_msg_.buttons[6] - last_joy1_msg_.buttons[7];
         double shoulder_extra_power = 0.05;
         // if (shoulder_cmd_extra) {
         //   arm_cmd.cmd_s += shoulder_cmd_extra * shoulder_extra_power;     // Button 10 = extra shoulder power
@@ -184,8 +184,8 @@ private:
 
       // Extra shoulder power
       // Button 11 is labeled with 12 on the joystick
-      if (last_joy0_msg_.buttons.size() > 11) {
-        auto elbow_cmd_extra = last_joy0_msg_.buttons[11];
+      if (last_joy1_msg_.buttons.size() > 11) {
+        auto elbow_cmd_extra = last_joy1_msg_.buttons[9] - last_joy1_msg_.buttons[8];
         double elbow_extra_power = 0.05;
         // if (elbow_cmd_extra) {
         //   arm_cmd.cmd_s += elbow_cmd_extra * elbow_extra_power;     // Button 10 = extra elbow power
