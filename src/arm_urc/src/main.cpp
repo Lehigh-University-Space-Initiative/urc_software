@@ -42,39 +42,39 @@ int main(int argc, char **argv)
     manager = std::make_unique<ArmMotorManager>(node,true);
     manager->init();
 
-        // Subscriber for rover drive commands
+    // Command inputs: full arm command from the drive controller, and raw
+    // end-effector input (e.g. SpaceMouse).
     auto driveCommandsSub = node->create_subscription<cross_pkg_messages::msg::RoverComputerArmCMD>(
         "/roverArmCommands", 10, callback);
     auto eefCommandSub = node->create_subscription<cross_pkg_messages::msg::ArmInputRaw>(
         "/armInputRaw", 10, callback2);
 
+    // Publishes measured joint positions back out for MoveIt.
     auto armPosPub = node->create_publisher<cross_pkg_messages::msg::RoverComputerArmCMD>(
         "/roverArmPos", 10);
 
-    rclcpp::Rate loop_rate(100); // Set rate to 6k Hz
-    
+    rclcpp::Rate loop_rate(100); // 100 Hz control loop
+
     bool firstTime = true;
 
     size_t itr = 0;
 
     /*
-        to add
-        - logging to see period of all updating events and incoming topics 
-        - see if moving velocity and positining reading to another thread will help
-        - need to understand better what effect queue length has
-        - use rqt plot to try to see if delay is occuring pre during or post servo node
+        Performance investigation notes (kept for context):
 
+        TODO:
+        - log the period of all update events and incoming topics
+        - try moving velocity/position reading to another thread
+        - understand the effect of subscription queue length
+        - use rqt_plot to see whether delay occurs before/during/after the servo node
 
-    DATA
-        full freq:  around 2000-7000
-        pid tick freq: about 600
-        publish freq: 131
+        Measured frequencies:
+        - full loop:      ~2000-7000 Hz
+        - pid tick:       ~600 Hz
+        - position publish: ~131 Hz
 
-
-        MORE DATA
-
-        - looks like esp with new fixes but even before this node is not a problem and the data received from servo is oscilating
-
+        Observation: this node is not the bottleneck; the data received from the
+        servo node is itself oscillating.
     */
 
     while (rclcpp::ok())
@@ -95,7 +95,7 @@ int main(int argc, char **argv)
             last_update = std::chrono::system_clock::now();
             RCLCPP_INFO(rclcpp::get_logger("Arm"), "publish cycle delta: %f", delta);
 
-            //reading of movotrs for movit should be in radians from veterical
+            // Motor readings for MoveIt should be in radians from vertical.
             manager->readMotors(delta);
 
             auto& positions = manager->getMotorPositions();

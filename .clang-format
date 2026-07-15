@@ -1,0 +1,28 @@
+# House C++ style for urc_software.
+#
+# Chosen to match the code the team already writes (4-space indent, braces on a
+# new line for function/class/namespace bodies but K&R for control flow), so that
+# running clang-format causes minimal churn. Apply with:
+#
+#     clang-format -i $(git ls-files '*.cpp' '*.h' '*.hpp' | grep -vE 'libs/|cs_libguarded|shared_code/pid')
+#
+# (pid.* is vendored third-party and the libs/ + cs_libguarded headers are external.)
+---
+Language: Cpp
+BasedOnStyle: LLVM
+ColumnLimit: 100
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+AccessModifierOffset: -4
+BreakBeforeBraces: Stroustrup
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+PointerAlignment: Left
+SpaceBeforeParens: ControlStatements
+SortIncludes: false
+IndentCaseLabels: true
+NamespaceIndentation: None
+FixNamespaceComments: true
+ReflowComments: true

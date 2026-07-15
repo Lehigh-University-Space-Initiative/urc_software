@@ -42,16 +42,6 @@ ament_target_dependencies(JoyMapper_node
 )
 target_include_directories(JoyMapper_node PRIVATE src/base_station_urc/include/cs_libguarded)
 
-# Add executable for TelemetryPanel
-# add_executable(TelemetryPanel_node src/gui/panels/TelemetryPanel.cpp)
-# ament_target_dependencies(TelemetryPanel_node
-#   rclcpp
-#   std_msgs
-#   cross_pkg_messages
-#   cv_bridge
-# )
-# target_include_directories(TelemetryPanel_node PRIVATE src/base_station_urc/include/cs_libguarded ../../libs/imgui ../../libs/imgui/backends)
-
 # GUI
 file(GLOB GUIFiles
      "src/gui/*.cpp"
@@ -78,18 +68,13 @@ ament_target_dependencies(GroundStationGUI
   cross_pkg_messages
 )
 
+# sockpp itself is provided by find_package(sockpp) / Sockpp::sockpp below.
 file(GLOB VisionFiles
-      "src/LUSIVisionStreamer/*.cpp"
-      "src/LUSIVisionStreamer/LUSIVisionTelem.cpp"
-      "src/LUSIVisionStreamer/*.h"
-
-      "src/LUSIVisionStreamer/sockpp/src/*.cpp"
-
-      "src/LUSIVisionStreamer/sockpp/src/linux/*.cpp"
-      "src/LUSIVisionStreamer/sockpp/src/unix*.h"
+     "src/LUSIVisionStreamer/*.cpp"
+     "src/LUSIVisionStreamer/*.h"
 )
 add_executable(LUSIVisionStreamer_node ${VisionFiles})
-target_include_directories(LUSIVisionStreamer_node PRIVATE src/LUSIVisionStreamer/sockpp/include include/cs_libguarded)
+target_include_directories(LUSIVisionStreamer_node PRIVATE include/cs_libguarded)
 target_link_libraries(LUSIVisionStreamer_node Sockpp::sockpp)
 ament_target_dependencies(LUSIVisionStreamer_node
   rclcpp
@@ -117,11 +102,9 @@ install(DIRECTORY
 
 install(TARGETS
   JoyMapper_node
-  # TelemetryPanel_node
   GroundStationGUI
   SpaceMouseMapper_node
   ArmCommandEncoder_node
-  # ArmCommandEncoder_node
   LUSIVisionStreamer_node
   DESTINATION lib/${PROJECT_NAME}
 )

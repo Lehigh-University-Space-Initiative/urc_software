@@ -1,0 +1,41 @@
+# Consistent whitespace across editors. See https://editorconfig.org
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+
+# C/C++ (matches .clang-format)
+[*.{c,cpp,h,hpp}]
+indent_size = 4
+
+# ROS 2 launch / deploy scripts and other Python
+[*.py]
+indent_size = 4
+
+# CMake
+[CMakeLists.txt]
+indent_size = 2
+[*.cmake]
+indent_size = 2
+
+# Markup / config
+[*.{xml,xacro,urdf,srdf,yaml,yml,rviz,json}]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
+
+# Vendored / external code — leave untouched
+[libs/**]
+indent_style = unset
+indent_size = unset
+[**/cs_libguarded/**]
+indent_style = unset
+indent_size = unset
+[src/shared_code/pid.{h,cpp}]
+indent_style = unset
+indent_size = unset

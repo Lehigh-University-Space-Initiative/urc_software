@@ -31,28 +31,17 @@ file(GLOB ARM_URC_SRC
   src/main.cpp
 )
 
-set(ARM_URC_HW_SRC
-  src/ArmHardware.cpp
-)
-
-# Declare the SpaceMouseMapper executable
+# Declare the ArmMotorManager executable
 add_executable(ArmMotorManager ${ARM_URC_SRC})
 ament_target_dependencies(ArmMotorManager rclcpp cross_pkg_messages std_msgs)
 target_link_libraries(ArmMotorManager pigpio)
 
 install(TARGETS
-  # arm_urc
-  # arm_urc_hw
   ArmMotorManager
   DESTINATION lib/${PROJECT_NAME}
 )
 
-# install(FILES plugin.xml
-#   DESTINATION share/${PROJECT_NAME}
-# )
-
 install(DIRECTORY
-  # urdf
   launch
   DESTINATION share/${PROJECT_NAME}
 )

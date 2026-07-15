@@ -7,30 +7,12 @@
 #include "CANDriver.h"
 #include "DriveTrainMotorManager.h"
 
-/*
-Note 
-Left stick:
-pitch: pitch
-roll: base rotate
-yaw: M3 rist pitch
-
-right stick:
-pitch: elbow pitch
-roll: rist roll
-yaw: rist/ yaw
-
-left trigger: close end effector
-right trigger: open end effector
-*/
-
-
 std::shared_ptr<rclcpp::Node> node;
 std::unique_ptr<DriveTrainMotorManager> manager;
 
-// Callback function
+// Called whenever a drive command arrives from the main computer.
 void callback(const cross_pkg_messages::msg::RoverComputerDriveCMD::SharedPtr msg) {
    RCLCPP_INFO(rclcpp::get_logger("Motor_CTR"), "Received command with CMD_R.z: %f", msg->cmd_r.z);
-   // wrist_yaw.setVelocity(msg->cmd_r.z);  // Uncomment and set velocity when integrating
    manager->parseDriveCommands(msg);
 }
 
@@ -50,7 +32,7 @@ int main(int argc, char** argv) {
     manager = std::make_unique<DriveTrainMotorManager>(node,false);
     manager->init();
 
-    // Set loop rate to 100 Hz
+    // Tight control loop; CAN reads inside tick() are the real rate limiter.
     rclcpp::Rate loop_rate(30000);
 
     // Subscriber for rover drive commands
