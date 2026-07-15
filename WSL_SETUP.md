@@ -39,8 +39,11 @@ username/password.
 Verify you are on version 2:
 
 ```powershell
-wsl --list --verbose      # STATE should be Running, VERSION should be 2
+wsl --list --verbose      # VERSION should be 2
 ```
+
+`STATE` shows `Stopped` whenever nothing is actively using the distro — that is
+normal, not a failure. It flips to `Running` as soon as you open a shell in it.
 
 ## 2. Install Docker
 
