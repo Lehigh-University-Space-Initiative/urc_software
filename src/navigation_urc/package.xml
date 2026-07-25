@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>navigation_urc</name>
+  <version>0.0.0</version>
+  <description>the autonomous navigation folder which drives toward GNSS/ArUco/object targets by publishing cmd_vel</description>
+
+  <maintainer email="kent@todo.todo">kent</maintainer>
+  <license>TODO</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <build_depend>rclcpp</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>cross_pkg_messages</build_depend>
+
+  <exec_depend>rclcpp</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>cross_pkg_messages</exec_depend>
+
+  <export>
+  </export>
+</package>
