@@ -1,4 +1,4 @@
-//reference: https://www.movable-type.co.uk/scripts/latlong.html
+//reference for formulas used in here: https://www.movable-type.co.uk/scripts/latlong.html
 
 #include "rclcpp/rclcpp.hpp"
 #include "geometry_msgs/msg/twist.hpp"
@@ -7,7 +7,7 @@
 #include <cmath>
 #include <algorithm>
 
-// Globals
+// globals
 cross_pkg_messages::msg::GPSData latestGPS{};
 bool hasFix = false;
 rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr cmdVelPublisher;
@@ -20,8 +20,8 @@ void gpsCallback(const cross_pkg_messages::msg::GPSData::SharedPtr msg) {
     hasFix = true;
 }
 
-/// @brief Great-circle distance and initial bearing from (lat1,lon1) to (lat2,lon2), in degrees.
-/// Haversine formula for distance, standard initial-bearing formula for bearing - both treat WGS84 lat/lon as points on a sphere, which is plenty accurate at the <2km scale of this mission.
+/// great-circle distance and initial bearing from (lat1,lon1)(our startiing point) to (lat2,lon2)(goal point), in degrees.
+/// Haversine formula for distance, standard initial-bearing formula for bearing - both treat WGS84 lat/lon as points on a sphere, which is accurate enough at the <2km range
 void computeBearingAndDistance(double lat1, double lon1, double lat2, double lon2,
                                 double &outDistanceMeters, double &outBearingDegrees) {
     constexpr double EARTH_RADIUS_M = 6371000.0;
@@ -48,7 +48,7 @@ void computeBearingAndDistance(double lat1, double lon1, double lat2, double lon
     outBearingDegrees = std::fmod((theta * 180.0 / M_PI) + 360.0, 360.0);
 }
 
-/// @brief Proportional controller: turn toward the target, drive forward scaled by distance,
+/// proportional controller: turn toward the target, drive forward scaled by distance,
 /// and throttle back linear speed when heading error is large so we don't drive sideways.
 geometry_msgs::msg::Twist computeDriveCommand(double distanceMeters, double bearingDegrees,
                                                double headingDegrees) {
