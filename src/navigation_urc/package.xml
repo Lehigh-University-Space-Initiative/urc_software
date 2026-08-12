@@ -15,6 +15,8 @@
   <exec_depend>rclcpp</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>cross_pkg_messages</exec_depend>
+  <!-- rclpy: only fake_gps_node.py needs this (it's Python, not compiled), no build_depend needed -->
+  <exec_depend>rclpy</exec_depend>
 
   <export>
   </export>

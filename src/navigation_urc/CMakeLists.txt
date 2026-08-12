@@ -31,4 +31,10 @@ install(DIRECTORY
   DESTINATION share/${PROJECT_NAME}/
 )
 
+# Install the fake GPS test script -- lets `ros2 run navigation_urc fake_gps_node.py` find it
+install(PROGRAMS
+  scripts/fake_gps_node.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 ament_package()

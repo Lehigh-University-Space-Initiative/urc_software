@@ -113,6 +113,13 @@ int main(int argc, char **argv) {
                 double headingDegrees = latestGPS.course;
                 auto cmd = computeDriveCommand(distance, bearing, headingDegrees);
                 cmdVelPublisher->publish(cmd);
+
+                // Watch this while testing: distance should trend downward toward
+                // arrival_radius, not oscillate or climb. If it oscillates, kAngular/
+                // kLinear in computeDriveCommand are too aggressive.
+                RCLCPP_INFO_THROTTLE(node->get_logger(), *node->get_clock(), 1000,
+                                      "distance=%.2fm bearing=%.1f heading=%.1f cmd(lin=%.2f ang=%.2f)",
+                                      distance, bearing, headingDegrees, cmd.linear.x, cmd.angular.z);
             }
         }
 
