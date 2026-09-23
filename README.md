@@ -1,6 +1,6 @@
 # URC Software
 
-Software for the LUSI (Laurentian University) rover competing in the University Rover
+Software for the LUSI (Lehigh University Space Initiative) rover competing in the University Rover
 Challenge (URC). The rover is driven from a **base station** laptop over the network; on
 the rover, a **main computer** coordinates the arm and cameras while dedicated **Raspberry
 Pis** drive the wheels and the arm hardware.
