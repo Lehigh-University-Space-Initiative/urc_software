@@ -119,7 +119,7 @@ urc_software/
 - Tested on **Ubuntu 22.04**, but any Linux distro with Docker should work.
 
 > **On Windows?** Build and run through **WSL 2 + Docker** — see
-> [WSL_SETUP.md](WSL_SETUP.md). WSL can compile the workspace and run the
+> [WSL_SETUP.md](docs/WSL_SETUP.md). WSL can compile the workspace and run the
 > GUI/simulation, but cannot exercise real rover hardware (CAN, GPIO, USB).
 
 ---
