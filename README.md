@@ -96,6 +96,7 @@ urc_software/
 │   ├── driveline_urc/         # Wheel motor controller (Raspberry Pi)
 │   ├── arm_urc/               # Arm motor controller (Raspberry Pi)
 │   ├── moveit_config_urc/     # MoveIt Setup Assistant output for the 2-DOF arm
+│   ├── navigation_urc/        # GNSS waypoint following and navigation testing
 │   ├── cross_pkg_messages_urc/# Custom ROS 2 message definitions (package: cross_pkg_messages)
 │   ├── shared_code/           # CAN driver, SparkMax, PID, MotorManager (shared by rover pkgs)
 │   └── slidar_ros2/           # Slamtec LiDAR driver (git submodule)
@@ -288,6 +289,15 @@ MoveIt Setup Assistant output for the 2-DOF arm: SRDF, kinematics, joint limits,
 configs, RViz config, and the `demo`/`move_group`/`moveit_rviz`/`spawn_controllers`/etc.
 launch files. Consumed by `main_computer_urc`'s launch file. Not a code package — it just
 installs config and launch files.
+
+### `navigation_urc`
+
+Autonomous navigation package currently implementing GNSS waypoint following.
+
+- **`WaypointFollower_node`** — subscribes to `gps_data`, calculates the distance and bearing to a configured GNSS target, and publishes velocity commands on `cmd_vel`.
+- **`fake_gps_node.py`** — simulates GPS movement from `cmd_vel` commands so the waypoint follower can be tested without rover hardware.
+
+The waypoint follower accepts `target_lat`, `target_lon`, and `arrival_radius_m` as ROS 2 parameters.
 
 ### `cross_pkg_messages` (folder `cross_pkg_messages_urc`)
 Defines the custom ROS 2 messages shared across packages. See
