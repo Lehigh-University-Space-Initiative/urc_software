@@ -1,8 +1,54 @@
-# Contributing / Code conventions
+# Contributing to URC Software
 
 This document captures the house style for `urc_software` so the codebase stays
 readable and consistent. See [README.md](README.md) for architecture and build
 instructions.
+
+## Development workflow
+
+When contributing to the repository:
+
+1. Create a branch for your changes instead of working directly on `main`.
+2. Keep each change focused on one feature, fix, documentation update, or cleanup task.
+3. Build and test your changes using the project's Docker build before submitting a pull request when possible.
+4. Commit your changes with a clear Conventional Commit message.
+5. Push your branch and open a pull request into `main`.
+6. Make sure the GitHub Actions build passes before merging.
+
+### Commit messages
+
+Use Conventional Commits to keep the repository history clear and consistent.
+
+Common commit types:
+
+- `feat:` — new feature
+- `fix:` — bug fix
+- `docs:` — documentation changes
+- `refactor:` — code restructuring without changing behavior
+- `test:` — test changes
+- `build:` — build system or dependency changes
+- `ci:` — CI or GitHub Actions changes
+- `chore:` — general maintenance
+
+Examples:
+
+```text
+feat: add autonomous waypoint follower
+fix: correct motor command handling
+docs: document navigation package
+refactor: simplify gps processing
+ci: update doxygen deployment workflow
+```
+
+### Pull requests and CI
+
+Keep pull requests focused and avoid combining unrelated changes.
+
+Pull requests to `main` automatically run the repository's Docker build through
+GitHub Actions. Check that the build succeeds before merging.
+
+When opening a pull request, briefly explain what changed, why it was changed,
+and how it was tested.
 
 ## Code formatting
 
