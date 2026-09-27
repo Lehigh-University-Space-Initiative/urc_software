@@ -38,7 +38,7 @@ case "$1" in
     exec /bin/bash
     ;;
   *)
-    echo "Unknown mode: $1. Please specify one of 'hootl', 'base_station', 'main_computer', or 'driveline'."
+    echo "Unknown mode: $1. Please specify one of 'hootl', 'base_station', 'main_computer', 'rviz', 'driveline', 'arm', or 'manual'."
     exit 1
     ;;
 esac
