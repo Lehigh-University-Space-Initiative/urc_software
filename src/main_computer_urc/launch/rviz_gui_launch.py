@@ -1,28 +1,41 @@
-from launch import LaunchDescription
-from launch_ros.actions import Node
-from launch.substitutions import Command, PathJoinSubstitution, FindExecutable, LaunchConfiguration
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, SetEnvironmentVariable
-from launch_ros.substitutions import FindPackageShare 
-from launch.launch_description_sources import PythonLaunchDescriptionSource
-from moveit_configs_utils import MoveItConfigsBuilder
-from launch.conditions import IfCondition, UnlessCondition
+"""
+Launch file that starts only RViz with the arm's MoveIt view (run mode "rviz" in run_nodes.sh)
 
+Useful on a laptop to watch the arm while the main computer runs the real stack
+
+Run it with:
+    ros2 launch main_computer_urc rviz_gui_launch.py
+"""
+
+# Imports
+
+from launch import LaunchDescription
+from launch.substitutions import PathJoinSubstitution
+from launch_ros.actions import Node
+from launch_ros.substitutions import FindPackageShare
+
+
+
+
+# ---------------------------------
+# Launch description
+# ---------------------------------
 
 def generate_launch_description():
+    """
+    Build the list of nodes ROS starts for this launch file
 
-    rviz_file = PathJoinSubstitution(
-        [FindPackageShare("moveit_config_urc"), "config", "moveit.rviz"]
-    )
-   
-    rviz_node = Node(
+    Returns:
+        A LaunchDescription containing a single RViz node using moveit_config_urc's saved view
+    """
+    rvizFile = PathJoinSubstitution([FindPackageShare("moveit_config_urc"), "config", "moveit.rviz"])
+
+    rvizNode = Node (
         package="rviz2",
         executable="rviz2",
         name="rviz2",
         output="log",
-        arguments=["-d", rviz_file],
+        arguments=["-d", rvizFile]  # -d loads a saved RViz display configuration
     )
-  
 
-    return LaunchDescription([
-        rviz_node,
-    ])
+    return LaunchDescription([rvizNode])

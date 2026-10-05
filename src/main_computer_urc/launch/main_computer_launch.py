@@ -1,290 +1,234 @@
-from launch import LaunchDescription
-from launch_ros.actions import Node
-from launch.substitutions import Command, PathJoinSubstitution, FindExecutable, LaunchConfiguration
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, SetEnvironmentVariable, ExecuteProcess
-from launch_ros.substitutions import FindPackageShare 
-from launch.launch_description_sources import PythonLaunchDescriptionSource
-from moveit_configs_utils import MoveItConfigsBuilder
-from launch.conditions import IfCondition, UnlessCondition
-from ament_index_python.packages import get_package_share_directory
+"""
+Launch file for the rover's main computer (run modes "main_computer" and "hootl" in run_nodes.sh)
 
+Starts:
+    rviz2 - 3D view of the arm and its MoveIt planning scene
+    move_group - MoveIt's planner, which also publishes the robot description (URDF) on /robot_description
+    ros2_control_node - the controller manager; it loads the MockArmHardware plugin (the MoveIt-to-arm bridge)
+    joint_state_broadcaster / arm_controller - ros2_control controllers, started by "spawner" helper nodes
+    servo_node - MoveIt Servo, which turns SpaceMouse twist commands into smooth joint motion
+    DriveTrainManager - turns /cmd_vel into per-wheel speeds for the driveline Pi
+    VideoStreamer - publishes the selected rover camera
+    video_compress - redundant image_transport relay (VideoStreamer already publishes the compressed stream; see below)
+
+Arguments:
+    gui_only - "true" starts only RViz and Servo (skips move_group, ros2_control, and the controllers)
+
+Run it with:
+    ros2 launch main_computer_urc main_computer_launch.py gui_only:=false
+"""
+
+# Imports
 
 import os
+
 import yaml
+from ament_index_python.packages import get_package_share_directory
+from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument
+from launch.conditions import UnlessCondition
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+from launch_ros.actions import Node
+from launch_ros.substitutions import FindPackageShare
+from moveit_configs_utils import MoveItConfigsBuilder
 
-def load_file(package_name, file_path):
-    package_path = get_package_share_directory(package_name)
-    absolute_file_path = os.path.join(package_path, file_path)
 
-    try:
-        with open(absolute_file_path, "r") as file:
-            return file.read()
-    except EnvironmentError:  # parent of IOError, OSError *and* WindowsError where available
-        return None
+
+
+# ---------------------------------
+# Helpers
+# ---------------------------------
 
 def load_yaml(package_name, file_path):
-    package_path = get_package_share_directory(package_name)
-    absolute_file_path = os.path.join(package_path, file_path)
+    """
+    Read a YAML file from an installed package's share directory
+
+    Args:
+        package_name: ROS package that installed the file (e.g. "main_computer_urc")
+        file_path: path to the file relative to that package's share directory
+
+    Returns:
+        The parsed YAML as Python dicts/lists, or None if the file can't be opened
+    """
+    packagePath = get_package_share_directory(package_name)
+    absoluteFilePath = os.path.join(packagePath, file_path)
 
     try:
-        with open(absolute_file_path, "r") as file:
+        with open(absoluteFilePath, "r") as file:
             return yaml.safe_load(file)
-    except EnvironmentError:  # parent of IOError, OSError *and* WindowsError where available
+    except EnvironmentError:  # Parent of IOError and OSError
         return None
 
 
-def generate_launch_description():
 
-    declared_arguments = []
-    declared_arguments.append(
-        DeclareLaunchArgument(
+
+# ---------------------------------
+# Launch description
+# ---------------------------------
+
+def generate_launch_description():
+    """
+    Build the list of nodes ROS starts for the main computer
+
+    ROS calls this function by name when you run `ros2 launch`, so the name can't change
+
+    Returns:
+        A LaunchDescription with the MoveIt arm stack, the drive relay, and the video pipeline
+    """
+
+    """
+    Launch arguments and file paths
+
+    - A launch argument is a value you can set on the command line (e.g. gui_only:=true)
+    - LaunchConfiguration("gui_only") reads that value later, when the launch file actually runs
+    - FindPackageShare locates a package's installed share/ directory, where launch and config files live
+    """
+    declaredArguments = [
+        DeclareLaunchArgument (
             "gui_only",
             default_value="false",
-            description="",
+            description="Start only RViz and Servo, without move_group, ros2_control, or the controllers"
         )
-    )
-    gui_only = LaunchConfiguration("gui_only")
+    ]
+    guiOnly = LaunchConfiguration("gui_only")
 
-    ## Setup for State publishing
+    rvizFile = PathJoinSubstitution([FindPackageShare("moveit_config_urc"), "config", "moveit.rviz"])
 
-    urdf_file = PathJoinSubstitution(
-        [FindPackageShare("main_computer_urc"), "description", "robot.urdf.xacro"]
-    )
-    initial_file = PathJoinSubstitution(
-        [FindPackageShare("moveit_config_urc"), "config", "initial_positions.yaml"]
-        # [FindPackageShare("moveit_config_urc"), "config", "moveit.rviz"]
-    )
-    # rviz_file = PathJoinSubstitution(
-    #     [FindPackageShare("main_computer_urc"), "description", "robot.rviz"]
-    # )
-    rviz_file = PathJoinSubstitution(
-        [FindPackageShare("moveit_config_urc"), "config", "moveit.rviz"]
-    )
-    # ros2_control_config = PathJoinSubstitution(
-    #     [FindPackageShare("main_computer_urc"), "description", "config", "ros2_control.yaml"]
-    # )
+    robotControllers = PathJoinSubstitution([FindPackageShare("moveit_config_urc"), "config", "ros2_controllers.yaml"])
 
+    """
+    MoveIt configuration
 
-    robot_description_content = Command([
-        'xacro ',
-        urdf_file,
-    ])
-    robot_description = {"robot_description": robot_description_content}    
-
-
-    kinimatics_yaml = PathJoinSubstitution(
-        [FindPackageShare("moveit_config_urc"), "config", "kinematics.yaml"]
-    )
-    joint_limits_yaml = PathJoinSubstitution(
-        [FindPackageShare("moveit_config_urc"), "config", "kinematics.yaml"]
-    )
-
-    # Load the robot configuration
-    moveit_config = (
-        MoveItConfigsBuilder(
-            "gen3", package_name="moveit_config_urc"
-        )
-        # .robot_description(file_path=urdf_file, mappings={"initial_positions_file": "config/initial_positions.yaml"})
+    - MoveItConfigsBuilder gathers the URDF, SRDF, kinematics, joint limits, and planner settings
+    - The name "gen3" is left over from MoveIt's Kinova Gen3 example; it only affects a default file lookup
+    - The URDF actually comes from moveit_config_urc/.setup_assistant (main_computer_urc/description/robot.urdf.xacro)
+    - The SRDF comes from the same file (moveit_config_urc/config/2dof_robot.srdf)
+    """
+    moveitConfig = (
+        MoveItConfigsBuilder("gen3", package_name="moveit_config_urc")
         .trajectory_execution(file_path="config/moveit_controllers.yaml")
-        .planning_scene_monitor(
-            publish_robot_description=True, publish_robot_description_semantic=True
+        .planning_scene_monitor (
+            publish_robot_description=True,
+            publish_robot_description_semantic=True
         )
-        # .planning_pipelines(
-        #     pipelines=["ompl", "stomp", "pilz_industrial_motion_planner"]
-        # )
         .to_moveit_configs()
     )
 
-    robot_state_publisher_node = Node(
-        package="robot_state_publisher",
-        executable="robot_state_publisher",
-        output="both",
-        parameters=[robot_description],
-    )
-    #https://github.com/moveit/moveit2/issues/3339
-    rviz_node = Node(
+    # MoveIt Servo settings live in this package's config/simulation_config.yaml, under the "moveit_servo" key
+    servoYaml = load_yaml("main_computer_urc", "config/simulation_config.yaml")
+    servoParams = {"moveit_servo": servoYaml}
+
+    """
+    Arm nodes
+
+    - RViz needs the kinematics and planning parameters to show MoveIt's interactive markers (moveit2 issue #3339)
+    - UnlessCondition(guiOnly) skips a node when gui_only:=true
+    - ros2_control_node gets the robot description from the /robot_description topic that move_group publishes
+    """
+    rvizNode = Node (
         package="rviz2",
         executable="rviz2",
         name="rviz2",
         output="log",
-        arguments=["-d", rviz_file],
-        parameters = [
-            moveit_config.joint_limits,
-            moveit_config.robot_description_kinematics,
-            moveit_config.planning_pipelines,
-        ],
-        # condition=IfCondition(gui_only),
-    )
-    joint_state_publisher_node = Node(
-        package="joint_state_publisher_gui",
-        executable="joint_state_publisher_gui",
-    )
-
-    robot_controllers = PathJoinSubstitution(
-        [
-            FindPackageShare("moveit_config_urc"),
-            "config",
-            "ros2_controllers.yaml",
+        arguments=["-d", rvizFile],
+        parameters=[
+            moveitConfig.joint_limits,
+            moveitConfig.robot_description_kinematics,
+            moveitConfig.planning_pipelines
         ]
     )
 
-    control_node = Node(
+    moveGroupNode = Node (
+        package="moveit_ros_move_group",
+        executable="move_group",
+        output="screen",
+        parameters=[moveitConfig.to_dict()],
+        condition=UnlessCondition(guiOnly)
+    )
+
+    controlNode = Node (
         package="controller_manager",
         executable="ros2_control_node",
-        parameters=[robot_controllers],
+        parameters=[robotControllers],
         output="both",
-        # arguments = ["--ros-args", "--log-level", "debug"],
-        remappings=[
-            ("~/robot_description", "/robot_description"),
-        ],
-        condition=UnlessCondition(gui_only),
+        remappings=[("~/robot_description", "/robot_description")],
+        condition=UnlessCondition(guiOnly)
     )
-    joint_state_broadcaster_spawner = Node(
+
+    # A spawner is a short-lived helper that asks the controller manager to load and start one controller
+    jointStateBroadcasterSpawner = Node (
         package="controller_manager",
         executable="spawner",
         arguments=["joint_state_broadcaster"],
-        condition=UnlessCondition(gui_only),
+        condition=UnlessCondition(guiOnly)
     )
 
-    arm_controller_spawner = Node(
+    armControllerSpawner = Node (
         package="controller_manager",
         executable="spawner",
         arguments=["arm_controller"],
-        condition=UnlessCondition(gui_only),
+        condition=UnlessCondition(guiOnly)
     )
 
-
-    srdf_path = "/ros2_ws/install/share/moveit_config_urc/config/2dof_robot.srdf"
-
-    with open(srdf_path, 'r') as f:
-        semantic_content = f.read()
-
-    # Get parameters for the Servo node
-    servo_yaml = load_yaml("main_computer_urc", "config/simulation_config.yaml")
-    servo_params = {"moveit_servo": servo_yaml}
-
-
-    move_group_node = Node(package='moveit_ros_move_group', executable='move_group',
-                       output='screen',
-                       parameters=[moveit_config.to_dict()],
-                        condition=UnlessCondition(gui_only),
-                       )
-
-
-    gazebo = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            [FindPackageShare("ros_gz_sim"), "/launch/gz_sim.launch.py"]
-        ),
-        launch_arguments={"gz_args": " -r -v 3 empty.sdf"}.items(),
-    )
-
-    gz_spawn_entity = Node(
-        package="ros_gz_sim",
-        executable="create",
-        output="screen",
-        arguments=[
-            "-topic",
-            "/robot_description",
-            "-name",
-            "rrbot_system_position",
-            "-allow_renaming",
-            "true",
-        ],
-    )
-
-
-    servo_node = Node(
+    servoNode = Node (
         package="moveit_servo",
         executable="servo_node_main",
         parameters=[
-            servo_params,
-            moveit_config.robot_description,
-            moveit_config.robot_description_semantic,
-            moveit_config.robot_description_kinematics,
+            servoParams,
+            moveitConfig.robot_description,
+            moveitConfig.robot_description_semantic,
+            moveitConfig.robot_description_kinematics
         ],
-        output="screen",
+        output="screen"
     )
 
+    """
+    Drive and video nodes
 
+    - DriveTrainManager and VideoStreamer are this package's own C++ nodes (see src/)
+    - video_compress is an image_transport relay with input transport "compressed" and its topics remapped onto /video_stream
+    - Verified in hootl: it subscribes to nothing and only adds a second publisher on /video_stream/compressed
+    - VideoStreamer's own image_transport publisher already provides that topic, so this relay can likely be removed
+    """
+    driveTrainManagerNode = Node (
+        package="main_computer_urc",
+        executable="DriveTrainManager_node",
+        name="DriveTrainManager",
+        output="screen"
+    )
 
-    ld = LaunchDescription([
-        # robot_state_publisher_node,
-        rviz_node,
-        # # joint_state_publisher_node,
-        # this env is for gazebo to work on M1 Mac
-        # SetEnvironmentVariable(name="LIBGL_DRI3_DISABLE", value="1"),
-        # gazebo,
-        # gz_spawn_entity,
-        move_group_node,
-        control_node,
-        joint_state_broadcaster_spawner,
-        arm_controller_spawner,
-        servo_node,
-        Node(
-            package='main_computer_urc',
-            executable='DriveTrainManager_node',
-            name='DriveTrainManager',
-            output='screen'
-        ),
-        # Node(
-        #     package='main_computer_urc',
-        #     executable='StatusLED_node',
-        #     name='StatusLED',
-        #     output='screen'
-        # ),
-        Node(
-            package='main_computer_urc',
-            executable='VideoStreamer_node',
-            name='VideoStreamer',
-            output='screen'
-        ),
-        Node(
-            package='image_transport',
-            executable='republish',
-            name='republish',
-            output='screen',
-            arguments=[
-                'compressed',  # Input transport type
-                '--ros-args',
-                '--remap', 'in:=/video_stream',
-                '--remap', 'out/compressed:=/video_stream/compressed',
-            ],
-        ),
-    ] + declared_arguments)
+    videoStreamerNode = Node (
+        package="main_computer_urc",
+        executable="VideoStreamer_node",
+        name="VideoStreamer",  # The GUI's video panel sets this node's stream_cam parameter by this name
+        output="screen"
+    )
 
-#     ld.add_action(
-#     ExecuteProcess(
-#         cmd=[[
-#             FindExecutable(name='ros2'),
-#             " service call ",
-#             "/servo_node/start_servo ",
-#             "std_srvs/srv/Trigger ",
-#             '"{}"',
-#         ]],
-#         shell=True
-#     )
-# )
+    videoRepublishNode = Node (
+        package="image_transport",
+        executable="republish",
+        name="video_compress",  # Unique name: the base station runs its own relay, and hootl puts both on one machine
+        output="screen",
+        arguments=[
+            "compressed",  # Input transport type
+            "--ros-args",
+            "--remap", "in:=/video_stream",
+            "--remap", "out/compressed:=/video_stream/compressed"
+        ]
+    )
 
-    return ld;
-
-# <ros2_control name="${name}" type="system">
-#             <hardware>
-#                 <!-- By default, set up controllers for simulation. This won't work on real hardware -->
-#                 <plugin>mock_components/GenericSystem</plugin>
-#             </hardware>
-#             <joint name="shoulder">
-#                 <command_interface name="position"/>
-#                 <state_interface name="position">
-#                   <param name="initial_value">${initial_positions['shoulder']}</param>
-#                 </state_interface>
-#                 <state_interface name="velocity"/>
-#             </joint>
-#             <joint name="elbow">
-#                 <command_interface name="position"/>
-#                 <state_interface name="position">
-#                   <param name="initial_value">${initial_positions['elbow']}</param>
-#                 </state_interface>
-#                 <state_interface name="velocity"/>
-#             </joint>
-
-#         </ros2_control>
+    # Intentionally not started: robot_state_publisher, joint_state_publisher_gui, Gazebo, and StatusLED_node
+    # The argument declarations must come first, because launch evaluates actions in order
+    # Each node's UnlessCondition reads gui_only, which fails ("launch configuration 'gui_only' does not exist") if it isn't declared yet
+    # They used to be last, which broke hootl mode (it doesn't pass gui_only on the command line)
+    return LaunchDescription (declaredArguments + [
+        rvizNode,
+        moveGroupNode,
+        controlNode,
+        jointStateBroadcasterSpawner,
+        armControllerSpawner,
+        servoNode,
+        driveTrainManagerNode,
+        videoStreamerNode,
+        videoRepublishNode
+    ])
