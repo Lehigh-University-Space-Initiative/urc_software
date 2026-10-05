@@ -6,6 +6,9 @@ instructions.
 
 ## Development workflow
 
+New to the project? Start with [QUICKSTART.md](QUICKSTART.md): it gets the software
+running without rover hardware and shows the fast edit-build-run loop.
+
 When contributing to the repository:
 
 1. Create a branch for your changes instead of working directly on `main`.
@@ -14,6 +17,27 @@ When contributing to the repository:
 4. Commit your changes with a clear Conventional Commit message.
 5. Push your branch and open a pull request into `main`.
 6. Make sure the GitHub Actions build passes before merging.
+
+### Branching, step by step
+
+```bash
+git switch main
+git pull                          # get everyone else's merged work
+git switch -c fix/short-description
+# ...edit, build, test, commit...
+git push -u origin fix/short-description   # then open the pull request on GitHub
+```
+
+- **Never push to `main` directly.** Changes reach `main` only through a merged pull request.
+- **Start every new piece of work from a freshly pulled `main`**, not from an old branch.
+- **After your PR is merged, don't keep committing on that branch.** PRs can be
+  *squash-merged* (PR #27 was), which gives `main` one new commit whose ID doesn't
+  match your branch's commits. If you keep using the old branch, git sees the merged
+  work as "different" and you get confusing conflicts or rejected pushes.
+  Switch to `main`, `git pull`, and start a new branch.
+- If `git push` is rejected with "non-fast-forward", someone else pushed to that
+  branch first: run `git pull --rebase`, then push again. (If it says that about
+  `main`, you were trying to push `main`; push your branch instead.)
 
 ### Commit messages
 
@@ -78,16 +102,67 @@ The following are third-party and should be left exactly as upstream ships them:
 
 ## Comments
 
-- Public classes and functions use **Doxygen** comments (`/** ... */` or `///`),
-  since API docs are generated with Doxygen (see [`Doxyfile`](Doxyfile)).
-  `CANDriver.h` is a good reference for the expected level of documentation.
-- Keep comments describing *why*, not *what the next line obviously does*.
+The goal: someone with a little programming experience can open any file and follow
+what it does, why, and how it connects to the rest of the rover. The
+[C++ and ROS 2 primer](docs/CPP_ROS2_PRIMER.md) explains the language features the
+comments refer to.
+
+### What every file has
+
+- **A file header** (`/** @file ... */` in C++, a module docstring in Python) saying what
+  the file is, which computer runs it, which launch file starts it, the topics it
+  subscribes to and publishes, and a "How it connects to the system" list.
+  [`src/main_computer_urc/src/DriveTrainManager/main.cpp`](src/main_computer_urc/src/DriveTrainManager/main.cpp)
+  is a good model.
+- **A header block on every non-trivial function**, in this shape:
+
+  ```cpp
+  /**
+   * One-line summary of what the function does (Doxygen uses this line as the brief)
+   *
+   * Parameters (inputs):
+   *   name - what it is, with units
+   *
+   * Return value:
+   *   what comes back
+   *
+   * Steps:
+   *   1. First thing it does
+   *   2. Next thing
+   */
+  ```
+
+  In a class, put `Parameters`/`Return value` on the declaration in the header and
+  `Steps` on the definition in the `.cpp`. Python uses the same idea with
+  Google-style `Args:` / `Returns:` docstrings.
+
+### Inline comments
+
+- **`// Syntax: ...`** explains a C++/Python/ROS feature the first time it appears in a file
+  (not every time). These are for newer members; skip them once you know the feature.
+- **`// System: ...`** marks where a topic or parameter connects to another node or computer.
+- Otherwise, explain *why* a line exists, or what a non-obvious value, unit, or formula means.
+  A magic number gets a comment even when the logic around it is clear.
+- Don't comment trivial lines (`return 0;`), and don't tag every statement with `// Step 1`.
+
+### Style rules for comment text
+
+- **One complete thought per line.** Never wrap a sentence across two lines; if it's too
+  long, split it into two sentences or a bullet list. (`clang-format` is set to
+  `ReflowComments: false` so it won't re-wrap them.)
+- No trailing period on comment lines.
+- Describe actions with a present participle: `// Draining pending CAN frames`, not `// Drain pending CAN frames`.
+- Put supporting detail in parentheses: `(the textbook formula uses half the width)`.
+- **State only what the code guarantees.** If you're inferring intent or haven't checked
+  something, say so (`presumably`, `VERIFY`) instead of writing it as fact.
+
+### Housekeeping
+
 - Delete dead/commented-out code rather than leaving it in place — git history is
   the archive. If a block is intentionally disabled, leave a one-line note saying
   so and why, not the whole commented body.
-- Keep log tags accurate. Several existing log calls in shared code use mislabeled
-  tags (e.g. `rclcpp::get_logger("Arm")` inside code shared with the driveline);
-  prefer the module's real logger.
+- Keep log tags accurate (the logger name should match the module) and keep per-tick
+  logs at `DEBUG` level, so a fast control loop doesn't flood the terminal.
 
 ## File & directory structure
 
@@ -107,10 +182,7 @@ src/<package>/
 Code shared between packages lives in [`src/shared_code`](src/shared_code) and is
 pulled into the rover-side packages via `file(GLOB ...)`.
 
-### Known inconsistencies worth cleaning up (not yet done — need a verified build)
-
-These were found during review but not changed, because they touch generated
-headers or many build files and can't be compile-verified on a non-Linux host:
+### Known inconsistencies worth cleaning up
 
 1. **Package vs. folder name.** The folder `src/cross_pkg_messages_urc/` builds a
    package named `cross_pkg_messages` (no `_urc`), unlike every other package
@@ -118,16 +190,16 @@ headers or many build files and can't be compile-verified on a non-Linux host:
    *package* would touch every `find_package(cross_pkg_messages)` and every
    `#include "cross_pkg_messages/msg/..."`; do it in one focused, build-verified
    change if desired.
-2. **Header guards.** Most first-party headers use `#pragma once`; a few
-   (`CANDriver.h`, the vendored `pid.h`) use `#ifndef` guards. Standardize the
-   first-party ones on `#pragma once`.
-3. **Stale include paths.** Several `target_include_directories(... PRIVATE
+2. **Stale include paths.** Several `target_include_directories(... PRIVATE
    src/base_station_urc/include/cs_libguarded)` lines point at a doubled path that
    does not exist (the real path is `include/cs_libguarded`). They are harmless
    (a non-existent include dir is ignored) but should be corrected.
-4. **`file(GLOB)` for sources.** CMake globbing does not re-run when files are
+3. **`file(GLOB)` for sources.** CMake globbing does not re-run when files are
    added/removed unless CMake reconfigures. Prefer listing sources explicitly, or
    run a clean rebuild after adding/removing files.
+
+Already resolved: first-party headers now all use `#pragma once`, and the shared
+motor code's per-tick logs use an accurately named `MotorManager` logger at `DEBUG` level.
 
 ### Not currently wired in
 

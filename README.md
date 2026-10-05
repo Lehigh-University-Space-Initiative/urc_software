@@ -10,11 +10,27 @@ Everything is written as a set of [ROS 2 Humble](https://docs.ros.org/en/humble/
 the base station and on every on-rover computer — the command-line argument passed to the
 container selects which nodes start.
 
+> **New here? Start with [QUICKSTART.md](QUICKSTART.md).** It gets the software
+> running on your laptop with no rover hardware (a navigation simulation, then the
+> GUI) and shows the fast edit-build-run loop. If you're on Windows, set up
+> [WSL 2 + Docker](docs/WSL_SETUP.md) first.
+
+### Documentation map
+
+| Document | Read it when |
+|----------|--------------|
+| [QUICKSTART.md](QUICKSTART.md) | You want to see the software run and make your first change |
+| [docs/WSL_SETUP.md](docs/WSL_SETUP.md) | You're on Windows |
+| This README | You need the architecture, topics, run modes, build, or deploy details |
+| [docs/CPP_ROS2_PRIMER.md](docs/CPP_ROS2_PRIMER.md) | A C++ or ROS 2 construct in the code is unfamiliar |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | You're about to open a pull request (branching, commits, comment style) |
+
 ---
 
 ## Table of contents
 
 - [System architecture](#system-architecture)
+- [Topic map](#topic-map)
 - [Repository layout](#repository-layout)
 - [Prerequisites](#prerequisites)
 - [Setup](#setup)
@@ -27,6 +43,7 @@ container selects which nodes start.
 - [External libraries (submodules)](#external-libraries-submodules)
 - [Documentation](#documentation)
 - [Continuous integration](#continuous-integration)
+- [Known integration issues](#known-integration-issues)
 - [Housekeeping notes](#housekeeping-notes)
 
 ---
@@ -77,6 +94,38 @@ Nodes communicate over ROS 2 topics carrying the custom messages defined in
 Motor control on the rover uses **REV SparkMax** controllers on a CAN bus (via a Waveshare
 2-channel CAN HAT on the Raspberry Pis); the CAN and PID logic lives in
 [`src/shared_code`](src/shared_code).
+
+Off the rover (a laptop, WSL, `hootl` mode), the CAN interfaces don't exist. The motor
+nodes then log `CAN bus N (canN) unavailable` **once** and keep running in no-hardware
+mode, ignoring motor output, so the rest of the system can still be tested.
+
+---
+
+## Topic map
+
+Every connection between nodes is a ROS 2 topic. This is the full list of topics the
+first-party code publishes or subscribes to (each source file's header repeats its own).
+
+| Topic | Message type | Published by | Subscribed by |
+|-------|--------------|--------------|---------------|
+| `/joy0`, `/joy1` | `sensor_msgs/Joy` | `joy_node` ×2 (base station) | `JoyMapper` |
+| `/cmd_vel` | `geometry_msgs/Twist` | `JoyMapper`; `WaypointFollower` | `DriveTrainManager`; GUI Telemetry; `fake_gps_node` (sim) |
+| `/roverDriveCommands` | `RoverComputerDriveCMD` | `DriveTrainManager` (main computer) | `MotorCtr_node` (driveline Pi); `LUSIVisionStreamer` |
+| `/armInputRaw` | `ArmInputRaw` | `SpaceMouseMapper` (base station) | `ArmMotorManager` (gripper buttons); GUI Telemetry |
+| `/delta_twist_cmds` | `geometry_msgs/TwistStamped` | `SpaceMouseMapper` | MoveIt Servo (`servo_node`, main computer) |
+| `/arm_controller/joint_trajectory` | `trajectory_msgs/JointTrajectory` | MoveIt Servo | ros2_control `arm_controller` |
+| `/roverArmCommands` | `RoverComputerArmCMD` | `MockArmHardware` plugin (main computer) | `ArmMotorManager` (arm Pi) |
+| `/roverArmPos` | `RoverComputerArmCMD` | `ArmMotorManager` | `MockArmHardware` plugin |
+| `/video_stream` | `sensor_msgs/Image` | `VideoStreamer` (main computer) | *nobody* (raw frames stay on the main computer) |
+| `/video_stream/compressed` | `sensor_msgs/CompressedImage` | `VideoStreamer` (via image_transport; the `video_compress` relay is redundant) | `video_decompress` (base station) |
+| `/video_stream/image_raw` | `sensor_msgs/Image` | `video_decompress` (base station) | GUI Video Stream panel; `LUSIVisionStreamer` |
+| `/gps_data` | `GPSData` | `fake_gps_node` (sim only; no real GPS driver yet) | `WaypointFollower`; `LUSIVisionStreamer` |
+| `motorVels` | `RoverComputerDriveCMD` | *nobody yet* | GUI Telemetry (wheel bars) |
+| `manualArmControl` | `RoverComputerDriveCMD` | *nobody yet* | `LUSIVisionStreamer` |
+
+Arm data path in one line: SpaceMouse → `SpaceMouseMapper` → `/delta_twist_cmds` → MoveIt
+Servo → `arm_controller` → `MockArmHardware` (despite the name, the real bridge) →
+`/roverArmCommands` → `ArmMotorManager` → CAN → SparkMax.
 
 ---
 
@@ -160,12 +209,24 @@ This script:
    generated messages are available first:
    - `cross_pkg_messages`
    - then `base_station_urc`, `main_computer_urc`, `driveline_urc`, `sllidar_ros2`,
-     `moveit_config_urc`, `arm_urc`
+     `moveit_config_urc`, `arm_urc`, `navigation_urc`
 3. Builds the final runtime image, tagged both `urc_software` and
    `10.0.0.10:65000/urc_software` (the rover's local registry).
 
-On success it prints **"Code compiled successfully!"**; a compile failure exits non-zero
-with **"Code did not compile!"**.
+On success it prints **"Code compiled successfully!"** (exit code 0). A compile failure
+prints **"Code did not compile!"** (exit code 2), and a failed image build prints
+**"... image build failed!"** (exit code 1).
+
+The first build downloads several GB and can take 30–60 minutes; later builds reuse the
+cached builder image and the `build/` folder, so they take minutes. For an even faster
+loop while editing one package, use the dev shell described in
+[QUICKSTART.md](QUICKSTART.md#4-the-fast-edit-build-run-loop).
+
+> **Clean build failing in `arm_urc` with `strip: libpigpio.so ... file truncated`?**
+> Older versions of the build rebuilt pigpio inside `libs/pigpio` from two packages at
+> once, which corrupts the library. That's fixed (pigpio now comes only from the Docker
+> image), but a clone that ran the old build may still hold the bad file:
+> `git -C libs/pigpio clean -xfd`, then rebuild.
 
 ---
 
@@ -174,20 +235,24 @@ with **"Code did not compile!"**.
 Each computer is started by running the container with the appropriate mode argument.
 `run_nodes.sh` (the image entrypoint) sources the workspace and dispatches on that argument:
 
-| Mode | Launches |
-|------|----------|
-| `base_station` | `base_station_urc` (GUI + input mappers + video receiver) |
-| `main_computer` | `main_computer_urc` (MoveIt/servo, drive relay, video streamer) |
-| `driveline` | `driveline_urc` (wheel motor controller) |
-| `arm` | `arm_urc` (arm motor controller) |
-| `rviz` | `main_computer_urc` RViz-only visualization launch |
-| `hootl` | Hardware-out-of-the-loop: runs base station **+** main computer **+** driveline together on one machine for local testing |
-| `manual` | Drops into an interactive `bash` shell in the container (run with `-it`) |
+| Mode | Launches | Needs a display? | Needs rover hardware? |
+|------|----------|------------------|-----------------------|
+| `nav_sim` | `navigation_urc` waypoint follower + simulated GPS | No | No |
+| `base_station` | `base_station_urc` (GUI + input mappers + video receiver) | Yes | No (joysticks/SpaceMouse optional) |
+| `hootl` | Hardware-out-of-the-loop: base station **+** main computer **+** driveline on one machine | Yes | No |
+| `rviz` | `main_computer_urc` RViz-only visualization launch | Yes | No |
+| `main_computer` | `main_computer_urc` (MoveIt/servo, drive relay, video streamer) | For RViz | Cameras |
+| `driveline` | `driveline_urc` (wheel motor controller) | No | CAN HAT + motors |
+| `arm` | `arm_urc` (arm motor controller) | No | CAN HAT + motors |
+| `manual` | An interactive `bash` shell in the container (run with `-it`) | No | No |
 
 Convenience wrappers under each package's `launch/launchScript.sh` run the correct
 `docker run` command (device passthrough, host networking, `DISPLAY`, etc.):
 
 ```bash
+# Hardware-free navigation simulation (the quickest way to see something work)
+./src/navigation_urc/launch/launchScript.sh
+
 # Base station (operator laptop)
 ./src/base_station_urc/launch/launchScript.sh
 
@@ -197,17 +262,27 @@ Convenience wrappers under each package's `launch/launchScript.sh` run the corre
 # Driveline / arm Raspberry Pis
 ./src/driveline_urc/launch/launchScript.sh
 ./src/arm_urc/launch/launchScript.sh
+
+# Everything except the arm on one machine, no hardware needed
+docker run --rm -it --net=host --ipc=host --pid=host -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix urc_software hootl
 ```
+
+Without hardware, expect a few one-time warnings rather than crashes: the motor nodes log
+`CAN bus N (canN) unavailable`, `SpaceMouseMapper` reports no SpaceMouse, and
+`VideoStreamer` warns `No frame data` every few seconds. In `hootl` mode the GUI shows a
+flashing "Hardware out of the loop test" banner.
 
 ### X11 / GUI on Linux
 
-Once per boot, allow the container to draw on your display:
+Once per boot, allow local containers to draw on your display:
 
 ```bash
-xhost +
+xhost +local:
 ```
 
 Then launch the base station as above. The GUI (ImGui + GLFW) and RViz both need this.
+(Avoid plain `xhost +`, which lets any machine on the network draw on your screen.)
+Under WSL, see [docs/WSL_SETUP.md](docs/WSL_SETUP.md#4-run-the-gui--simulation).
 
 ---
 
@@ -219,18 +294,22 @@ the driveline Pi (`10.0.0.20`), and restarts the `lusi-software.service` systemd
 each.
 
 ```bash
-# Full deploy (default when no flags are given): sync + remote Docker build
+# Full deploy (default when no flags are given): sync + remote build/push + restart
 python3 ./softwareUpdate/urc_deploy.py
 
-# Individual stages
+# Individual stages (each flag runs exactly what's listed)
 python3 ./softwareUpdate/urc_deploy.py --rsync    # sync files only
 python3 ./softwareUpdate/urc_deploy.py --docker   # sync + remote Docker build + registry push
-python3 ./softwareUpdate/urc_deploy.py --deploy   # sync + build + restart the systemd service
+python3 ./softwareUpdate/urc_deploy.py --deploy   # ONLY restart the systemd service (no sync, no build)
 python3 ./softwareUpdate/urc_deploy.py --help
 ```
 
-Requires Python with `paramiko` installed on the machine running the deploy. Host IPs and
-credentials are defined at the top of the script.
+If the remote build fails, the script stops and does **not** restart the rover software,
+so the rover keeps running the last good image.
+
+Requires Python with `paramiko` installed on the machine running the deploy, `rsync`, and a
+connection to the rover network. Host IPs and credentials are defined at the top of the
+script (and are readable by anyone with repo access).
 
 ---
 
@@ -297,7 +376,16 @@ Autonomous navigation package currently implementing GNSS waypoint following.
 - **`WaypointFollower_node`** — subscribes to `gps_data`, calculates the distance and bearing to a configured GNSS target, and publishes velocity commands on `cmd_vel`.
 - **`fake_gps_node.py`** — simulates GPS movement from `cmd_vel` commands so the waypoint follower can be tested without rover hardware.
 
-The waypoint follower accepts `target_lat`, `target_lon`, and `arrival_radius_m` as ROS 2 parameters.
+The waypoint follower accepts `target_lat`, `target_lon`, and `arrival_radius_m` as ROS 2 parameters
+(also exposed as launch arguments).
+
+Launch files:
+
+- `launch/navigation_sim_launch.py` — fake GPS + waypoint follower, the hardware-free simulation (run mode `nav_sim`)
+- `launch/navigation_launch.py` — the waypoint follower alone, for use with a real GPS publishing `/gps_data`
+
+On the rover, the follower's turn commands don't reach the wheels yet; see
+[Known integration issues](#known-integration-issues).
 
 ### `cross_pkg_messages` (folder `cross_pkg_messages_urc`)
 Defines the custom ROS 2 messages shared across packages. See
@@ -311,10 +399,12 @@ Defined in `src/cross_pkg_messages_urc/msg`:
 
 | Message | Purpose | Key fields |
 |---------|---------|-----------|
-| **`RoverComputerDriveCMD`** | Wheel commands base→rover | `cmd_l` (L front/center/back), `cmd_r` (R front/center/back), normalized ±1 |
-| **`RoverComputerArmCMD`** | Arm joint commands to the arm Pi | `cmd_b` (base), `cmd_s` (shoulder), `cmd_e` (elbow), `cmd_w` (wrist roll/pitch/yaw) |
-| **`ArmInputRaw`** | Raw operator arm input (e.g. SpaceMouse) | `linear_input`, `angular_input`, `left_btn`, `right_btn` |
-| **`GPSData`** | GPS fix | `status`, `lla`, `speed`, `course`, `sats`, `lla_acc` |
+| **`RoverComputerDriveCMD`** | Per-wheel speeds, main computer → driveline Pi | `cmd_l` / `cmd_r` (x/y/z = front/middle/back), wheel angular velocity in **rad/s** |
+| **`RoverComputerArmCMD`** | Arm joint targets (`/roverArmCommands`) and measured positions (`/roverArmPos`) | `cmd_b` (base), `cmd_s` (shoulder), `cmd_e` (elbow), `cmd_w` (wrists 1–3), all in **radians** |
+| **`ArmInputRaw`** | Raw operator arm input (SpaceMouse) | `linear_input`, `angular_input` (each in [-1, 1]), `left_btn`/`right_btn` (nonzero while held) |
+| **`GPSData`** | GPS fix | `status`, `lla` (x = latitude, y = longitude, z = altitude), `speed`, `course` (compass degrees), `sats`, `lla_acc` |
+
+Each `.msg` file's header comment lists who publishes and subscribes to it.
 
 ---
 
@@ -379,6 +469,29 @@ Two GitHub Actions workflows (`.github/workflows/`):
 Code style, comment conventions, and file-structure guidelines live in
 [CONTRIBUTING.md](CONTRIBUTING.md). Formatting is enforced by
 [`.clang-format`](.clang-format) and [`.editorconfig`](.editorconfig).
+
+## Known integration issues
+
+Found while documenting the code. None of these crash anything, but each one means two
+parts of the system don't fully work together yet. They make good first tasks; each is
+also noted in the relevant source file.
+
+1. **Navigation can't steer the real rover.** `JoyMapper` and `DriveTrainManager` treat
+   +Y as "up" and steer with `angular.y` in **deg/s**. `WaypointFollower` follows the ROS
+   standard (REP 103: +Z up) and steers with `angular.z` in **rad/s**. On the rover,
+   `DriveTrainManager` therefore ignores the follower's turn commands. Pick one
+   convention (the ROS standard is the usual choice) and update all three nodes together.
+2. **No real GPS driver.** Only the simulator publishes `/gps_data`.
+3. **GUI wheel bars stay at zero.** The Telemetry panel listens on `motorVels`, which
+   nothing publishes (`DriveTrainMotorManager` declares `wheelVelPub` but never creates it).
+4. **Front/back wheel order mismatch.** `DriveTrainMotorManager` orders the right-side motors
+   back-to-front but applies `cmd_r.x` (defined as right *front*) to the right *back* motor.
+   Harmless while every wheel on a side gets the same speed.
+5. **System Control panel stubs.** "Motor Freeze" and "Deploy Code" do nothing, "Reboot"
+   calls a script that isn't in this repo, and the `/op_mode` / `/lusi_vision_mode`
+   parameters live on the panel's own node, so no other node sees them.
+6. **The driveline never reads its own encoder feedback.** `MotorManager::tick()` only reads
+   CAN bus 1 (the arm's bus), so on the driveline (bus 0) no feedback is parsed.
 
 ## Housekeeping notes
 

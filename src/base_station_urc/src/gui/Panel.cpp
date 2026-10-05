@@ -1,25 +1,34 @@
+/**
+ * @file
+ * Implementation of the Panel base class
+ */
 #include "Panel.h"
 
-Panel::Panel(const std::string &name, const rclcpp::Node::SharedPtr &node)
-    : name(name), node_(node) {
+// Syntax: ": name(name), node_(node)" initializes the members from the parameters before the body runs
+Panel::Panel(const std::string& name, const rclcpp::Node::SharedPtr& node)
+    : name(name), node_(node)
+{
 }
 
-Panel::~Panel() {
+Panel::~Panel()
+{
 }
 
-void Panel::renderToScreen() {
-    // Begin window if open
+void Panel::renderToScreen()
+{
     // TODO: add window hiding
-
     ImGui::Begin(name.c_str());
-    //prevent window from being removed from viewport
+    // Keeping windows from being removed from the main viewport (called after Begin, so it applies to the next window drawn)
     ImGui::SetNextWindowViewport(ImGui::GetMainViewport()->ID);
     drawBody();
     ImGui::End();
 }
 
-void Panel::setup() {
+// Default setup/update do nothing; panels override them as needed
+void Panel::setup()
+{
 }
 
-void Panel::update() {
+void Panel::update()
+{
 }

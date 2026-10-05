@@ -25,4 +25,4 @@ SortIncludes: false
 IndentCaseLabels: true
 NamespaceIndentation: None
 FixNamespaceComments: true
-ReflowComments: true
+ReflowComments: false  # Comments are hand-structured (one complete thought per line); see CONTRIBUTING.md
