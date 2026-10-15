@@ -41,6 +41,7 @@ setup(
             'weight_sensor_node = science_urc.weight_sensor_node:main',
             'camera_node = science_urc.camera_node:main',
             'spectrometer_node = science_urc.spectrometer_node:main',
+            'soil_probe_node = science_urc.soil_probe_node:main',
         ],
     },
 )
