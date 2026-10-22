@@ -107,7 +107,7 @@ class BehaviorController(Node):
         # Positive angle means the person is to the rover's left.
         #caps the angular velocity to a maximum of 0.6 rad/s in either direction to prevent the rover from
         #turning too quickly
-        movement.angular.z = max(-0.6, min(0.6, angle))
+        movement.angular.y =- math.degrees(max(-0.6, min(0.6, angle)))
 
         # Drive only while approximately facing the person.
         if abs(angle) < math.radians(30):
