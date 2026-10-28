@@ -4,80 +4,110 @@ import serial
 import RPi.GPIO as GPIO
 
 # --- Hardware Configuration ---
-SERIAL_PORT = '/dev/serial0' # Built-in RPi UART (GPIO 14 TX, GPIO 15 RX)
+SERIAL_PORT = '/dev/serial0'  # Built-in RPi UART (GPIO 14 TX, GPIO 15 RX)
 BAUDRATE = 9600
-DE_RE_PIN = 4                # GPIO pin tied to MAX485 DE and RE pins
+DE_RE_PIN = 4                 # GPIO pin tied to MAX485 DE and RE pins
 
-# Sensor Query Frames (Address 0x01, Function 0x03, Register Address, Length 1, CRC16)
-QUERIES = {
-    "moisture":     bytes([0x01, 0x03, 0x00, 0x12, 0x00, 0x01, 0x24, 0x0F]),
-    "temperature":  bytes([0x01, 0x03, 0x00, 0x13, 0x00, 0x01, 0x75, 0xCF]),
-    "ph":           bytes([0x01, 0x03, 0x00, 0x06, 0x00, 0x01, 0x64, 0x0B]),
-    "conductivity": bytes([0x01, 0x03, 0x00, 0x15, 0x00, 0x01, 0x95, 0xCE]),
-    "nitrogen":     bytes([0x01, 0x03, 0x00, 0x1E, 0x00, 0x01, 0xE4, 0x0C]),
-    "phosphorus":   bytes([0x01, 0x03, 0x00, 0x1F, 0x00, 0x01, 0xB5, 0xCC]),
-    "potassium":    bytes([0x01, 0x03, 0x00, 0x20, 0x00, 0x01, 0x85, 0xC0]),
+# Sensor register addresses (device address 0x01, function 0x03)
+REGISTERS = {
+    "moisture":     0x0012,
+    "temperature":  0x0013,
+    "ph":           0x0006,
+    "conductivity": 0x0015,
+    "nitrogen":     0x001E,
+    "phosphorus":   0x001F,
+    "potassium":    0x0020,
 }
+
 
 def setup_gpio():
     """Initializes the GPIO pin for RS485 Transmit/Receive direction control."""
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(DE_RE_PIN, GPIO.OUT)
-    GPIO.output(DE_RE_PIN, GPIO.LOW) # Default to Receive Mode
+    GPIO.output(DE_RE_PIN, GPIO.LOW)  # Default to Receive Mode
 
-def send_query_and_get_raw(ser, query_bytes, expected_len=7):
-    """Handles RS485 direction switching, clears buffers, sends query, and reads response."""
-    ser.reset_input_buffer()
 
-    # 1. Switch MAX485 to Transmit Mode
-    GPIO.output(DE_RE_PIN, GPIO.HIGH)
-    time.sleep(0.001)
+# --- Modbus helpers ---
 
-    # 2. Transmit frame
-    ser.write(query_bytes)
-    ser.flush()
-    time.sleep(0.002) # Let the last byte fully leave the hardware buffer
+def crc16(data: bytes) -> int:
+    crc = 0xFFFF
+    for b in data:
+        crc ^= b
+        for _ in range(8):
+            crc = (crc >> 1) ^ 0xA001 if crc & 1 else crc >> 1
+    return crc
 
-    # 3. Switch MAX485 back to Receive Mode
-    GPIO.output(DE_RE_PIN, GPIO.LOW)
-    time.sleep(0.001)
 
-    # 4. Read response
-    response = ser.read(expected_len)
+def build_query(reg, addr=0x01):
+    frame = bytes([addr, 0x03, reg >> 8, reg & 0xFF, 0x00, 0x01])
+    return frame + struct.pack('<H', crc16(frame))  # CRC is low byte first
 
-    if len(response) == expected_len and response[0] == 0x01 and response[1] == 0x03:
-        raw_val = (response[3] << 8) | response[4]
-        return raw_val
+
+def read_register(ser, reg, retries=3):
+    """Sends one query, waits for the frame to fully leave, then reads and validates the reply."""
+    frame = build_query(reg)
+    tx_time = len(frame) * 10 / BAUDRATE  # ~8.3 ms at 9600 baud
+
+    for _ in range(retries):
+        ser.reset_input_buffer()
+
+        GPIO.output(DE_RE_PIN, GPIO.HIGH)
+        time.sleep(0.002)
+        t_start = time.monotonic()
+        ser.write(frame)
+        ser.flush()
+        # Wait only for the transmit time still left (plus a small margin),
+        # so we release the line promptly and don't miss the start of the reply
+        remaining = tx_time + 0.001 - (time.monotonic() - t_start)
+        if remaining > 0:
+            time.sleep(remaining)
+        GPIO.output(DE_RE_PIN, GPIO.LOW)
+
+        resp = ser.read(7)
+        if (len(resp) == 7
+                and resp[0] == 0x01 and resp[1] == 0x03 and resp[2] == 0x02
+                and crc16(resp[:5]) == struct.unpack('<H', resp[5:7])[0]):
+            return (resp[3] << 8) | resp[4]
+
+        time.sleep(0.1)  # let the bus settle before retrying
     return None
+
 
 # --- Individual Parameter Reading Functions ---
 
 def read_moisture(ser):
-    raw = send_query_and_get_raw(ser, QUERIES["moisture"])
+    raw = read_register(ser, REGISTERS["moisture"])
     return (raw / 10.0) if raw is not None else None
 
+
 def read_temperature(ser):
-    raw = send_query_and_get_raw(ser, QUERIES["temperature"])
+    raw = read_register(ser, REGISTERS["temperature"])
     if raw is not None:
         signed_raw = struct.unpack('>h', raw.to_bytes(2, 'big'))[0]
         return signed_raw / 10.0
     return None
 
+
 def read_ph(ser):
-    raw = send_query_and_get_raw(ser, QUERIES["ph"])
+    raw = read_register(ser, REGISTERS["ph"])
     return (raw / 100.0) if raw is not None else None
 
+
 def read_conductivity(ser):
-    return send_query_and_get_raw(ser, QUERIES["conductivity"])
+    return read_register(ser, REGISTERS["conductivity"])
+
 
 def read_nitrogen(ser):
-    return send_query_and_get_raw(ser, QUERIES["nitrogen"])
+    return read_register(ser, REGISTERS["nitrogen"])
+
 
 def read_phosphorus(ser):
-    return send_query_and_get_raw(ser, QUERIES["phosphorus"])
+    return read_register(ser, REGISTERS["phosphorus"])
+
 
 def read_potassium(ser):
-    return send_query_and_get_raw(ser, QUERIES["potassium"])
+    return read_register(ser, REGISTERS["potassium"])
+
 
 # --- Main Loop ---
 
@@ -131,6 +161,7 @@ def main():
     finally:
         ser.close()
         GPIO.cleanup()
+
 
 if __name__ == "__main__":
     main()
