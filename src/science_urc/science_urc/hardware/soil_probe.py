@@ -2,9 +2,22 @@
 import time
 
 
+def modbus_crc16(data):
+    crc = 0xFFFF
+    for byte in data:
+        crc ^= byte
+        for _ in range(8):
+            if crc & 1:
+                crc = (crc >> 1) ^ 0xA001
+            else:
+                crc >>= 1
+    return bytes([crc & 0xFF, crc >> 8])
+
+
 class SoilProbe:
     def __init__(self, port="/dev/serial0", baudrate=9600,
                  direction_pin=4, serial_connection=None, gpio=None):
+        self.baudrate = baudrate
         self.direction_pin = direction_pin
         self.gpio = gpio
         self.serial = serial_connection
@@ -31,17 +44,23 @@ class SoilProbe:
 
         try:
             time.sleep(0.001)
+            # Don't use serial.flush() here: on the Pi it can return a few
+            # ms late, and the probe answers within ~1 ms, so the start of
+            # its reply is lost. Release the bus as soon as the query
+            # (10 bits per byte) has left the UART.
+            start = time.perf_counter()
             self.serial.write(query)
-            self.serial.flush()
-            time.sleep(0.002)
+            done = start + len(query) * 10 / self.baudrate + 0.0003
+            while time.perf_counter() < done:
+                pass
         finally:
             self.gpio.output(self.direction_pin, self.gpio.LOW)
 
-        time.sleep(0.001)
         response = self.serial.read(7)
 
         if (len(response) != 7 or response[0] != 0x01
-                or response[1] != 0x03 or response[2] != 0x02):
+                or response[1] != 0x03 or response[2] != 0x02
+                or modbus_crc16(response[:5]) != response[5:]):
             return None
 
         return (response[3] << 8) | response[4]

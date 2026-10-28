@@ -19,6 +19,15 @@ QUERIES = {
     "potassium":    bytes([0x01, 0x03, 0x00, 0x20, 0x00, 0x01, 0x85, 0xC0]),
 }
 
+def crc16(data):
+    """Modbus RTU CRC16, returned low byte first as it appears on the wire."""
+    crc = 0xFFFF
+    for byte in data:
+        crc ^= byte
+        for _ in range(8):
+            crc = (crc >> 1) ^ 0xA001 if crc & 1 else crc >> 1
+    return bytes([crc & 0xFF, crc >> 8])
+
 def setup_gpio():
     """Initializes the GPIO pin for RS485 Transmit/Receive direction control."""
     GPIO.setmode(GPIO.BCM)
@@ -33,19 +42,23 @@ def send_query_and_get_raw(ser, query_bytes, expected_len=7):
     GPIO.output(DE_RE_PIN, GPIO.HIGH)
     time.sleep(0.001)
 
-    # 2. Transmit frame
+    # 2. Transmit frame. Don't use ser.flush(): on the Pi it can return a few ms
+    # late, and the sensor replies within ~1 ms, so the start of the reply is lost.
+    # Instead wait exactly as long as the frame takes to send (10 bits per byte).
+    start = time.perf_counter()
     ser.write(query_bytes)
-    ser.flush()
-    time.sleep(0.002) # Let the last byte fully leave the hardware buffer
+    done = start + len(query_bytes) * 10 / BAUDRATE + 0.0003
+    while time.perf_counter() < done:
+        pass
 
     # 3. Switch MAX485 back to Receive Mode
     GPIO.output(DE_RE_PIN, GPIO.LOW)
-    time.sleep(0.001)
 
     # 4. Read response
     response = ser.read(expected_len)
 
-    if len(response) == expected_len and response[0] == 0x01 and response[1] == 0x03:
+    if (len(response) == expected_len and response[0] == 0x01 and response[1] == 0x03
+            and crc16(response[:5]) == response[5:]):
         raw_val = (response[3] << 8) | response[4]
         return raw_val
     return None
