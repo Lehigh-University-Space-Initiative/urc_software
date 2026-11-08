@@ -1,0 +1,3 @@
+GAZEBO_MODEL_DATABASE_URI="" gazebo --verbose /usr/share/gazebo-11/worlds/empty.world
+
+gz model --spawn-file=$HOME/urc_software/src/rover_sim_urc/models/lusi_rover/model.sdf --model-name=lusi_rover_4wheel

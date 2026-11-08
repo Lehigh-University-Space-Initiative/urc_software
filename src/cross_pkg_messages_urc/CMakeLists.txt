@@ -20,6 +20,8 @@ find_package(rosidl_default_generators REQUIRED)
 # To add a message: create msg/NewThing.msg, list it here, and rebuild this package before the others
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/RoverComputerDriveCMD.msg"
+  "msg/RoverDriveCommand2027.msg"
+  "srv/SetDriveMode2027.srv"
   "msg/GPSData.msg"
   "msg/ArmInputRaw.msg"
   "msg/RoverComputerArmCMD.msg"

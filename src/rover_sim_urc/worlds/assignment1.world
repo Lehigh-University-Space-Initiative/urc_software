@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!-- No downloaded models or graphical client are needed for the suspended test assembly -->
+<sdf version="1.6">
+  <world name="assignment1">
+    <physics name="ode" type="ode">
+      <max_step_size>0.001</max_step_size>
+      <real_time_update_rate>1000</real_time_update_rate>
+    </physics>
+    <light name="sun" type="directional">
+      <pose>0 0 10 0 0 0</pose><diffuse>0.8 0.8 0.8 1</diffuse>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+  </world>
+</sdf>
