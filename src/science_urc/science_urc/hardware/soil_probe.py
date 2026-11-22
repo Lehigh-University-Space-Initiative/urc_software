@@ -35,13 +35,33 @@ class SoilProbe:
             import serial
             self.serial = serial.Serial(port, baudrate, timeout=0.4)
 
-    def read_register(self, query):
+    def read_register(self, query, retries=3):
+        """
+        Send one Modbus query and return the 16-bit register value, or None.
+
+        Args:
+            query: the 8-byte Modbus request frame (address, function, register, CRC).
+            retries: attempts before giving up (ported from the chaiteathaichi-patch-1 branch).
+
+        Returns:
+            The register value as an int, or None if no valid reply arrived.
+        """
         if self.closed:
             raise RuntimeError("Soil probe is closed")
 
+        for attempt in range(retries):
+            value = self._query_once(query)
+            if value is not None:
+                return value
+            # Letting the RS-485 bus settle before trying again
+            if attempt < retries - 1:
+                time.sleep(0.1)
+        return None
+
+    def _query_once(self, query):
+        """Send the query once and validate the 7-byte reply (None if invalid)."""
         self.serial.reset_input_buffer()
         self.gpio.output(self.direction_pin, self.gpio.HIGH)
-
         try:
             time.sleep(0.001)
             # Don't use serial.flush() here: on the Pi it can return a few
@@ -57,12 +77,10 @@ class SoilProbe:
             self.gpio.output(self.direction_pin, self.gpio.LOW)
 
         response = self.serial.read(7)
-
         if (len(response) != 7 or response[0] != 0x01
                 or response[1] != 0x03 or response[2] != 0x02
                 or modbus_crc16(response[:5]) != response[5:]):
             return None
-
         return (response[3] << 8) | response[4]
 
     def read_measurements(self):

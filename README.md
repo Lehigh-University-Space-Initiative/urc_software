@@ -122,6 +122,11 @@ first-party code publishes or subscribes to (each source file's header repeats i
 | `/video_stream/compressed` | `sensor_msgs/CompressedImage` | `VideoStreamer` (via image_transport; the `video_compress` relay is redundant) | `video_decompress` (base station) |
 | `/video_stream/image_raw` | `sensor_msgs/Image` | `video_decompress` (base station) | GUI Video Stream panel; `LUSIVisionStreamer` |
 | `/gps_data` | `GPSData` | `fake_gps_node` (sim only; no real GPS driver yet) | `WaypointFollower`; `LUSIVisionStreamer` |
+| `/science/auger_speed`, `/science/platform_command`, `/science/soil_drop_angle`, `/science/chamber_lid_angle` | `Float32` / `String` | Web UI Science page | `science_node` (Science Pi) |
+| `/science/weight_g`, `/science/soil/<name>` | `std_msgs/Float32` | `weight_sensor_node`, `soil_probe_node` (Science Pi) | Web UI; `science_recorder` |
+| `/science/spectrometer/intensity` | `std_msgs/Float32MultiArray` | `spectrometer_node` (Science Pi) | Web UI; `science_recorder` |
+| `/science/camera/image_raw` (+ `/compressed`) | `sensor_msgs/Image` (+ `CompressedImage`) | `camera_node` (Science Pi) | `web_video_server`; `science_recorder` (compressed) |
+| `/web_ui/save_snapshot`, `/web_ui/snapshot_status` | `std_msgs/String` | Web UI; `science_recorder` | `science_recorder`; Web UI |
 | `/dcs_stage1/*` | various (see package README) | `drivetrain_2027_urc` (mock only) | `drivetrain_2027_urc` |
 | `behavior_command` | `std_msgs/String` | *nobody yet* (speech recognizer planned) | `BehaviorController` |
 | `person_position` | `geometry_msgs/Point` | *nobody yet* (person tracker planned) | `BehaviorController` |
@@ -152,6 +157,8 @@ urc_software/
 │   ├── moveit_config_urc/     # MoveIt Setup Assistant output for the 2-DOF arm
 │   ├── navigation_urc/        # GNSS waypoint following and navigation testing
 │   ├── voice_commands_urc/    # Voice-command behavior state machine (stay/come/follow/fetch)
+│   ├── science_urc/           # Science Module nodes (Science Raspberry Pi) and standalone scripts
+│   ├── web_ui_urc/            # Browser interface (Drive and Science pages) served from the base station
 │   ├── drivetrain_2027_urc/   # 2027 4-wheel drivetrain: mode arbitration, mock only (no hardware output)
 │   ├── rover_sim_urc/         # Gazebo simulation of the 2027 rover (opt-in; needs Gazebo)
 │   ├── cross_pkg_messages_urc/# Custom ROS 2 message definitions (package: cross_pkg_messages)
@@ -217,7 +224,7 @@ This script:
    generated messages are available first:
    - `cross_pkg_messages`
    - then `base_station_urc`, `main_computer_urc`, `driveline_urc`, `sllidar_ros2`,
-     `moveit_config_urc`, `arm_urc`, `navigation_urc`, `voice_commands_urc`, `drivetrain_2027_urc`, `science_urc`
+     `moveit_config_urc`, `arm_urc`, `navigation_urc`, `voice_commands_urc`, `drivetrain_2027_urc`, `science_urc`, `web_ui_urc`
 3. Builds the final runtime image, tagged both `urc_software` and
    `10.0.0.10:65000/urc_software` (the rover's local registry).
 
@@ -252,6 +259,8 @@ Each computer is started by running the container with the appropriate mode argu
 | `main_computer` | `main_computer_urc` (MoveIt/servo, drive relay, video streamer) | For RViz | Cameras |
 | `driveline` | `driveline_urc` (wheel motor controller) | No | CAN HAT + motors |
 | `arm` | `arm_urc` (arm motor controller) | No | CAN HAT + motors |
+| `science` | `science_urc`: Science Module motors, soil probe, weight, spectrometer, camera | No | Science Pi devices; `sudo pigpiod` on the Pi first |
+| `web_ui` | `web_ui_urc`: browser interface at `http://<base-station-ip>:8000` (Steam Deck or laptop) | No | No |
 | `manual` | An interactive `bash` shell in the container (run with `-it`) | No | No |
 
 Convenience wrappers under each package's `launch/launchScript.sh` run the correct
@@ -406,6 +415,25 @@ mission's astronaut-assistance tasks (design: [docs/state_machine_design_plan.pn
   manual driving. Turns use `angular.y` in deg/s, matching `DriveTrainManager`.
 - `fetch` and `give` are not implemented yet, and nothing publishes its input topics yet.
   No run mode starts it; use `ros2 run voice_commands_urc behavior_controller`.
+
+### `science_urc`
+
+Runs on the Science Raspberry Pi (run mode `science`, launcher `launch/launchScript.sh`). Five nodes:
+`science_node` (auger, platform, soil dropper, chamber lid; the auger and platform stop if commands
+stop for 2 s), `soil_probe_node` (7 values over RS-485, retries failed reads), `weight_sensor_node`,
+`spectrometer_node` (raw intensity per pixel), and `camera_node` (raw and JPEG images). The
+standalone tools in `scripts/` (spectrometer calibration, camera capture, motor CLI) are not ROS nodes.
+
+### `web_ui_urc`
+
+Browser interface for the base station (run mode `web_ui`, launcher `launch/launchScript.sh`). Open
+`http://<base-station-ip>:8000` from a Steam Deck or laptop on the rover network. The **Drive** page is
+view only (rover camera, drive command, wheel speeds, GPS). The **Science** page shows the Science
+camera, sensor readings, and the raw spectrum, and controls the Science Module: the auger and
+platform run only while their button is held. "Save snapshot" writes to
+`ground_station_volume/science_data/` on the base station. The launch file also starts
+`rosbridge_server` (port 9090) and `web_video_server` (port 8080). The page only shows topics that
+already exist in the code; add a reading by subscribing to its topic in `web/app.js`.
 
 ### `drivetrain_2027_urc`
 

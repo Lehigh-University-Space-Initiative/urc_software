@@ -28,7 +28,7 @@ docker container run \
     urc_software_builder \
     bash -c 'source /opt/ros/humble/setup.sh && colcon build --merge-install --packages-select cross_pkg_messages &&
              source ./install/setup.bash &&
-             colcon build --merge-install --packages-select base_station_urc main_computer_urc driveline_urc sllidar_ros2 moveit_config_urc arm_urc navigation_urc voice_commands_urc drivetrain_2027_urc science_urc'
+             colcon build --merge-install --packages-select base_station_urc main_computer_urc driveline_urc sllidar_ros2 moveit_config_urc arm_urc navigation_urc voice_commands_urc drivetrain_2027_urc science_urc web_ui_urc'
 
 # Failing on any non-zero exit, not just code 2 (e.g. a missing `docker` exits 127)
 if [ $? -ne 0 ]; then

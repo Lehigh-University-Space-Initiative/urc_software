@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<!--
+  LUSI rover browser interface (served by web_ui_urc's web_server node, port 8000)
+  Pages: Drive (view only) and Science (live readings and module controls)
+  Every reading and control here maps to a topic that already exists in the code; see app.js
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <!-- Fitting the page to the device width (Steam Deck screen is 1280 x 800) -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LUSI Rover</title>
+  <!-- Empty icon, so browsers do not request a favicon.ico that does not exist -->
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <span class="brand">LUSI Rover</span>
+    <nav>
+      <button class="tab active" data-page="drive">Drive</button>
+      <button class="tab" data-page="science">Science</button>
+    </nav>
+    <span id="connection" class="badge offline">Disconnected</span>
+  </header>
+
+  <!-- Drive page: everything here is read-only -->
+  <main id="page-drive" class="page active">
+    <section class="card video-card">
+      <h2>Rover camera</h2>
+      <div class="video-frame">
+        <img id="drive-video" alt="">
+        <span class="video-empty">No video</span>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Drive command</h2>
+      <dl class="readings">
+        <dt>Forward speed</dt><dd><span data-value="cmd_forward">--</span> m/s</dd>
+        <dt>Turn rate</dt><dd><span data-value="cmd_turn">--</span> deg/s</dd>
+      </dl>
+      <h2>Wheel speeds (rad/s)</h2>
+      <table class="wheels">
+        <tr><th></th><th>Left</th><th>Right</th></tr>
+        <tr><th>Front</th><td data-value="wheel_lf">--</td><td data-value="wheel_rf">--</td></tr>
+        <tr><th>Middle</th><td data-value="wheel_lm">--</td><td data-value="wheel_rm">--</td></tr>
+        <tr><th>Back</th><td data-value="wheel_lb">--</td><td data-value="wheel_rb">--</td></tr>
+      </table>
+      <h2>GPS</h2>
+      <dl class="readings">
+        <dt>Latitude</dt><dd><span data-value="gps_lat">--</span></dd>
+        <dt>Longitude</dt><dd><span data-value="gps_lon">--</span></dd>
+        <dt>Satellites</dt><dd><span data-value="gps_sats">--</span></dd>
+      </dl>
+    </section>
+  </main>
+
+  <!-- Science page: live readings plus Science Module controls -->
+  <main id="page-science" class="page">
+    <section class="card video-card">
+      <h2>Science camera</h2>
+      <div class="video-frame">
+        <img id="science-video" alt="">
+        <span class="video-empty">No video</span>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Readings</h2>
+      <dl class="readings">
+        <dt>Weight</dt><dd><span data-value="weight_g">--</span> g</dd>
+        <dt>Moisture</dt><dd><span data-value="moisture">--</span> %</dd>
+        <dt>Temperature</dt><dd><span data-value="temperature">--</span> &deg;C</dd>
+        <dt>pH</dt><dd><span data-value="ph">--</span></dd>
+        <dt>Conductivity</dt><dd><span data-value="conductivity">--</span> &micro;S/cm</dd>
+        <dt>Nitrogen</dt><dd><span data-value="nitrogen">--</span> mg/kg</dd>
+        <dt>Phosphorus</dt><dd><span data-value="phosphorus">--</span> mg/kg</dd>
+        <dt>Potassium</dt><dd><span data-value="potassium">--</span> mg/kg</dd>
+      </dl>
+      <h2>Spectrometer <span class="hint">(raw intensity by pixel)</span></h2>
+      <canvas id="spectrum" width="600" height="160"></canvas>
+
+      <!-- Saved on the base station by science_recorder, in ground_station_volume/science_data -->
+      <div class="controls snapshot">
+        <h2>Save snapshot</h2>
+        <input type="text" id="snapshot-note" placeholder="Note (optional), e.g. site name">
+        <button id="snapshot-save">Save readings, spectrum, and photo</button>
+        <p id="snapshot-status" class="hint"></p>
+      </div>
+    </section>
+
+    <section class="card controls">
+      <h2>Auger</h2>
+      <label>Speed <output data-for="auger-speed">50</output>%
+        <input type="range" id="auger-speed" min="0" max="100" value="50"></label>
+      <button class="hold" id="auger-run">Hold to run</button>
+
+      <h2>Platform</h2>
+      <label>Speed <output data-for="platform-speed">30</output>%
+        <input type="range" id="platform-speed" min="0" max="100" value="30"></label>
+      <div class="row">
+        <button class="hold" id="platform-up">Hold: Up</button>
+        <button class="hold" id="platform-down">Hold: Down</button>
+      </div>
+
+      <h2>Soil dropper</h2>
+      <label>Angle <output data-for="drop-angle">0</output>&deg;
+        <input type="range" id="drop-angle" min="0" max="180" value="0"></label>
+      <button id="drop-move">Move dropper</button>
+
+      <h2>Chamber lid</h2>
+      <label>Angle <output data-for="lid-angle">0</output>&deg;
+        <input type="range" id="lid-angle" min="0" max="180" value="0"></label>
+      <button id="lid-move">Move lid</button>
+
+      <button id="stop-motors" class="stop">Stop motors</button>
+
+    </section>
+  </main>
+
+  <script src="vendor/roslib-1.4.1.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
