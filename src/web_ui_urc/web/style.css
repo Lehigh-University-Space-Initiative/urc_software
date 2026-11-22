@@ -1,0 +1,132 @@
+/*
+  Styles for the LUSI rover browser interface
+  Sized for touch on the Steam Deck (1280 x 800): buttons are at least 48 px tall
+*/
+
+:root {
+  --bg: #15181c;
+  --card: #1f242a;
+  --line: #333a42;
+  --text: #e6e9ec;
+  --muted: #8b95a0;
+  --accent: #4da3ff;
+  --good: #3fb67a;
+  --bad: #e5534b;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* Stopping long-press text selection, which fights with hold-to-run buttons on touch screens */
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.brand { font-weight: 600; }
+nav { display: flex; gap: 8px; flex: 1; }
+
+button {
+  min-height: 48px;
+  padding: 0 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #2a3038;
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+  /* Stopping the browser from treating a held finger as a scroll or zoom */
+  touch-action: none;
+}
+
+button:disabled { opacity: 0.4; cursor: not-allowed; }
+.tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.hold.active { background: var(--good); border-color: var(--good); color: #fff; }
+.stop { background: var(--bad); border-color: var(--bad); color: #fff; width: 100%; margin-top: 14px; }
+
+.badge { padding: 4px 10px; border-radius: 999px; font-size: 14px; }
+.badge.online { background: var(--good); color: #fff; }
+.badge.offline { background: var(--bad); color: #fff; }
+
+/* Only the active page is shown */
+.page { display: none; padding: 12px; gap: 12px; }
+.page.active { display: grid; grid-template-columns: 1.4fr 1fr; }
+#page-science.active { grid-template-columns: 1.3fr 1fr 0.9fr; }
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px 14px;
+  min-width: 0;
+}
+
+h2 { margin: 10px 0 4px; font-size: 15px; font-weight: 600; color: var(--muted); }
+h2:first-child { margin-top: 0; }
+.hint { font-weight: 400; font-size: 13px; color: var(--muted); }
+
+.video-frame {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  background: #000;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.video-frame img { width: 100%; height: 100%; object-fit: contain; }
+.video-empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+}
+.video-frame.live .video-empty { display: none; }
+
+.readings { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 0; }
+.readings dt { color: var(--muted); }
+.readings dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+
+/* Values that have not updated recently are dimmed (see app.js STALE_MS) */
+.stale { opacity: 0.35; }
+
+.wheels { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.wheels th, .wheels td { padding: 3px 6px; text-align: right; }
+.wheels th { color: var(--muted); font-weight: 400; }
+.wheels th:first-child { text-align: left; padding-left: 0; }
+
+canvas { width: 100%; height: 160px; background: #111418; border-radius: 6px; }
+
+.controls label { display: block; }
+.controls input[type=range] { width: 100%; height: 28px; margin: 0 0 4px; }
+.controls .row { display: flex; gap: 8px; }
+.controls .row button { flex: 1; }
+.controls > button { width: 100%; }
+.snapshot { margin-top: 8px; }
+.snapshot p { margin: 6px 0 0; }
+.controls input[type=text] {
+  width: 100%;
+  min-height: 44px;
+  margin-bottom: 8px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #111418;
+  color: var(--text);
+  font: inherit;
+}
+
+/* Stacking the columns on narrow screens (phones, a narrow laptop window) */
+@media (max-width: 900px) {
+  .page.active, #page-science.active { grid-template-columns: 1fr; }
+}

@@ -41,7 +41,8 @@ Read that header before the rest of the file.
 | `src/drivetrain_2027_urc` | Main computer (future) | 2027 drivetrain mode arbitration and kinematics; mock only, no hardware output |
 | `src/rover_sim_urc` | Dev machine | Gazebo sim of the 2027 rover; not in the Docker build (needs Gazebo) |
 | `src/voice_commands_urc` | Main computer (presumably; not launched yet) | Python voice-command state machine (stay/come/follow/fetch) driving `cmd_vel` |
-| `src/science_urc` | Science module | Python nodes on `/science/*` topics; drivers in `science_urc/hardware/` |
+| `src/science_urc` | Science Pi (run mode `science`) | Python nodes on `/science/*` topics; drivers in `science_urc/hardware/` |
+| `src/web_ui_urc` | Base station (run mode `web_ui`) | Browser interface (Drive and Science pages) via rosbridge; page files in `web/` |
 | `src/cross_pkg_messages_urc` | All | Custom messages; ROS package name is `cross_pkg_messages` |
 | `src/shared_code` | Arm and driveline Pis | `CANDriver`, `SparkMax`, `MotorManager`, `pid` |
 
@@ -117,7 +118,8 @@ Do not search or read these either unless the task is specifically about them; t
 - **Topics and messages are contracts across computers.** When you rename a topic or change a message field, unit, or axis convention, update every publisher and subscriber in the same change, plus the README topic map. Search for the topic string both with and without a leading `/`; the code uses both.
 - **Package name mismatch.** Folder `src/cross_pkg_messages_urc/` builds package `cross_pkg_messages`.
 - **CMake globbing.** Sources are collected with `file(GLOB)`; after adding or removing files, rebuild clean or CMake will not see them.
-- **CI only proves `science_urc` installs.** It is in the Docker build now, but it is pure Python with no launch mode, so a passing build does not run or lint the Science code. Run `colcon test --packages-select science_urc` in the dev shell.
+- **CI only proves the Python packages install.** `science_urc`, `web_ui_urc`, and `voice_commands_urc` are pure Python, so a passing build does not run or lint them. Run `colcon test --packages-select <package>` in the dev shell.
+- **The web UI shows only what already exists.** Add a reading or control to `web_ui_urc/web/app.js` only for a topic some node already publishes or subscribes to.
 
 ## Keeping docs true
 

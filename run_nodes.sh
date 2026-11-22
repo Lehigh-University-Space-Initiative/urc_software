@@ -10,6 +10,8 @@
 #   driveline      driveline Pi: wheel motors over CAN
 #   arm            arm Pi: arm motors over CAN
 #   rviz           RViz-only view of the arm
+#   science        Science Raspberry Pi: Science Module motors and sensors
+#   web_ui         base station: browser interface (http://<base-station>:8000) for the Steam Deck or a laptop
 #   nav_sim        hardware-free navigation simulation (fake GPS + waypoint follower); needs no display or devices
 #   hootl          hardware-out-of-the-loop: base station + main computer + driveline together on one machine
 #   manual         an interactive bash shell inside the container (run with -it)
@@ -46,6 +48,12 @@ case "$1" in
   arm)
     ros2 launch arm_urc arm_launch.py
     ;;
+  science)
+    ros2 launch science_urc science_launch.py
+    ;;
+  web_ui)
+    ros2 launch web_ui_urc web_ui_launch.py
+    ;;
   nav_sim)
     ros2 launch navigation_urc navigation_sim_launch.py
     ;;
@@ -54,7 +62,7 @@ case "$1" in
     exec /bin/bash
     ;;
   *)
-    echo "Unknown mode: $1. Please specify one of 'hootl', 'base_station', 'main_computer', 'rviz', 'driveline', 'arm', 'nav_sim', or 'manual'."
+    echo "Unknown mode: $1. Please specify one of 'hootl', 'base_station', 'main_computer', 'rviz', 'driveline', 'arm', 'nav_sim', 'science', 'web_ui', or 'manual'."
     exit 1
     ;;
 esac

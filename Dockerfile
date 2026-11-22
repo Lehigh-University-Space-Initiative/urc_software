@@ -14,6 +14,8 @@
 FROM ros:humble-ros-base-jammy AS urc_software_base
 
 # Installing ROS 2 packages, build tools, GUI libraries (GLFW/GLEW), and debugging tools
+# rosbridge-server and web-video-server serve the browser UI (web_ui_urc); python3-serial and
+# python3-opencv are used by the Science nodes (soil probe, cameras, spectrometer)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-humble-ros-base=0.10.0-1* \
     ros-humble-rclcpp \
@@ -32,6 +34,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-humble-ros2-controllers \
     ros-humble-moveit-ros-planning-interface \
     ros-humble-moveit-servo \
+    ros-humble-rosbridge-server \
+    ros-humble-web-video-server \
+    python3-serial \
+    python3-opencv \
     tmux \
     ruby \
     vim nano gdb \
