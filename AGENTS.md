@@ -110,7 +110,7 @@ Do not search or read these either unless the task is specifically about them; t
 ## Things that will trip you up
 
 - **The code can lag the physical rover.** Before changing code that depends on physical values (wheel count, wheel radius, track width, gear ratios, steering, CAN map), compare the code with `docs/DRIVETRAIN.md` and ask the human whether the physical design has changed since. Do not "fix" a mismatch in passing; flag it.
-  - Current example: the rover has 4 driven wheels with 2 steered front wheels, but `main` still drives 6 wheels with tank (skid) steering.
+  - Current example: the rover has 4 wheels, of which only the front 2 are driven and steered (the rear 2 roll freely), but `main` still drives 6 wheels with tank (skid) steering.
 - **Two turn conventions.** `JoyMapper` and `DriveTrainManager` steer with `angular.y` in deg/s; `WaypointFollower` uses the ROS standard `angular.z` in rad/s. See "Known integration issues" in `README.md` before touching `cmd_vel`.
 - **Topics and messages are contracts across computers.** When you rename a topic or change a message field, unit, or axis convention, update every publisher and subscriber in the same change, plus the README topic map. Search for the topic string both with and without a leading `/`; the code uses both.
 - **Package name mismatch.** Folder `src/cross_pkg_messages_urc/` builds package `cross_pkg_messages`.

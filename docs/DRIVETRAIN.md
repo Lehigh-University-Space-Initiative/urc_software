@@ -9,7 +9,8 @@ Last updated: November 2026.
 
 ## Layout
 
-- 4 wheels, all driven. Front-left and front-right steer; rear wheels are fixed.
+- 4 wheels. Only the two front wheels are driven for now; the two rear wheels roll freely
+  (this may change later). Front-left and front-right steer; rear wheels are fixed.
 - Suspension: two-arm rocker (one arm per side, no bogie). The two arms are coupled by a
   gear differential, so one arm rotating up drives the other down.
 - **Driving mode:** front steering is position-controlled within ±100° (software limit, no
@@ -46,9 +47,9 @@ Last updated: November 2026.
 | CAN ID | Wheel | Function | Motor | Controller |
 |---|---|---|---|---|
 | 1 | Left front | Drive | NEO V1.1 (REV-21-1650) | SPARK MAX |
-| 2 | Left rear | Drive | NEO V1.1 | SPARK MAX |
+| 2 | Left rear | Drive (not installed; rear wheels undriven for now) | NEO V1.1 | SPARK MAX |
 | 3 | Right front | Drive | NEO V1.1 | SPARK MAX |
-| 4 | Right rear | Drive | NEO V1.1 | SPARK MAX |
+| 4 | Right rear | Drive (not installed; rear wheels undriven for now) | NEO V1.1 | SPARK MAX |
 | 5 | Left front | Steer | NEO V1.1 | SPARK MAX |
 | 6 | Right front | Steer | NEO V1.1 | SPARK MAX |
 
@@ -79,7 +80,7 @@ Each side (right side mirrored):
 - `right_rocker` mimics `left_rocker` with multiplier −1 (models the differential)
 - `left_rocker` → `front_left_steer`: revolute, vertical axis, ±100° limits
 - `front_left_steer` → `front_left_wheel`: continuous
-- `left_rocker` → `rear_left_wheel`: continuous
+- `left_rocker` → `rear_left_wheel`: continuous, passive (not driven)
 
 ## Where the software differs (as of November 2026)
 
