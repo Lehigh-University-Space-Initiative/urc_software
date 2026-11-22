@@ -18,6 +18,7 @@ Behaviors:
   come   - driving to within 2 m of the person, then switching to stay
   follow - staying about 2 m from the person for as long as positions keep arriving
   fetch  - placeholder; holds still until the approach/pickup/return sequence is written
+  ("give" from docs/state_machine_design_plan.png is not implemented yet)
 
 How it connects to the system:
   - Nothing publishes behavior_command or person_position yet

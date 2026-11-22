@@ -7,7 +7,7 @@ Last verified against the code: 2026-11-22
 
 ## What this repo is
 
-ROS 2 Humble software (mostly C++, Science module in Python) for the Lehigh University Space Initiative (LUSI) Mars rover, competing in the University Rover Challenge (URC).
+ROS 2 Humble software (mostly C++; the Science module and voice commands are Python) for the Lehigh University Space Initiative (LUSI) Mars rover, competing in the University Rover Challenge (URC).
 Everything builds and ships as one Docker image; the container's mode argument (`run_nodes.sh`) picks which nodes start on which computer.
 
 ## Read only what your task needs
@@ -38,6 +38,7 @@ Read that header before the rest of the file.
 | `src/arm_urc` | Arm Pi | Arm joint motors (SPARK MAX over CAN) |
 | `src/moveit_config_urc` | Main computer | MoveIt Setup Assistant output; config only |
 | `src/navigation_urc` | Main computer / sim | GNSS waypoint follower and `fake_gps_node.py` |
+| `src/voice_commands_urc` | Main computer (presumably; not launched yet) | Python voice-command state machine (stay/come/follow/fetch) driving `cmd_vel` |
 | `src/science_urc` | Science module | Python nodes on `/science/*` topics; drivers in `science_urc/hardware/` |
 | `src/cross_pkg_messages_urc` | All | Custom messages; ROS package name is `cross_pkg_messages` |
 | `src/shared_code` | Arm and driveline Pis | `CANDriver`, `SparkMax`, `MotorManager`, `pid` |
