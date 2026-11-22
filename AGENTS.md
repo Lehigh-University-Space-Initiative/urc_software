@@ -38,6 +38,8 @@ Read that header before the rest of the file.
 | `src/arm_urc` | Arm Pi | Arm joint motors (SPARK MAX over CAN) |
 | `src/moveit_config_urc` | Main computer | MoveIt Setup Assistant output; config only |
 | `src/navigation_urc` | Main computer / sim | GNSS waypoint follower and `fake_gps_node.py` |
+| `src/drivetrain_2027_urc` | Main computer (future) | 2027 drivetrain mode arbitration and kinematics; mock only, no hardware output |
+| `src/rover_sim_urc` | Dev machine | Gazebo sim of the 2027 rover; not in the Docker build (needs Gazebo) |
 | `src/voice_commands_urc` | Main computer (presumably; not launched yet) | Python voice-command state machine (stay/come/follow/fetch) driving `cmd_vel` |
 | `src/science_urc` | Science module | Python nodes on `/science/*` topics; drivers in `science_urc/hardware/` |
 | `src/cross_pkg_messages_urc` | All | Custom messages; ROS package name is `cross_pkg_messages` |
