@@ -117,7 +117,7 @@ Do not search or read these either unless the task is specifically about them; t
 - **Topics and messages are contracts across computers.** When you rename a topic or change a message field, unit, or axis convention, update every publisher and subscriber in the same change, plus the README topic map. Search for the topic string both with and without a leading `/`; the code uses both.
 - **Package name mismatch.** Folder `src/cross_pkg_messages_urc/` builds package `cross_pkg_messages`.
 - **CMake globbing.** Sources are collected with `file(GLOB)`; after adding or removing files, rebuild clean or CMake will not see them.
-- **`science_urc` is not in the Docker build.** `dockerBuild.sh` does not build it and no launch mode starts it, so a passing CI build says nothing about Science code.
+- **CI only proves `science_urc` installs.** It is in the Docker build now, but it is pure Python with no launch mode, so a passing build does not run or lint the Science code. Run `colcon test --packages-select science_urc` in the dev shell.
 
 ## Keeping docs true
 

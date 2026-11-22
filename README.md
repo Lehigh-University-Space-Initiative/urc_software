@@ -217,7 +217,7 @@ This script:
    generated messages are available first:
    - `cross_pkg_messages`
    - then `base_station_urc`, `main_computer_urc`, `driveline_urc`, `sllidar_ros2`,
-     `moveit_config_urc`, `arm_urc`, `navigation_urc`, `voice_commands_urc`, `drivetrain_2027_urc`
+     `moveit_config_urc`, `arm_urc`, `navigation_urc`, `voice_commands_urc`, `drivetrain_2027_urc`, `science_urc`
 3. Builds the final runtime image, tagged both `urc_software` and
    `10.0.0.10:65000/urc_software` (the rover's local registry).
 
