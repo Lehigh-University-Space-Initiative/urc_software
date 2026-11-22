@@ -111,7 +111,7 @@ first-party code publishes or subscribes to (each source file's header repeats i
 | Topic | Message type | Published by | Subscribed by |
 |-------|--------------|--------------|---------------|
 | `/joy0`, `/joy1` | `sensor_msgs/Joy` | `joy_node` ×2 (base station) | `JoyMapper` |
-| `/cmd_vel` | `geometry_msgs/Twist` | `JoyMapper`; `WaypointFollower` | `DriveTrainManager`; GUI Telemetry; `fake_gps_node` (sim) |
+| `/cmd_vel` | `geometry_msgs/Twist` | `JoyMapper`; `WaypointFollower`; `BehaviorController` (only while driving) | `DriveTrainManager`; GUI Telemetry; `fake_gps_node` (sim) |
 | `/roverDriveCommands` | `RoverComputerDriveCMD` | `DriveTrainManager` (main computer) | `MotorCtr_node` (driveline Pi); `LUSIVisionStreamer` |
 | `/armInputRaw` | `ArmInputRaw` | `SpaceMouseMapper` (base station) | `ArmMotorManager` (gripper buttons); GUI Telemetry |
 | `/delta_twist_cmds` | `geometry_msgs/TwistStamped` | `SpaceMouseMapper` | MoveIt Servo (`servo_node`, main computer) |
@@ -122,6 +122,8 @@ first-party code publishes or subscribes to (each source file's header repeats i
 | `/video_stream/compressed` | `sensor_msgs/CompressedImage` | `VideoStreamer` (via image_transport; the `video_compress` relay is redundant) | `video_decompress` (base station) |
 | `/video_stream/image_raw` | `sensor_msgs/Image` | `video_decompress` (base station) | GUI Video Stream panel; `LUSIVisionStreamer` |
 | `/gps_data` | `GPSData` | `fake_gps_node` (sim only; no real GPS driver yet) | `WaypointFollower`; `LUSIVisionStreamer` |
+| `behavior_command` | `std_msgs/String` | *nobody yet* (speech recognizer planned) | `BehaviorController` |
+| `person_position` | `geometry_msgs/Point` | *nobody yet* (person tracker planned) | `BehaviorController` |
 | `motorVels` | `RoverComputerDriveCMD` | *nobody yet* | GUI Telemetry (wheel bars) |
 | `manualArmControl` | `RoverComputerDriveCMD` | *nobody yet* | `LUSIVisionStreamer` |
 
@@ -148,6 +150,7 @@ urc_software/
 │   ├── arm_urc/               # Arm motor controller (Raspberry Pi)
 │   ├── moveit_config_urc/     # MoveIt Setup Assistant output for the 2-DOF arm
 │   ├── navigation_urc/        # GNSS waypoint following and navigation testing
+│   ├── voice_commands_urc/    # Voice-command behavior state machine (stay/come/follow/fetch)
 │   ├── cross_pkg_messages_urc/# Custom ROS 2 message definitions (package: cross_pkg_messages)
 │   ├── shared_code/           # CAN driver, SparkMax, PID, MotorManager (shared by rover pkgs)
 │   └── slidar_ros2/           # Slamtec LiDAR driver (git submodule)
@@ -211,7 +214,7 @@ This script:
    generated messages are available first:
    - `cross_pkg_messages`
    - then `base_station_urc`, `main_computer_urc`, `driveline_urc`, `sllidar_ros2`,
-     `moveit_config_urc`, `arm_urc`, `navigation_urc`
+     `moveit_config_urc`, `arm_urc`, `navigation_urc`, `voice_commands_urc`
 3. Builds the final runtime image, tagged both `urc_software` and
    `10.0.0.10:65000/urc_software` (the rover's local registry).
 
@@ -388,6 +391,18 @@ Launch files:
 
 On the rover, the follower's turn commands don't reach the wheels yet; see
 [Known integration issues](#known-integration-issues).
+
+### `voice_commands_urc`
+
+Python package with one node, **`behavior_controller`**: a state machine for the Autonomy
+mission's astronaut-assistance tasks (design: [docs/state_machine_design_plan.png](docs/state_machine_design_plan.png)).
+
+- Reads a command (`stay`, `come`, `follow`, `fetch`) from `behavior_command` and the person's
+  position from `person_position`, and drives toward the person on `cmd_vel`.
+- Publishes on `cmd_vel` only while driving, plus one stop message, so it doesn't override
+  manual driving. Turns use `angular.y` in deg/s, matching `DriveTrainManager`.
+- `fetch` and `give` are not implemented yet, and nothing publishes its input topics yet.
+  No run mode starts it; use `ros2 run voice_commands_urc behavior_controller`.
 
 ### `cross_pkg_messages` (folder `cross_pkg_messages_urc`)
 Defines the custom ROS 2 messages shared across packages. See
