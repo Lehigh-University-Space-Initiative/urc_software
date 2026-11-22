@@ -24,6 +24,8 @@ container selects which nodes start.
 | This README | You need the architecture, topics, run modes, build, or deploy details |
 | [docs/CPP_ROS2_PRIMER.md](docs/CPP_ROS2_PRIMER.md) | A C++ or ROS 2 construct in the code is unfamiliar |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | You're about to open a pull request (branching, commits, comment style) |
+| [docs/DRIVETRAIN.md](docs/DRIVETRAIN.md) | You need physical rover values: geometry, motors, CAN IDs, gearing (estimates) |
+| [AGENTS.md](AGENTS.md) | You're using an AI coding agent (it reads this file automatically) |
 
 ---
 

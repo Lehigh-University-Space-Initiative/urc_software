@@ -16,3 +16,4 @@ ground_station_volume/
 
 # Doxygen-generated documentation
 docs/html/
+**/.DS_Store
