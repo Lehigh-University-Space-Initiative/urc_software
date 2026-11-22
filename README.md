@@ -122,6 +122,7 @@ first-party code publishes or subscribes to (each source file's header repeats i
 | `/video_stream/compressed` | `sensor_msgs/CompressedImage` | `VideoStreamer` (via image_transport; the `video_compress` relay is redundant) | `video_decompress` (base station) |
 | `/video_stream/image_raw` | `sensor_msgs/Image` | `video_decompress` (base station) | GUI Video Stream panel; `LUSIVisionStreamer` |
 | `/gps_data` | `GPSData` | `fake_gps_node` (sim only; no real GPS driver yet) | `WaypointFollower`; `LUSIVisionStreamer` |
+| `/dcs_stage1/*` | various (see package README) | `drivetrain_2027_urc` (mock only) | `drivetrain_2027_urc` |
 | `behavior_command` | `std_msgs/String` | *nobody yet* (speech recognizer planned) | `BehaviorController` |
 | `person_position` | `geometry_msgs/Point` | *nobody yet* (person tracker planned) | `BehaviorController` |
 | `motorVels` | `RoverComputerDriveCMD` | *nobody yet* | GUI Telemetry (wheel bars) |
@@ -151,6 +152,8 @@ urc_software/
 │   ├── moveit_config_urc/     # MoveIt Setup Assistant output for the 2-DOF arm
 │   ├── navigation_urc/        # GNSS waypoint following and navigation testing
 │   ├── voice_commands_urc/    # Voice-command behavior state machine (stay/come/follow/fetch)
+│   ├── drivetrain_2027_urc/   # 2027 4-wheel drivetrain: mode arbitration, mock only (no hardware output)
+│   ├── rover_sim_urc/         # Gazebo simulation of the 2027 rover (opt-in; needs Gazebo)
 │   ├── cross_pkg_messages_urc/# Custom ROS 2 message definitions (package: cross_pkg_messages)
 │   ├── shared_code/           # CAN driver, SparkMax, PID, MotorManager (shared by rover pkgs)
 │   └── slidar_ros2/           # Slamtec LiDAR driver (git submodule)
@@ -214,7 +217,7 @@ This script:
    generated messages are available first:
    - `cross_pkg_messages`
    - then `base_station_urc`, `main_computer_urc`, `driveline_urc`, `sllidar_ros2`,
-     `moveit_config_urc`, `arm_urc`, `navigation_urc`, `voice_commands_urc`
+     `moveit_config_urc`, `arm_urc`, `navigation_urc`, `voice_commands_urc`, `drivetrain_2027_urc`
 3. Builds the final runtime image, tagged both `urc_software` and
    `10.0.0.10:65000/urc_software` (the rover's local registry).
 
@@ -403,6 +406,20 @@ mission's astronaut-assistance tasks (design: [docs/state_machine_design_plan.pn
   manual driving. Turns use `angular.y` in deg/s, matching `DriveTrainManager`.
 - `fetch` and `give` are not implemented yet, and nothing publishes its input topics yet.
   No run mode starts it; use `ros2 run voice_commands_urc behavior_controller`.
+
+### `drivetrain_2027_urc`
+
+Stage 1 of the 2027 drivetrain (4 driven wheels, front-wheel steering): manual/autonomy mode
+arbitration, skid-steer kinematics, and fault latching, verified against **mock feedback only**.
+It has no CAN backend and never commands hardware; all topics are under `/dcs_stage1`.
+Interfaces, safety policy, and test commands are in
+[src/drivetrain_2027_urc/README.md](src/drivetrain_2027_urc/README.md). Its messages are
+`RoverDriveCommand2027` and the `SetDriveMode2027` service in `cross_pkg_messages`.
+
+### `rover_sim_urc`
+
+Gazebo models, controllers, and launch tests for the 2027 rover. Not in `dockerBuild.sh` (the
+image has no Gazebo); see [src/rover_sim_urc/README.md](src/rover_sim_urc/README.md).
 
 ### `cross_pkg_messages` (folder `cross_pkg_messages_urc`)
 Defines the custom ROS 2 messages shared across packages. See

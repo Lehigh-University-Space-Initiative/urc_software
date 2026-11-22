@@ -1,0 +1,26 @@
+/assignment1/controller_manager:
+  ros__parameters:
+    update_rate: 100
+    use_sim_time: true
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+    wheel_velocity_controller:
+      type: forward_command_controller/ForwardCommandController
+    steering_position_controller:
+      type: forward_command_controller/ForwardCommandController
+
+/assignment1/joint_state_broadcaster:
+  ros__parameters:
+    use_local_topics: true
+    joints: [front_left_wheel_joint, front_left_steering_joint]
+    interfaces: [position, velocity]
+
+/assignment1/wheel_velocity_controller:
+  ros__parameters:
+    joints: [front_left_wheel_joint]
+    interface_name: velocity
+
+/assignment1/steering_position_controller:
+  ros__parameters:
+    joints: [front_left_steering_joint]
+    interface_name: position

@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>drivetrain_2027_urc</name>
+  <version>0.1.0</version>
+  <description>Software-only 2027 DCS arbitration and mock safety verification</description>
+  <maintainer email="rek429@lehigh.edu">Redoyan Kobir</maintainer>
+  <license>TODO</license>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>cross_pkg_messages</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>std_srvs</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+  <test_depend>launch_testing_ament_cmake</test_depend>
+  <test_depend>ament_cmake_test</test_depend>
+  <test_depend>launch_testing</test_depend>
+  <test_depend>python3-pytest</test_depend>
+  <test_depend>ament_index_python</test_depend>
+  <export><build_type>ament_cmake</build_type></export>
+</package>

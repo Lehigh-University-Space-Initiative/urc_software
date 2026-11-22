@@ -83,8 +83,11 @@ Each side (right side mirrored):
 
 ## Where the software differs (as of November 2026)
 
-- `main` still drives 6 wheels with tank (skid) steering. 4-wheel work exists on the
-  unmerged branches `tina/steering` (CAN map and motor directions) and `new-driveline`
-  (ros2_control skeleton).
+- The deployed driveline path on `main` still drives 6 wheels with tank (skid) steering.
+  The 2027 drivetrain is in `drivetrain_2027_urc` (Stage 1: mode arbitration and kinematics
+  against mock feedback, no hardware backend yet) and `rover_sim_urc` (Gazebo).
+- Last season's hardware-tested 4-wheel code is kept, unmerged, on `final_fixes` (CAN map and
+  motor direction signs) and `tina/steering` (open-loop steering, arm joystick mapping).
+  Use them as reference when writing the hardware backend; they predate the July 2026 rewrite.
 - `DriveTrainManager` uses a 4.5 in wheel radius (should be 4.25 in) and treats
   `roverWidth` as the full track in the differential formula, so it turns about twice as hard as intended.
